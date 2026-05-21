@@ -215,7 +215,7 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:15px;l
    PRODUCT DETAIL MODAL — Web3 Futuristic
    ══════════════════════════════════════════ */
 .modal-xl{
-  max-width:900px;padding:0;overflow:hidden;
+  max-width:520px;padding:0;overflow:hidden;
   border:1px solid rgba(240,185,11,.2);
   box-shadow:0 0 60px rgba(240,185,11,.08),0 32px 80px rgba(0,0,0,.8);
 }
@@ -243,12 +243,17 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:15px;l
 }
 .pd-scroll::-webkit-scrollbar{width:5px;}
 .pd-scroll::-webkit-scrollbar-thumb{background:rgba(240,185,11,.25);border-radius:10px;}
-.pd-body{padding:22px;display:flex;gap:1.75rem;flex-wrap:wrap;}
+/* Body — single column: image full width on top, info full width below */
+.pd-body{
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  gap:1.25rem;
+}
 @media(max-width:640px){.pd-body{padding:14px;gap:1rem;}}
 
-/* Gallery */
-.pd-gallery{flex:0 0 340px;max-width:340px;}
-@media(max-width:700px){.pd-gallery{flex:1 1 100%;max-width:100%;}}
+/* Gallery — full width, no fixed column */
+.pd-gallery{width:100%;max-width:100%;}
 
 /* Main image — full width, auto height, no crop, no fixed frame */
 .pd-main-img{
@@ -295,8 +300,8 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:15px;l
 .pd-thumb.active{border-color:var(--gold);box-shadow:0 0 12px rgba(240,185,11,.3);}
 .pd-thumb img{width:100%;height:100%;object-fit:cover;}
 
-/* Info pane */
-.pd-info{flex:1;min-width:220px;}
+/* Info pane — full width */
+.pd-info{width:100%;}
 .pd-title{font-size:16px;font-weight:700;line-height:1.5;margin-bottom:10px;color:var(--t1);}
 
 /* Rating bar — redesigned, no duplication */
