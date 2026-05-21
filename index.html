@@ -3,2028 +3,230 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TCC Marketplace — USDT Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>TCC Marketplace — USDT Web3 Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0B0E11;--sur:#1E2329;--card:#2B3139;--hov:#363D47;
-  --gold:#F0B90B;--ok:#0ECB81;--err:#F6465D;--warn:#F0B90B;--inf:#1890FF;
-  --t1:#EAECEF;--t2:#848E9C;--t3:#5E6673;
-  --bdr:rgba(255,255,255,0.08);--bdg:rgba(240,185,11,0.3);
+  --bg:#060709;--sur:rgba(20,22,28,0.92);--card:rgba(30,35,45,0.78);--hov:rgba(45,52,65,0.9);
+  --gold:#F3BA2F;--gold2:#FFD700;--neon:#FFEA80;--ok:#0ECB81;--err:#F6465D;
+  --t1:#EAECEF;--t2:#A0A8B8;--t3:#6B7280;
+  --bdr:rgba(243,186,47,0.22);--glass:rgba(255,255,255,0.05);
   --fd:'Syne',sans-serif;--fm:'IBM Plex Mono',monospace;--fb:'Plus Jakarta Sans',sans-serif;
-  --r:8px;--rl:12px;--rxl:16px;
+  --r:12px;--rl:20px;
 }
+
+/* GLOBAL */
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:15px;line-height:1.6;min-height:100vh;}
-/* NAV */
-.nav{position:sticky;top:0;z-index:100;background:rgba(11,14,17,.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(240,185,11,.08);padding:0 2rem;display:flex;align-items:center;gap:1.5rem;height:60px;}
-.nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(240,185,11,.15),transparent);}
-.logo{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--gold);cursor:pointer;white-space:nowrap;letter-spacing:-.02em;}
-.logo span{color:var(--t1);}
-.nav-links{display:flex;list-style:none;flex:1;}
-.nav-links a{color:var(--t2);font-size:13px;font-weight:500;padding:0 14px;height:60px;display:flex;align-items:center;cursor:pointer;transition:color .15s;white-space:nowrap;position:relative;}
-.nav-links a:hover{color:var(--t1);}
-.nav-links a.active{color:var(--gold);}
-.nav-links a.active::after{content:'';position:absolute;bottom:0;left:14px;right:14px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px;}
-.nav-r{display:flex;align-items:center;gap:8px;margin-left:auto;}
-/* BELL */
-.bell-wrap{position:relative;}
-.bell-btn{width:36px;height:36px;border-radius:var(--r);background:transparent;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
-.bell-btn:hover{background:rgba(255,255,255,.06);}
-.bell-bdg{position:absolute;top:-4px;right:-4px;background:var(--err);color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);}
-.notif-dd{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);box-shadow:0 16px 48px rgba(0,0,0,.6);z-index:300;display:none;max-height:480px;overflow-y:auto;}
-.notif-dd.open{display:block;}
-.nd-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--sur);}
-.nd-head span{font-size:13px;font-weight:600;}
-.nd-link{font-size:12px;color:var(--gold);cursor:pointer;}
-.nd-item{display:flex;gap:10px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .12s;}
-.nd-item:hover{background:rgba(255,255,255,.03);}
-.nd-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px;}
-.nd-dot.r{background:var(--t3);}
-.nd-text{font-size:12px;line-height:1.4;color:var(--t1);flex:1;}
-.nd-time{font-size:10px;color:var(--t3);margin-top:3px;}
-.nd-footer{padding:10px 16px;text-align:center;font-size:12px;color:var(--gold);cursor:pointer;border-top:1px solid var(--bdr);}
-/* ROLE SWITCH */
-.role-sw{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bdg);background:rgba(240,185,11,.08);font-size:12px;font-weight:600;color:var(--gold);cursor:pointer;}
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:var(--fb);}
-.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bdr);}
-.btn-ghost:hover{color:var(--t1);border-color:rgba(255,255,255,.2);}
-.btn-gold{background:var(--gold);color:#0B0E11;}
-.btn-gold:hover{background:#d4a30a;}
-.btn-sm{padding:5px 12px;font-size:12px;}
-.btn-ok{background:rgba(14,203,129,.15);color:var(--ok);border:1px solid rgba(14,203,129,.3);}
-.btn-err{background:rgba(246,70,93,.15);color:var(--err);border:1px solid rgba(246,70,93,.3);}
-.btn-inf{background:rgba(24,144,255,.15);color:var(--inf);border:1px solid rgba(24,144,255,.3);}
-.btn-warn{background:rgba(240,185,11,.15);color:var(--gold);border:1px solid rgba(240,185,11,.3);}
-.w100{width:100%;}
-/* PAGES */
-.page{display:none;padding:2rem;max-width:1400px;margin:0 auto;}
-.page.active{display:block;}
-/* HERO — Futuristic Blockchain */
-.hero{
-  text-align:center;padding:6rem 2rem 3.5rem;position:relative;overflow:hidden;
-  background:radial-gradient(ellipse 70% 60% at 50% -10%,rgba(240,185,11,.1),transparent),
-             radial-gradient(ellipse 40% 40% at 80% 80%,rgba(24,144,255,.05),transparent);
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(circle at 50% 20%, rgba(243,186,47,0.07) 0%, transparent 50%),
+                   linear-gradient(180deg,#0A0C0F 0%,#060709 100%);}
+
+/* GLASSMORPHISM + CYBER */
+.glass{
+  background:linear-gradient(135deg, rgba(30,35,45,0.8), rgba(15,18,25,0.9));
+  border:1px solid var(--bdr);
+  backdrop-filter:blur(24px);
+  border-radius:var(--rl);
+  box-shadow:0 8px 32px rgba(0,0,0,0.7), inset 0 0 20px rgba(243,186,47,0.08);
+  position:relative;overflow:hidden;
 }
-/* Animated grid background */
+.glass::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,234,128,0.06),transparent 60%);
+  pointer-events:none;
+}
+.cyber-border::after{
+  content:'';position:absolute;inset:-2px;
+  background:linear-gradient(45deg,transparent,var(--gold),transparent);
+  border-radius:22px;z-index:-1;filter:blur(12px);opacity:0.4;
+  transition:all .4s;
+}
+.cyber-border:hover::after{opacity:0.85;filter:blur(16px);}
+
+/* NAV — FLOATING QUANTUM */
+.nav{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);
+  z-index:1000;background:rgba(11,14,20,0.9);backdrop-filter:blur(20px);
+  border:1px solid var(--bdr);border-radius:9999px;padding:10px 28px;
+  display:flex;align-items:center;gap:24px;box-shadow:0 12px 50px rgba(0,0,0,0.8);
+}
+.logo{
+  font-family:var(--fd);font-size:24px;font-weight:800;
+  background:linear-gradient(90deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  cursor:pointer;transition:.4s;
+}
+.logo:hover{transform:scale(1.08) rotate(3deg);}
+
+/* HERO */
+.hero{
+  padding:180px 20px 100px;position:relative;overflow:hidden;text-align:center;
+}
 .hero::before{
   content:'';position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(240,185,11,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(240,185,11,.04) 1px,transparent 1px);
-  background-size:60px 60px;
-  mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black,transparent);
-  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black,transparent);
-  pointer-events:none;
+  background-image:linear-gradient(rgba(243,186,47,0.07) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(243,186,47,0.07) 1px,transparent 1px);
+  background-size:70px 70px;animation:gridMove 35s linear infinite;opacity:0.75;
 }
-/* Glowing orbs */
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:70px 70px}}
 .hero::after{
-  content:'';position:absolute;top:30%;left:10%;width:300px;height:300px;
-  background:radial-gradient(circle,rgba(240,185,11,.06) 0%,transparent 70%);
-  pointer-events:none;animation:orb 8s ease-in-out infinite alternate;
-}
-@keyframes orb{0%{transform:translate(0,0) scale(1);}100%{transform:translate(60px,-30px) scale(1.1);}}
-.hero-inner{position:relative;z-index:1;}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:rgba(240,185,11,.08);border:1px solid rgba(240,185,11,.25);
-  color:var(--gold);padding:5px 16px;border-radius:50px;
-  font-size:11.5px;font-weight:600;margin-bottom:1.75rem;
-  box-shadow:0 0 20px rgba(240,185,11,.1);
-  letter-spacing:.04em;font-family:var(--fm);
-  backdrop-filter:blur(4px);
-}
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;flex-shrink:0;}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(240,185,11,.4);}50%{opacity:.7;box-shadow:0 0 0 5px rgba(240,185,11,0);}}
-.hero h1{
-  font-family:var(--fd);font-size:clamp(2.4rem,5.5vw,4.2rem);font-weight:800;line-height:1.08;margin-bottom:1.2rem;
-  background:linear-gradient(135deg,#ffffff 0%,#f5e5a0 45%,#F0B90B 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  letter-spacing:-.02em;
-}
-.hero p{color:var(--t2);font-size:1.05rem;max-width:560px;margin:0 auto 2.25rem;line-height:1.75;}
-.hero-cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-/* Hero buttons */
-.hero-cta .btn-gold{
-  background:linear-gradient(135deg,#F0B90B,#d4a30a);
-  box-shadow:0 4px 20px rgba(240,185,11,.35);
-  padding:10px 22px;font-size:13.5px;
-  transition:all .2s;
-}
-.hero-cta .btn-gold:hover{box-shadow:0 6px 30px rgba(240,185,11,.55);transform:translateY(-2px);}
-.hero-cta .btn-ghost{
-  padding:10px 22px;font-size:13.5px;
-  border-color:rgba(255,255,255,.15);
-  backdrop-filter:blur(4px);
-  background:rgba(255,255,255,.04);
-  transition:all .2s;
-}
-.hero-cta .btn-ghost:hover{border-color:rgba(240,185,11,.4);color:var(--gold);background:rgba(240,185,11,.06);}
-/* Stats row */
-.hero-stats{
-  display:flex;gap:0;justify-content:center;margin-top:3.5rem;
-  flex-wrap:wrap;max-width:640px;margin-left:auto;margin-right:auto;
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
-  border-radius:var(--rxl);overflow:hidden;backdrop-filter:blur(4px);
-}
-.hs-item{flex:1;min-width:120px;padding:1.1rem 1rem;position:relative;}
-.hs-item:not(:last-child)::after{content:'';position:absolute;top:20%;right:0;width:1px;height:60%;background:rgba(255,255,255,.08);}
-.hs-num{font-family:var(--fm);font-size:1.5rem;font-weight:600;color:var(--gold);}
-.hs-lbl{font-size:11px;color:var(--t3);margin-top:3px;letter-spacing:.02em;}
-/* SECTION TITLE */
-.stitle{font-family:var(--fd);font-size:1.5rem;font-weight:800;margin-bottom:1.5rem;letter-spacing:-.02em;}
-.stitle span{
-  background:linear-gradient(135deg,var(--gold),#FFD700);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.stitle-sm{font-family:var(--fd);font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--t1);}
-/* GRIDS */
-.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
-.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
-.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
-/* CARD */
-.card{
-  background:linear-gradient(135deg,var(--sur),rgba(43,49,57,.8));
-  border:1px solid var(--bdr);border-radius:var(--rl);padding:1.25rem;
-  transition:border-color .2s,box-shadow .2s;
-}
-.card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 4px 20px rgba(0,0,0,.3);}
-.clbl{font-size:12px;color:var(--t3);margin-bottom:6px;letter-spacing:.02em;text-transform:uppercase;font-size:11px;}
-.cval{font-family:var(--fm);font-size:1.5rem;font-weight:600;}
-.csub{font-size:12px;color:var(--t2);margin-top:4px;}
-.card-gold{border-color:var(--bdg);box-shadow:0 0 20px rgba(240,185,11,.06);}
-/* ══════════════════════════════════════════
-   PRODUCT CARD — Shopee / Lazada Standard
-   ══════════════════════════════════════════ */
-.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
-@media(min-width:768px){.g4{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}}
-@media(min-width:1100px){.g4{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}}
-
-.pc{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:pointer;position:relative;display:flex;flex-direction:column;}
-.pc:hover{box-shadow:0 6px 28px rgba(0,0,0,.45);transform:translateY(-3px);border-color:rgba(255,255,255,.14);}
-
-/* รูปสินค้า — สัดส่วน 1:1 แบบ Shopee */
-.pc-img{width:100%;aspect-ratio:1/1;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:3rem;overflow:hidden;position:relative;flex-shrink:0;}
-.pc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .38s;}
-.pc:hover .pc-img img{transform:scale(1.07);}
-.pc-img-ico{font-size:3rem;line-height:1;}
-
-/* Wishlist heart button */
-.pc-heart{position:absolute;top:7px;right:7px;width:28px;height:28px;border-radius:50%;background:rgba(11,14,17,.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;z-index:2;backdrop-filter:blur(3px);}
-.pc-heart:hover,.pc-heart.liked{background:rgba(246,70,93,.25);}
-.pc-heart.liked{color:var(--err);}
-@keyframes heartPop{0%{transform:scale(1);}50%{transform:scale(1.45);}100%{transform:scale(1);}}
-.pc-heart.pop{animation:heartPop .28s ease;}
-
-/* FF badge overlay */
-.pc-ff-ov{position:absolute;top:8px;left:8px;background:linear-gradient(90deg,#F0B90B,#d4a50c);color:#0B0E11;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;z-index:2;letter-spacing:.3px;}
-
-/* Discount badge */
-.pc-disc-ov{position:absolute;bottom:8px;left:8px;background:var(--err);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;z-index:2;}
-
-/* Skeleton shimmer */
-.pc-skel{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;}
-.skel-img{aspect-ratio:1/1;background:linear-gradient(90deg,var(--card) 25%,var(--hov) 50%,var(--card) 75%);background-size:200% 100%;animation:skelShim 1.3s infinite;}
-.skel-line{height:11px;border-radius:4px;background:linear-gradient(90deg,var(--card) 25%,var(--hov) 50%,var(--card) 75%);background-size:200% 100%;animation:skelShim 1.3s infinite;margin:10px 12px 0;}
-.skel-line.short{width:55%;height:10px;}
-.skel-line.xs{width:40%;height:9px;}
-@keyframes skelShim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-
-/* Card body */
-.pc-body{padding:10px 11px 13px;display:flex;flex-direction:column;gap:0;flex:1;}
-.pc-name{font-size:12.5px;font-weight:500;line-height:1.42;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:35px;color:var(--t1);}
-.pc-price-row{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;margin-bottom:3px;}
-.pc-price{font-family:var(--fm);font-size:14px;font-weight:700;color:var(--err);}
-.pc-orig{font-family:var(--fm);font-size:10.5px;color:var(--t3);text-decoration:line-through;}
-.pc-disc-pct{font-size:9px;font-weight:700;color:var(--err);background:rgba(246,70,93,.12);padding:1px 4px;border-radius:3px;}
-
-/* Rating row */
-.pc-meta{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
-.pc-stars{display:flex;align-items:center;gap:1px;}
-.pc-star{font-size:10px;color:var(--card);}
-.pc-star.f{color:#FFD700;}
-.pc-star.h{color:#FFD700;opacity:.5;}
-.pc-sold{font-size:10.5px;color:var(--t3);}
-.pc-shop-row{display:flex;align-items:center;gap:4px;margin-top:4px;}
-.pc-shop{font-size:10.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pc-veri{font-size:9px;color:var(--ok);}
-.ff-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(240,185,11,.12);color:var(--gold);font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:50px;border:1px solid rgba(240,185,11,.25);margin-top:5px;width:fit-content;}
-
-/* ══════════════════════════════════════════
-   PRODUCT DETAIL MODAL — Web3 Futuristic
-   ══════════════════════════════════════════ */
-.modal-xl{
-  max-width:900px;padding:0;overflow:hidden;
-  border:1px solid rgba(240,185,11,.2);
-  box-shadow:0 0 60px rgba(240,185,11,.08),0 32px 80px rgba(0,0,0,.8);
-}
-/* Single-scroll: sticky header + scrollable content area only */
-.pd-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 22px;
-  background:linear-gradient(90deg,rgba(30,35,41,.98),rgba(43,49,57,.98));
-  border-bottom:1px solid rgba(240,185,11,.15);
-  position:sticky;top:0;z-index:10;
-  backdrop-filter:blur(12px);
-}
-.pd-header::before{
-  content:'';position:absolute;left:0;top:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(240,185,11,.6),transparent);
-}
-.pd-header .mtitle{
-  margin:0;font-size:13px;font-family:var(--fm);color:var(--t2);
-  letter-spacing:.05em;text-transform:uppercase;
-}
-/* The single scroll container — NO overflow on modal itself */
-.pd-scroll{
-  max-height:calc(90vh - 52px);overflow-y:auto;overflow-x:hidden;
-  scrollbar-width:thin;scrollbar-color:rgba(240,185,11,.3) transparent;
-}
-.pd-scroll::-webkit-scrollbar{width:5px;}
-.pd-scroll::-webkit-scrollbar-thumb{background:rgba(240,185,11,.25);border-radius:10px;}
-.pd-body{padding:22px;display:flex;gap:1.75rem;flex-wrap:wrap;}
-@media(max-width:640px){.pd-body{padding:14px;gap:1rem;}}
-
-/* Gallery */
-.pd-gallery{flex:0 0 300px;max-width:300px;}
-@media(max-width:640px){.pd-gallery{flex:1 1 100%;max-width:100%;}}
-.pd-main-img{
-  width:100%;aspect-ratio:1/1;border-radius:var(--rl);overflow:hidden;
-  background:linear-gradient(135deg,var(--card),var(--sur));
-  display:flex;align-items:center;justify-content:center;font-size:5rem;
-  margin-bottom:10px;cursor:zoom-in;position:relative;
-  border:1px solid rgba(255,255,255,.07);
-  box-shadow:0 4px 24px rgba(0,0,0,.4);
-}
-.pd-main-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s cubic-bezier(.25,.46,.45,.94);}
-.pd-main-img:hover img{transform:scale(1.05);}
-/* shimmer line on main img */
-.pd-main-img::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);
-  pointer-events:none;
+  background:radial-gradient(circle at 50% 30%,rgba(243,186,47,0.18),transparent 70%);
+  animation:aurora 22s ease infinite;
 }
-.pd-thumbs{display:flex;gap:7px;flex-wrap:wrap;}
-.pd-thumb{
-  width:56px;height:56px;border-radius:var(--r);overflow:hidden;
-  background:var(--card);display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;cursor:pointer;
-  border:2px solid transparent;
-  transition:all .2s;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);
-}
-.pd-thumb:hover{border-color:rgba(240,185,11,.5);transform:scale(1.06);}
-.pd-thumb.active{border-color:var(--gold);box-shadow:0 0 12px rgba(240,185,11,.3);}
-.pd-thumb img{width:100%;height:100%;object-fit:cover;}
+@keyframes aurora{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-30px)}}
 
-/* Info pane */
-.pd-info{flex:1;min-width:220px;}
-.pd-title{font-size:16px;font-weight:700;line-height:1.5;margin-bottom:10px;color:var(--t1);}
-
-/* Rating bar — redesigned, no duplication */
-.pd-rating-bar{
-  display:flex;align-items:center;gap:10px;margin-bottom:14px;
-  padding:10px 14px;border-radius:var(--r);
-  background:rgba(255,215,0,.04);
-  border:1px solid rgba(255,215,0,.1);
-  flex-wrap:wrap;
+.hero-badge{
+  display:inline-flex;align-items:center;gap:10px;background:rgba(243,186,47,0.12);
+  border:1px solid rgba(243,186,47,0.4);color:var(--gold);padding:10px 26px;
+  border-radius:9999px;font-weight:600;backdrop-filter:blur(12px);
 }
-.pd-rating-num{font-family:var(--fm);font-size:1.25rem;font-weight:700;color:#FFD700;}
-.pd-stars-lg{display:flex;gap:3px;}
-.pd-star-lg{font-size:15px;}
-.pd-star-lg.f{color:#FFD700;text-shadow:0 0 6px rgba(255,215,0,.5);}
-.pd-star-lg.h{color:#FFD700;opacity:.5;}
-.pd-star-lg.e{color:var(--card);}
-.pd-cnt-sep{width:1px;height:16px;background:var(--bdr);}
-.pd-stat{font-size:11.5px;color:var(--t3);}
-
-/* Price box — neon glow style */
-.pd-price-box{
-  background:linear-gradient(135deg,rgba(246,70,93,.07),rgba(246,70,93,.03));
-  border:1px solid rgba(246,70,93,.25);
-  border-radius:var(--rl);padding:14px 16px;margin-bottom:14px;
-  position:relative;overflow:hidden;
-}
-.pd-price-box::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(246,70,93,.5),transparent);
-}
-.pd-price-main{
-  font-family:var(--fm);font-size:1.8rem;font-weight:700;color:var(--err);
-  text-shadow:0 0 20px rgba(246,70,93,.3);
-}
-.pd-price-orig{font-family:var(--fm);font-size:12px;color:var(--t3);text-decoration:line-through;margin-left:8px;}
-.pd-disc-badge{
-  background:linear-gradient(90deg,var(--err),#d4364f);
-  color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px;margin-left:6px;
-}
-.pd-ff-note{
-  display:flex;align-items:center;gap:6px;margin-top:8px;
-  font-size:11.5px;color:var(--gold);
-  background:rgba(240,185,11,.08);
-  border-radius:50px;padding:4px 10px;width:fit-content;
-  border:1px solid rgba(240,185,11,.2);
+.hero h1{
+  font-family:var(--fd);font-size:clamp(3rem,8.5vw,5.4rem);font-weight:800;
+  line-height:1.05;margin:1.4rem 0 1rem;
+  background:linear-gradient(90deg,#fff,var(--gold2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 
-/* Shop strip — glassmorphism */
-.shop-strip{
-  display:flex;align-items:center;gap:12px;padding:12px 14px;
-  background:linear-gradient(135deg,rgba(43,49,57,.9),rgba(30,35,41,.8));
-  border-radius:var(--rl);margin-bottom:14px;cursor:pointer;
-  border:1px solid rgba(255,255,255,.08);
-  transition:all .2s;backdrop-filter:blur(4px);
+/* PRODUCT CARD — HOLOGRAPHIC */
+.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;}
+.pc{
+  background:var(--card);border:1px solid var(--bdr);border-radius:18px;
+  overflow:hidden;transition:all .5s cubic-bezier(0.23,1,0.32,1);cursor:pointer;
 }
-.shop-strip:hover{border-color:rgba(240,185,11,.3);box-shadow:0 4px 20px rgba(240,185,11,.08);}
-.shop-av-sm{
-  width:38px;height:38px;border-radius:50%;
-  background:linear-gradient(135deg,var(--card),var(--sur));
-  border:2px solid rgba(240,185,11,.4);
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-  overflow:hidden;flex-shrink:0;box-shadow:0 0 10px rgba(240,185,11,.15);
+.pc:hover{
+  transform:translateY(-16px) scale(1.04);
+  box-shadow:0 30px 70px -15px rgba(243,186,47,0.4);
 }
-.shop-av-sm img{width:100%;height:100%;object-fit:cover;}
-.shop-name-sm{font-size:13px;font-weight:700;}
-.shop-meta-sm{font-size:10.5px;color:var(--t3);}
-.shop-strip-r{margin-left:auto;}
+.pc-img{
+  aspect-ratio:1/1;position:relative;overflow:hidden;background:var(--sur);
+}
+.pc-img img{width:100%;height:100%;object-fit:cover;transition:0.6s;}
+.pc:hover .pc-img img{transform:scale(1.12);}
+.pc-img::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,234,128,0.7),transparent);
+  top:-120%;transition:1.2s;
+}
+.pc:hover .pc-img::after{top:180%;}
+.pc-body{padding:14px 16px;}
+.pc-name{font-size:14.5px;font-weight:600;line-height:1.45;margin-bottom:8px;}
+.pc-price{font-family:var(--fm);font-size:1.4rem;font-weight:700;color:var(--gold);}
 
-/* Actions */
-.pd-actions{display:flex;gap:8px;margin-top:14px;}
-.btn-buy-now{
-  flex:1;
-  background:linear-gradient(135deg,#F6465D,#d4364f);
-  color:#fff;border:none;padding:12px 8px;border-radius:var(--r);
-  font-size:13px;font-weight:700;cursor:pointer;
-  transition:all .2s;font-family:var(--fb);
-  box-shadow:0 4px 20px rgba(246,70,93,.3);
-  letter-spacing:.02em;
+/* BUTTONS */
+.btn-gold,.btn-buy-now{
+  background:linear-gradient(135deg,#F3BA2F,#CC9A06)!important;
+  color:#0B0E11;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  box-shadow:0 0 25px rgba(243,186,47,0.6);
+  transition:all .3s;
 }
-.btn-buy-now:hover{
-  background:linear-gradient(135deg,#ff5570,#e03a52);
-  box-shadow:0 6px 28px rgba(246,70,93,.45);transform:translateY(-1px);
-}
-.btn-wishlist{
-  width:44px;flex-shrink:0;border-radius:var(--r);
-  background:var(--card);border:1px solid var(--bdr);
-  cursor:pointer;font-size:17px;display:flex;align-items:center;
-  justify-content:center;transition:all .2s;
-}
-.btn-wishlist:hover{border-color:rgba(246,70,93,.4);background:rgba(246,70,93,.08);}
-.btn-wishlist.liked{border-color:var(--err);color:var(--err);background:rgba(246,70,93,.12);}
-
-/* FF Plan chips — neon pills */
-.pd-plans{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
-.pd-plan-chip{
-  padding:6px 14px;border-radius:50px;
-  border:1px solid var(--bdr);font-size:11.5px;cursor:pointer;
-  transition:all .2s;background:var(--card);
-  font-family:var(--fm);
-}
-.pd-plan-chip:hover{border-color:rgba(240,185,11,.4);}
-.pd-plan-chip.sel{
-  background:rgba(240,185,11,.1);color:var(--gold);
-  border-color:var(--bdg);
-  box-shadow:0 0 12px rgba(240,185,11,.15);
+.btn-gold:hover,.btn-buy-now:hover{
+  box-shadow:0 0 45px rgba(243,186,47,0.85);
+  transform:translateY(-3px);
 }
 
-/* Payout info strip */
-.pd-payout-strip{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 12px;background:rgba(14,203,129,.05);
-  border:1px solid rgba(14,203,129,.15);border-radius:var(--r);
-  font-size:12px;color:var(--ok);margin-bottom:14px;
+/* MODALS */
+.modal,.modal-xl{
+  background:rgba(12,15,22,0.97)!important;
+  border:1px solid rgba(243,186,47,0.35)!important;
+  backdrop-filter:blur(32px);
+  box-shadow:0 0 100px rgba(243,186,47,0.25)!important;
 }
 
-/* ══════════════════════════════════════════
-   REVIEW SECTION — Web3 Redesign
-   ══════════════════════════════════════════ */
-.rv-section{margin-top:0;padding:0 22px 24px;}
-.rv-sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);margin:0 0 20px;}
-.rv-summary{
-  display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;
-  background:linear-gradient(135deg,rgba(255,215,0,.04),rgba(255,215,0,.01));
-  border:1px solid rgba(255,215,0,.12);border-radius:var(--rl);
-  padding:16px 18px;margin-bottom:16px;
-  position:relative;overflow:hidden;
-}
-.rv-summary::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,215,0,.3),transparent);
-}
-.rv-big{text-align:center;flex-shrink:0;}
-.rv-big-num{font-family:var(--fm);font-size:3.2rem;font-weight:700;color:#FFD700;line-height:1;text-shadow:0 0 24px rgba(255,215,0,.3);}
-.rv-big-stars{display:flex;gap:3px;justify-content:center;margin:6px 0;}
-.rv-big-cnt{font-size:11px;color:var(--t3);}
-.rv-bars{flex:1;min-width:140px;}
-.rv-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.rv-bar-lbl{font-size:10.5px;color:var(--t3);width:20px;text-align:right;flex-shrink:0;font-family:var(--fm);}
-.rv-bar-track{flex:1;height:6px;background:var(--card);border-radius:50px;overflow:hidden;}
-.rv-bar-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,#FFD700,#F0B90B);transition:width .7s cubic-bezier(.25,.46,.45,.94);}
-.rv-bar-cnt{font-size:10.5px;color:var(--t3);width:18px;font-family:var(--fm);}
-
-/* Review filter chips */
-.rv-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-.rv-fbtn{
-  background:var(--card);border:1px solid var(--bdr);color:var(--t2);
-  padding:5px 13px;border-radius:50px;font-size:11.5px;cursor:pointer;transition:all .18s;
-}
-.rv-fbtn:hover{border-color:rgba(255,215,0,.3);}
-.rv-fbtn.active{
-  background:rgba(255,215,0,.1);color:#FFD700;
-  border-color:rgba(255,215,0,.35);
-  box-shadow:0 0 10px rgba(255,215,0,.1);
-}
-
-/* Review item */
-.rv-item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.rv-item:last-child{border-bottom:none;}
-.rv-user-row{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
-.rv-av{
-  width:32px;height:32px;border-radius:50%;
-  background:linear-gradient(135deg,rgba(240,185,11,.2),rgba(240,185,11,.1));
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;flex-shrink:0;color:var(--gold);
-  border:1px solid rgba(240,185,11,.2);
-}
-.rv-username{font-size:13px;font-weight:600;}
-.rv-date{font-size:10.5px;color:var(--t3);margin-left:auto;font-family:var(--fm);}
-.rv-stars-sm{display:flex;gap:2px;margin-bottom:6px;}
-.rv-star-sm{font-size:12px;color:var(--card);}
-.rv-star-sm.f{color:#FFD700;text-shadow:0 0 4px rgba(255,215,0,.4);}
-.rv-text{font-size:13px;line-height:1.65;color:var(--t2);margin-bottom:8px;}
-.rv-imgs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-.rv-ri{width:60px;height:60px;border-radius:var(--r);overflow:hidden;background:var(--card);cursor:pointer;border:1px solid var(--bdr);transition:border-color .15s;}
-.rv-ri:hover{border-color:rgba(240,185,11,.4);}
-.rv-ri img{width:100%;height:100%;object-fit:cover;}
-.rv-actions-row{display:flex;align-items:center;gap:14px;font-size:11.5px;color:var(--t3);}
-.rv-like-btn{cursor:pointer;display:flex;align-items:center;gap:4px;transition:color .15s;}
-.rv-like-btn:hover,.rv-like-btn.liked{color:var(--err);}
-.rv-comment-btn{cursor:pointer;display:flex;align-items:center;gap:4px;transition:color .15s;}
-.rv-comment-btn:hover{color:var(--inf);}
-.rv-seller-reply{
-  background:rgba(240,185,11,.05);border-left:3px solid var(--gold);
-  padding:10px 12px;margin-top:10px;border-radius:0 var(--r) var(--r) 0;
-}
-.rv-seller-reply-lbl{font-size:10.5px;font-weight:700;color:var(--gold);margin-bottom:4px;}
-.rv-seller-reply-text{font-size:12.5px;color:var(--t2);}
-/* Write Review */
-.wr-wrap{
-  background:linear-gradient(135deg,rgba(43,49,57,.8),rgba(30,35,41,.6));
-  border-radius:var(--rl);padding:16px;margin-bottom:18px;
-  border:1px solid rgba(255,255,255,.07);
-}
-.wr-title{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--t1);}
-.wr-stars{display:flex;gap:6px;margin-bottom:10px;}
-.wr-star{font-size:28px;cursor:pointer;color:var(--sur);transition:transform .18s,color .18s;-webkit-text-stroke:1.5px #444;}
-.wr-star.hov,.wr-star.sel{color:#FFD700;transform:scale(1.2);-webkit-text-stroke:0;text-shadow:0 0 12px rgba(255,215,0,.5);}
-.wr-label{font-size:11px;color:var(--gold);margin-top:-4px;margin-bottom:10px;height:16px;font-weight:600;}
-.wr-input{width:100%;min-height:76px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:10px;color:var(--t1);font-family:var(--fb);font-size:13px;resize:vertical;margin-bottom:12px;}
-.wr-input:focus{outline:none;border-color:rgba(240,185,11,.4);}
-
-/* ══════════════════════════════════════════
-   TABLES
-   ══════════════════════════════════════════ */
-.tbl-wrap{border:1px solid var(--bdr);border-radius:var(--rl);overflow-x:auto;background:var(--sur);margin-bottom:1rem;}
-.tbl{width:100%;border-collapse:collapse;text-align:left;font-size:13px;}
-.tbl th{background:rgba(255,255,255,.02);color:var(--t2);font-weight:600;padding:12px 16px;border-bottom:1px solid var(--bdr);white-space:nowrap;}
-.tbl td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--t1);vertical-align:middle;white-space:nowrap;}
-.tbl tr:last-child td{border-bottom:none;}
-.tbl tr:hover td{background:rgba(255,255,255,.01);}
-/* BADGES */
-.bdg{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:var(--fm);}
-.bdg-warn{background:rgba(240,185,11,0.15);color:var(--gold);}
-.bdg-inf{background:rgba(24,144,255,0.15);color:var(--inf);}
-.bdg-ok{background:rgba(14,203,129,0.15);color:var(--ok);}
-.bdg-err{background:rgba(246,70,93,0.15);color:var(--err);}
-.bdg-orange{background:rgba(255,102,0,0.15);color:#ff6600;}
-.bdg-muted{background:rgba(255,255,255,0.06);color:var(--t2);}
-/* PAGINATION */
-.pag{display:flex;justify-content:center;gap:4px;margin-top:1rem;}
-.pbtn{min-width:28px;height:28px;border-radius:6px;background:var(--card);border:1px solid var(--bdr);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.pbtn:hover{color:var(--t1);border-color:rgba(255,255,255,.2);}
-.pbtn.active{background:var(--gold);color:#0B0E11;border-color:var(--gold);}
-/* MODAL */
-.md-mask{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
-.md-mask.open{display:flex;}
-.md-box{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rxl);width:100%;max-width:480px;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:mdShow .2s cubic-bezier(0,0,0.2,1);position:relative;}
-@keyframes mdShow{from{transform:scale(0.95);opacity:0;}to{transform:scale(1);opacity:1;}}
-.md-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bdr);}
-.mtitle{font-family:var(--fd);font-size:1.1rem;font-weight:800;color:var(--gold);}
-.mclose{background:transparent;border:none;color:var(--t2);font-size:20px;cursor:pointer;line-height:1;}
-.mclose:hover{color:var(--t1);}
-.md-body{padding:20px;}
-/* FORM ELEMENTS */
-.fgrp{margin-bottom:14px;}
-.lbl{display:block;font-size:12px;color:var(--t2);margin-bottom:6px;font-weight:500;}
-.inp{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 12px;color:var(--t1);font-family:var(--fb);font-size:13.5px;transition:all .15s;}
-.inp:focus{outline:none;border-color:var(--gold);box-shadow:0 0 8px rgba(240,185,11,0.15);}
-.inp:disabled{opacity:0.6;cursor:not-allowed;}
-/* TABS INSIDE PAGE */
-.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--bdr);margin-bottom:1.5rem;padding-bottom:1px;}
-.subtabs button{background:transparent;border:none;color:var(--t2);font-size:13px;font-weight:600;padding:8px 16px;cursor:pointer;position:relative;transition:color .15s;}
-.subtabs button:hover{color:var(--t1);}
-.subtabs button.active{color:var(--gold);}
-.subtabs button.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--gold);border-radius:2px;}
-/* TOAST */
-#toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--gold);box-shadow:0 12px 32px rgba(0,0,0,0.5);border-radius:var(--r);padding:12px 20px;color:var(--t1);font-size:13px;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.155);display:flex;align-items:center;gap:8px;}
-#toast.show{transform:translateY(0);opacity:1;}
-/* TX LIST SPECIAL */
-.tx-item{background:rgba(255,255,255,.01);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:between;}
-/* COUNTDOWN PILL */
-.cd-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(246,70,93,.1);border:1px solid rgba(246,70,93,.25);color:var(--err);padding:2px 8px;border-radius:4px;font-family:var(--fm);font-size:11.5px;font-weight:600;}
+/* UTILITY */
+.stitle{font-family:var(--fd);font-size:2.1rem;font-weight:800;letter-spacing:-0.04em;}
+.stitle span{color:var(--gold);}
 </style>
 </head>
 <body>
 
-<nav class="nav">
-  <div class="logo" onclick="chPage('home')">TCC <span>Marketplace</span></div>
-  <ul class="nav-links">
-    <li><a id="nav-home" onclick="chPage('home')">หน้าแรก</a></li>
-    <li><a id="nav-shop" onclick="chPage('shop')">ร้านค้า</a></li>
-    <li><a id="nav-orders" onclick="chPage('orders')">รายการสั่งซื้อ</a></li>
-    <li><a id="nav-wallet" onclick="chPage('wallet')">กระเป๋าเงิน</a></li>
-    <li><a id="nav-admin" onclick="chPage('admin')" style="display:none; color:var(--gold);">แผงควบคุมหลัก</a></li>
+<!-- NAV -->
+<nav class="nav glass cyber-border">
+  <div class="logo" onclick="go('home')">TCC<span style="color:var(--t1)">Market</span></div>
+  <ul class="nav-links" id="mnav" style="display:flex;list-style:none;gap:20px;">
+    <li><a onclick="go('marketplace')" class="active">Marketplace</a></li>
+    <li><a onclick="go('dashboard')">Dashboard</a></li>
   </ul>
-  <div class="nav-r">
-    <div class="bell-wrap">
-      <button class="bell-btn" onclick="toggleNotifDD(event)">🔔<span class="bell-bdg" id="bell-count">0</span></button>
-      <div class="notif-dd" id="notif-dd">
-        <div class="nd-head">
-          <span>การแจ้งเตือน</span>
-          <span class="nd-link" onclick="markAllNotifRead()">อ่านทั้งหมด</span>
-        </div>
-        <div id="notif-list-box"></div>
-        <div class="nd-footer" onclick="chPage('orders'); toggleNotifDD(event);">ดูประวัติคำสั่งซื้อทั้งหมด</div>
-      </div>
-    </div>
-    <div class="role-sw" id="role-sw-btn" onclick="toggleRoleMode()">บทบาท: ผู้ซื้อ</div>
-    <button class="btn btn-ghost btn-sm" onclick="logoutTCC()">ออกจากระบบ</button>
+  <div class="nav-r" style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+    <div style="color:var(--gold);font-family:var(--fm);">💰 <span id="nb">1,250.00</span> USDT</div>
+    <button class="btn btn-gold btn-sm" onclick="openM('m-login')">Login</button>
   </div>
 </nav>
 
-<div id="p-home" class="page">
-  <div class="hero">
-    <div class="hero-inner">
-      <div class="hero-badge">
-        <div class="hero-badge-dot"></div>
-        TCC PRO ELITE ECOSYSTEM LIVE
-      </div>
-      <h1>ซื้อขายปลอดภัยด้วยระบบ USDT Platform</h1>
-      <p>ยินดีต้อนรับสู่ศูนย์กลางการแลกเปลี่ยนสินค้าและบริการแนวใหม่ ขับเคลื่อนด้วยเสถียรภาพและเทคโนโลยีอัจฉริยะในเครือ Trader Cafe Club</p>
-      <div class="hero-cta">
-        <button class="btn btn-gold" onclick="chPage('shop')">🛍️ เข้าสู่ร้านค้าออนไลน์</button>
-        <button class="btn btn-ghost" onclick="chPage('wallet')">💳 จัดการกระเป๋าเงิน USDT</button>
-      </div>
-      <div class="hero-stats">
-        <div class="hs-item">
-          <div class="hs-num" id="st-bal">0.00</div>
-          <div class="hs-lbl">ยอดคงเหลือของคุณ (USDT)</div>
-        </div>
-        <div class="hs-item">
-          <div class="hs-num" id="st-items">0</div>
-          <div class="hs-lbl">สินค้าทั้งหมดพร้อมขาย</div>
-        </div>
-        <div class="hs-item">
-          <div class="hs-num" id="st-orders">0</div>
-          <div class="hs-lbl">คำสั่งซื้อของคุณวันนี้</div>
-        </div>
-      </div>
+<!-- HERO -->
+<div class="hero">
+  <div class="glass" style="max-width:1200px;margin:0 auto;padding:4rem 2rem;border-radius:28px;">
+    <div class="hero-badge">
+      <span style="color:var(--ok);animation:pulse 2s infinite;">● LIVE</span>
+      🔐 SMART CONTRACT SECURED • TRC20 / BEP20
+    </div>
+    <h1>ตลาดสินค้าบน<br>Blockchain ยุคใหม่</h1>
+    <p style="font-size:1.3rem;max-width:720px;margin:0 auto 2.5rem;color:var(--t2);">
+      ซื้อขายด้วย USDT • Funding Free อัตโนมัติ • Referral Commission แบบกระจายศูนย์
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="go('marketplace')" style="padding:16px 36px;font-size:1.15rem;">🛒 สำรวจสินค้า</button>
+      <button class="btn glass" onclick="go('seller-apply')" style="padding:16px 36px;font-size:1.15rem;">🏪 เปิดร้านเป็น Seller</button>
     </div>
   </div>
 </div>
 
-<div id="p-shop" class="page">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;">
-    <h2 class="stitle">รายการ<span>สินค้าทั้งหมด</span></h2>
-    <div style="display:flex;gap:8px;width:100%;max-width:400px;margin-left:auto;">
-      <input type="text" id="shop-search" class="inp" placeholder="🔍 ค้นหาชื่อสินค้า หรือชื่อร้านค้า..." oninput="filterShopItems()">
-    </div>
-  </div>
-  <div class="g4" id="shop-grid"></div>
+<!-- MARKETPLACE SECTION -->
+<div style="max-width:1400px;margin:40px auto;padding:0 2rem;">
+  <div class="stitle">สินค้า<span>แนะนำ</span></div>
+  <div class="g4" id="h-products"></div>
 </div>
 
-<div id="p-orders" class="page">
-  <h2 class="stitle">รายการ<span>คำสั่งซื้อ / ประวัติธุรกรรม</span></h2>
-  <div class="subtabs">
-    <button id="tb-ord-buy" class="active" onclick="chOrdTab('buy')">📦 สินค้าที่คุณซื้อ</button>
-    <button id="tb-ord-sell" onclick="chOrdTab('sell')" style="display:none;">🏪 รายการขายของร้านคุณ</button>
-  </div>
-  <div class="tbl-wrap">
-    <table class="tbl">
-      <thead>
-        <tr id="ord-th-row"></tr>
-      </thead>
-      <tbody id="ord-tbody"></tbody>
-    </table>
-  </div>
-  <div class="pag" id="ord-pag"></div>
-</div>
-
-<div id="p-wallet" class="page">
-  <h2 class="stitle">กระเป๋าเงิน <span>USDT Wallet</span></h2>
-  <div class="g3" style="margin-bottom:2rem;">
-    <div class="card card-gold">
-      <div class="clbl">ยอดเงินคงเหลือในระบบ</div>
-      <div class="cval" id="wal-bal" style="color:var(--gold);">0.00 USDT</div>
-      <div class="csub">สามารถใช้ซื้อสินค้าหรือถอนเงินได้ทันที</div>
-    </div>
-    <div class="card">
-      <div class="clbl">ยอดเงินที่รอการยืนยัน</div>
-      <div class="cval" id="wal-hold" style="color:var(--warn);">0.00 USDT</div>
-      <div class="csub">จากการขายสินค้าที่รอผู้ซื้อกดยืนยัน</div>
-    </div>
-    <div class="card">
-      <div class="clbl">สถิติการใช้งานกระเป๋า</div>
-      <div class="csub" id="wal-username" style="font-weight:600;margin-bottom:4px;">User: -</div>
-      <div class="csub" id="wal-role">สิทธิ์การเข้าถึง: Member</div>
-    </div>
-  </div>
-  <div class="g2">
-    <div>
-      <h3 class="stitle-sm">📜 ประวัติธุรกรรมการเงินล่าสุด</h3>
-      <div id="wal-tx-list"></div>
-    </div>
-    <div>
-      <div class="card" style="margin-bottom:1rem;">
-        <h3 class="stitle-sm" style="color:var(--gold);">💳 รายละเอียดบัญชีธนาคารเพื่อรับเงิน</h3>
-        <p style="font-size:13px;color:var(--t2);margin-bottom:12px;">ข้อมูลนี้ใช้สำหรับให้ระบบหรือแอดมินโอนเงินเข้าบัญชีจริงเมื่อคุณทำรายการถอนเงินรางวัลหรือรายได้</p>
-        <div class="fgrp">
-          <label class="lbl">ธนาคารปลายทาง</label>
-          <input type="text" id="w-bankname" class="inp" placeholder="เช่น กสิกรไทย, ไทยพาณิชย์">
-        </div>
-        <div class="fgrp">
-          <label class="lbl">เลขที่บัญชี</label>
-          <input type="text" id="w-bankacc" class="inp" placeholder="เลขบัญชี 10 หลัก (เฉพาะตัวเลข)">
-        </div>
-        <div class="fgrp">
-          <label class="lbl">ชื่อบัญชีผู้รับ</label>
-          <input type="text" id="w-banknameuser" class="inp" placeholder="ชื่อ-นามสกุล ที่ตรงกับหน้าสมุดบัญชี">
-        </div>
-        <button class="btn btn-gold btn-sm" onclick="saveBankProfile()">💾 บันทึกข้อมูลบัญชีธนาคาร</button>
-      </div>
-    </div>
+<!-- MODALS (ตัวอย่าง) -->
+<div class="mover" id="m-login" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div class="modal glass" style="width:90%;max-width:480px;padding:2rem;">
+    <h2 style="text-align:center;margin-bottom:1.5rem;color:var(--gold);">เข้าสู่ระบบ</h2>
+    <button onclick="closeM('m-login');alert('Demo Login สำเร็จ (v6)')" class="btn btn-gold w100">Login with Wallet</button>
   </div>
 </div>
-
-<div id="p-admin" class="page">
-  <h2 class="stitle">👑 ระบบแผงควบคุมสำหรับ <span>Super Admin</span></h2>
-  <div class="subtabs">
-    <button id="tb-adm-items" class="active" onclick="chAdmTab('items')">📝 จัดการสินค้า</button>
-    <button id="tb-adm-orders" onclick="chAdmTab('orders')">📊 ดูคำสั่งซื้อทั้งหมดในระบบ</button>
-  </div>
-  <div id="adm-view-items">
-    <div style="display:flex;justify-content:between;align-items:center;margin-bottom:1rem;gap:1rem;flex-wrap:wrap;">
-      <h3 class="stitle-sm">ฐานข้อมูลสินค้าและแผนการจ่าย USDT</h3>
-      <button class="btn btn-gold btn-sm" onclick="openAddProductModal()">➕ เพิ่มสินค้าใหม่เข้าสู่แพลตฟอร์ม</button>
-    </div>
-    <div class="tbl-wrap">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>รูป</th>
-            <th>ID / ชื่อสินค้า</th>
-            <th>ราคา (USDT)</th>
-            <th>ราคาเดิม / ส่วนลด</th>
-            <th>คะแนน / ขายแล้ว</th>
-            <th>ชื่อร้านค้า</th>
-            <th>ประเภทแผน FF / การจ่ายคืน</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="adm-items-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-  <div id="adm-view-orders" style="display:none;">
-    <h3 class="stitle-sm" style="margin-bottom:1rem;">ประวัติและสถานะคำสั่งซื้อของสมาชิกทุกคน</h3>
-    <div class="tbl-wrap">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>เลขสั่งซื้อ</th>
-            <th>วัน-เวลา</th>
-            <th>ผู้ซื้อ</th>
-            <th>สินค้า</th>
-            <th>ยอดชำระ</th>
-            <th>แผน FF</th>
-            <th>นับถอยหลัง</th>
-            <th>สถานะ</th>
-            <th>แอคชั่นแอดมิน</th>
-          </tr>
-        </thead>
-        <tbody id="adm-orders-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div id="md-prod-detail" class="md-mask" onclick="closeM('md-prod-detail')">
-  <div class="md-box modal-xl" onclick="event.stopPropagation()">
-    <div class="pd-header">
-      <h3 class="mtitle" id="pd-modal-label">PRODUCT OVERVIEW</h3>
-      <button class="mclose" onclick="closeM('md-prod-detail')">×</button>
-    </div>
-    <div class="pd-scroll">
-      <div class="pd-body">
-        <div class="pd-gallery">
-          <div class="pd-main-img" id="pd-main-image-wrap">🛍️</div>
-          <div class="pd-thumbs" id="pd-thumbnails-wrap"></div>
-        </div>
-        <div class="pd-info">
-          <div class="ff-badge" id="pd-badge-ff">🔥 PREMIUM PLATFORM</div>
-          <h2 class="pd-title" id="pd-title-text">-</h2>
-          <div class="pd-rating-bar">
-            <span class="pd-rating-num" id="pd-rate-num">0.0</span>
-            <div class="pd-stars-lg" id="pd-stars-wrap"></div>
-            <div class="pd-cnt-sep"></div>
-            <span class="pd-stat" id="pd-sold-text">ขายแล้ว 0 ชิ้น</span>
-          </div>
-          <div class="pd-price-box">
-            <span class="pd-price-main" id="pd-price-text">0.00 USDT</span>
-            <span class="pd-price-orig" id="pd-orig-text">0.00 USDT</span>
-            <span class="pd-disc-badge" id="pd-disc-pct-text">0% OFF</span>
-            <div class="pd-ff-note">⚙️ สินค้านี้รองรับเงื่อนไขประกันการันตีสัญญาอัจฉริยะแบบ USDT คืนรูป</div>
-          </div>
-          <div class="shop-strip" id="pd-shop-strip">
-            <div class="shop-av-sm" id="pd-shop-av">🏪</div>
-            <div>
-              <div class="shop-name-sm" id="pd-shop-name">กำลังโหลดร้านค้า...</div>
-              <div class="shop-meta-sm">ร้านค้าพันธมิตรอย่างเป็นทางการ • <span class="pc-veri">✓ Verified</span></div>
-            </div>
-            <div class="shop-strip-r">👉</div>
-          </div>
-          <div class="clbl" style="margin-top:1rem;">เลือกระยะเวลาและแผนการรับสิทธิประโยชน์ (FF Plan)</div>
-          <div class="pd-plans" id="pd-plans-pills-container"></div>
-          <div class="pd-payout-strip" id="pd-payout-calc-note">✨ สรุปแผนการจ่ายคืน: -</div>
-          <div id="pd-dynamic-fields-box" style="margin-top:1rem; border-top:1px dashed var(--bdr); padding-top:1rem;"></div>
-          <div class="pd-actions">
-            <button class="btn-buy-now" id="pd-buy-btn" onclick="submitPurchaseRequest()">⚡ ชำระเงินและเปิดใช้งานคำสั่งซื้อ</button>
-            <button class="btn-wishlist" id="pd-heart-btn" onclick="toggleProductWishlist()">♥</button>
-          </div>
-        </div>
-      </div>
-      <div class="rv-sep"></div>
-      <div class="rv-section">
-        <h3 class="stitle-sm" style="margin-bottom:1rem; font-family:var(--fd);">💬 รีวิวและความคิดเห็นจากผู้ใช้งานจริง</h3>
-        <div class="rv-summary">
-          <div class="rv-big">
-            <div class="rv-big-num" id="rv-summary-average">0.0</div>
-            <div class="rv-big-stars" id="rv-summary-stars-lg"></div>
-            <div class="rv-big-cnt" id="rv-summary-total-count">ทั้งหมด 0 รีวิว</div>
-          </div>
-          <div class="rv-bars" id="rv-summary-bars-container"></div>
-        </div>
-        <div class="wr-wrap" id="pd-write-review-block" style="display:none;">
-          <div class="wr-title">✏️ แสดงความคิดเห็นและให้คะแนนสินค้านี้</div>
-          <div class="wr-stars" id="wr-stars-row">
-            <span class="wr-star" data-v="1">★</span>
-            <span class="wr-star" data-v="2">★</span>
-            <span class="wr-star" data-v="3">★</span>
-            <span class="wr-star" data-v="4">★</span>
-            <span class="wr-star" data-v="5">★</span>
-          </div>
-          <div class="wr-label" id="wr-rating-label">กรุณาเลือกคะแนนความพึงพอใจ</div>
-          <textarea id="wr-review-text" class="wr-input" placeholder="พิมพ์ข้อความรีวิวของคุณที่นี่ เพื่อแชร์ประสบการณ์ให้กับสมาชิกคนอื่น..."></textarea>
-          <button class="btn btn-gold btn-sm" onclick="sendCustomerReview()">🚀 ส่งรีวิวสินค้า</button>
-        </div>
-        <div class="rv-filters" id="rv-filter-chips-row"></div>
-        <div id="pd-reviews-feed-container"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="md-prod-manage" class="md-mask" onclick="closeM('md-prod-manage')">
-  <div class="md-box" onclick="event.stopPropagation()" style="max-width:540px;">
-    <div class="md-head">
-      <h3 class="mtitle" id="pm-modal-title">เพิ่ม/แก้ไขข้อมูลสินค้า</h3>
-      <button class="mclose" onclick="closeM('md-prod-manage')">×</button>
-    </div>
-    <div class="md-body" style="max-height:80vh; overflow-y:auto;">
-      <input type="hidden" id="pm-id">
-      <div class="fgrp">
-        <label class="lbl">ชื่อสินค้า (Product Title)</label>
-        <input type="text" id="pm-name" class="inp" placeholder="เช่น บัตรกำนัลสมาชิกระดับ VIP หรือ ชื่อโมเดล">
-      </div>
-      <div class="fgrp">
-        <label class="lbl">รูปภาพหลักของสินค้า (URL หรือ Emoji / ไอคอนที่ใช้แทนรูปได้)</label>
-        <input type="text" id="pm-img" class="inp" placeholder="ใส่ลิงก์รูปภาพ https://... หรือใส่ตัวการ์ตูน/อีโมจิ">
-      </div>
-      <div class="g2">
-        <div class="fgrp">
-          <label class="lbl">ราคาตั้งขายจริง (USDT)</label>
-          <input type="number" id="pm-price" class="inp" step="0.01" placeholder="0.00">
-        </div>
-        <div class="fgrp">
-          <label class="lbl">ราคาเดิมก่อนลด (USDT)</label>
-          <input type="number" id="pm-orig" class="inp" step="0.01" placeholder="ระบุเพื่อทำป้ายโปรโมชั่น">
-        </div>
-      </div>
-      <div class="g2">
-        <div class="fgrp">
-          <label class="lbl">คะแนนตั้งต้น (Rating)</label>
-          <input type="number" id="pm-rate" class="inp" step="0.1" min="1" max="5" placeholder="4.9">
-        </div>
-        <div class="fgrp">
-          <label class="lbl">จำนวนที่ขายแล้วตั้งต้น</label>
-          <input type="number" id="pm-sold" class="inp" placeholder="0">
-        </div>
-      </div>
-      <div class="fgrp">
-        <label class="lbl">ชื่อร้านค้าเจ้าของผลิตภัณฑ์</label>
-        <input type="text" id="pm-shop" class="inp" placeholder="เช่น TCC Official Store, Shop Smart">
-      </div>
-      <div style="border:1px solid var(--bdg); padding:12px; border-radius:var(--r); background:rgba(240,185,11,0.03); margin-bottom:1rem;">
-        <span style="font-size:12px; font-weight:700; color:var(--gold); display:block; margin-bottom:8px;">⚙️ การตั้งค่าแผนสิทธิประโยชน์โบนัสปันผล (FF Plan Settings)</span>
-        <div class="fgrp">
-          <label class="lbl">ชุดระยะเวลาแผนวันที่มีให้เลือก (คั่นด้วยเครื่องหมายจุลภาค ,)</label>
-          <input type="text" id="pm-ff-days" class="inp" placeholder="เช่น 1, 3, 7, 15, 30">
-          <small style="color:var(--t3); font-size:11px;">ระบุตัวเลขวัน เช่น "3, 7" เพื่อให้ระบบนับถอยหลังสัญญาอัจฉริยะ</small>
-        </div>
-        <div class="g2">
-          <div class="fgrp">
-            <label class="lbl">เปอร์เซ็นต์กำไรที่ได้คืนทั้งหมด</label>
-            <input type="number" id="pm-ff-rate" class="inp" placeholder="เช่น 20 สำหรับได้เงินคืน 120%">
-          </div>
-          <div class="fgrp">
-            <label class="lbl">สูตรวิธีคำนวณการปันผล</label>
-            <select id="pm-ff-type" class="inp">
-              <option value="once">จ่ายก้อนเดียวเต็มจำนวนรวมทุนเมื่อครบกำหนดวัน</option>
-              <option value="daily">เฉลี่ยจ่ายคืนให้ทุกวันตามอัตราส่วนจนครบอายุสัญญา</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="fgrp">
-        <label class="lbl">โครงสร้างฟิลด์แบบฟอร์มรับข้อมูลเพิ่มเติมจากผู้ซื้อ (JSON Array รูปแบบ String)</label>
-        <textarea id="pm-fields" class="inp" style="min-height:60px; font-family:var(--fm); font-size:12px;" placeholder='[{"name":"username","label":"ชื่อผู้ใช้ในระบบ","type":"text","req":true}]'></textarea>
-        <small style="color:var(--t3); font-size:11px;">ตั้งเป็นค่าว่างได้หากสินค้านี้ไม่ต้องการให้ผู้ซื้อพิมพ์ข้อมูลอะไรตอนกดชำระเงิน</small>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:1rem;">
-        <button type="button" class="btn btn-ghost" onclick="closeM('md-prod-manage')">ยกเลิก</button>
-        <button type="button" class="btn btn-gold" onclick="saveProductAdminSubmit()">💾 บันทึกและอัปเดตข้อมูล</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="toast">✅ สำเร็จ</div>
 
 <script>
-// GLOBAL APPLICATION CONTEXT CONFIGURATION VARIABLES
-let CURRENT_USER = null; 
-let DB_PRODUCTS = [];
-let DB_ORDERS = [];
-let ACTIVE_PAGE = 'home';
-let ACTIVE_ORD_TAB = 'buy'; 
-let ACTIVE_ADM_TAB = 'items'; 
-
-// Paging cursors
-let PAG_CUR_ORD = 1;
-const PAG_LIMIT_ORD = 10;
-
-// Review Modal States context
-let SELECTED_PROD_ID_REVIEWS = null;
-let SELECTED_REVIEW_FILTER_SCORE = 'all';
-let SELECTED_REVIEW_WRITE_SCORE_VAL = 5;
-
-// Countdown active clock timers storage cache object
-let cdTimers = {};
-
-// GOOGLE APPS SCRIPT WEB APP GATEWAY URL CONNECTION
-// ดึงค่า URL ของ Apps Script เว็บแอปพลิเคชันจากหน้าต่างเบราว์サーหลัก
-const GAS_URL = window.parent && window.parent.location ? window.parent.location.href : '';
-
-// ═══════════════════════════════════════
-// LIFE CYCLE CORE INITIALIZATION
-// ═══════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  initAppCoreSequence();
-  initReviewStarsInteractiveListeners();
-});
-
-function initAppCoreSequence() {
-  showToast('🔄 กำลังเชื่อมต่อข้อมูล TCC Cloud Base...');
-  
-  // เรียกฟังก์ชันฝั่งเซิร์ฟเวอร์ Apps Script เพื่อดึงข้อมูลตั้งต้นของผู้ใช้ สินค้า และออเดอร์ทั้งหมด
-  if(typeof google !== 'undefined' && google.script && google.script.run){
-    google.script.run
-      .withSuccessHandler((res) => {
-        if(res && res.status === 'success') {
-          CURRENT_USER = res.user;
-          DB_PRODUCTS = res.products || [];
-          DB_ORDERS = res.orders || [];
-          
-          applyUserIdentityUIRender();
-          renderShopGridItems();
-          syncGlobalDashboardStatistics();
-          
-          showToast('✅ ซิงค์ฐานข้อมูลสดเสร็จสิ้น เรียบร้อยแล้ว!');
-        } else {
-          showToast('❌ การโหลดล้มเหลว: ' + (res ? res.message : 'ไม่ทราบสาเหตุ'));
-        }
-      })
-      .withFailureHandler((err) => {
-        showToast('❌ ตรวจพบข้อผิดพลาดของเครือข่ายระบบคลาวด์');
-        console.error(err);
-      })
-      .getInitialAppDataBundle();
-  } else {
-    // โหมด Fallback สำหรับรันบน Browser เดี่ยวภายนอก App (Mocking For Development Visual Check Only)
-    console.warn("GAS context undetected. Mounting offline fallback structures.");
-    setupMockDataArchitecture();
-  }
-}
-
-function setupMockDataArchitecture() {
-  CURRENT_USER = { username: "demo_tcc_leader", balance: 2500.50, hold_balance: 450.00, role: "Super Admin", bank_name:"", bank_account:"", bank_account_name:"" };
-  DB_PRODUCTS = [
-    { id: "P101", name: "TCC Pro Elite VIP Member 1 Month", price: 100.00, original_price: 150.00, rating: 4.9, sold_count: 324, shop_name: "TCC Official Store", image_url: "🎫", ff_days: "1,3,7,30", ff_profit_rate: 15, ff_type: "daily", extra_fields: '[{"name":"uid","label":"UID ของคุณในระบบหลัก","type":"text","req":true}]' },
-    { id: "P102", name: "USDT Locked Yield Booster Pack S1", price: 500.00, original_price: 500.00, rating: 4.8, sold_count: 89, shop_name: "FinTech Alliance", image_url: "🚀", ff_days: "7,15,45", ff_profit_rate: 25, ff_type: "once", extra_fields: "" },
-    { id: "P103", name: "Premium Crypto Trading Indicator Token", price: 50.00, original_price: 99.00, rating: 4.7, sold_count: 141, shop_name: "Trader Cafe Developer", image_url: "📊", ff_days: "3,10", ff_profit_rate: 8, ff_type: "once", extra_fields: '[{"name":"tg_id","label":"Telegram ID เพื่อรับสิทธิ์บอท","type":"text","req":true}]' }
-  ];
-  DB_ORDERS = [
-    { order_id: "TX-99081", timestamp: "2026-05-20 14:22", buyer_username: "demo_tcc_leader", product_id: "P101", product_name: "TCC Pro Elite VIP Member 1 Month", amount_paid: 100.00, ff_days_chosen: 3, ff_end_time: "2026-05-24 14:22", status: "confirmed", extra_data_filled: '{"uid":"leader_99"}' }
-  ];
-  applyUserIdentityUIRender();
-  renderShopGridItems();
-  syncGlobalDashboardStatistics();
-}
-
-// ═══════════════════════════════════════
-// NAVIGATION & CORE UI DISPLAY LOGIC
-// ═══════════════════════════════════════
-function chPage(p) {
-  ACTIVE_PAGE = p;
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
-  
-  const targetPage = document.getElementById('p-' + p);
-  const targetNav = document.getElementById('nav-' + p);
-  if(targetPage) targetPage.classList.add('active');
-  if(targetNav) targetNav.classList.add('active');
-  
-  if(p === 'orders') renderOrdersTableList();
-  if(p === 'wallet') renderWalletSummaryDashboard();
-  if(p === 'admin') renderAdminViewLayout();
-}
-
-function applyUserIdentityUIRender() {
-  if(!CURRENT_USER) return;
-  
-  // จัดการเมนูและการมองเห็นตามสิทธิ์ผู้ใช้งาน
-  const isAdmin = (CURRENT_USER.role === 'Super Admin' || CURRENT_USER.role === 'Admin');
-  document.getElementById('nav-admin').style.display = isAdmin ? 'block' : 'none';
-  document.getElementById('tb-ord-sell').style.display = isAdmin ? 'block' : 'none';
-  
-  // อัปเดตข้อมูลบัญชีธนาคารในฟอร์มของแถบกระเป๋าเงิน
-  document.getElementById('w-bankname').value = CURRENT_USER.bank_name || '';
-  document.getElementById('w-bankacc').value = CURRENT_USER.bank_account || '';
-  document.getElementById('w-banknameuser').value = CURRENT_USER.bank_account_name || '';
-}
-
-function syncGlobalDashboardStatistics() {
-  if(!CURRENT_USER) return;
-  document.getElementById('st-bal').innerText = Number(CURRENT_USER.balance || 0).toFixed(2);
-  document.getElementById('st-items').innerText = DB_PRODUCTS.length;
-  
-  const todayOrdersCount = DB_ORDERS.filter(o => o.buyer_username === CURRENT_USER.username).length;
-  document.getElementById('st-orders').innerText = todayOrdersCount;
-  
-  // ล้างตัวนับเวลาแจ้งเตือนจำลองตามออเดอร์ที่ค้าง
-  const pendingActionsCount = DB_ORDERS.filter(o => o.status === 'paid' || o.status === 'confirmed').length;
-  document.getElementById('bell-count').innerText = pendingActionsCount;
-  buildNotificationDropdownItemsList();
-}
-
-function toggleRoleMode() {
-  const btn = document.getElementById('role-sw-btn');
-  if(btn.innerText.includes('ผู้ซื้อ')) {
-    btn.innerText = 'บทบาท: ผู้ขาย/ร้านค้า';
-    btn.style.borderColor = 'var(--ok)';
-    btn.style.color = 'var(--ok)';
-    btn.style.background = 'rgba(14,203,129,0.08)';
-    showToast('🏪 เปลี่ยนมุมมองเป็นหน้าโหมดผู้ขายแล้ว');
-  } else {
-    btn.innerText = 'บทบาท: ผู้ซื้อ';
-    btn.style.borderColor = 'var(--bdg)';
-    btn.style.color = 'var(--gold)';
-    btn.style.background = 'rgba(240,185,11,0.08)';
-    showToast('🛒 เปลี่ยนมุมมองเป็นหน้าโหมดผู้ซื้อทั่วไปแล้ว');
-  }
-}
-
-// ═══════════════════════════════════════
-// RENDER: SHOP CATALOG (SHOPEE STYLE)
-// ═══════════════════════════════════════
-function renderShopGridItems() {
-  const container = document.getElementById('shop-grid');
-  if(!container) return;
-  
-  if(DB_PRODUCTS.length === 0) {
-    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--t3);">ไม่มีรายการสินค้าเปิดวางจำหน่ายในขณะนี้</div>`;
-    return;
-  }
-  
-  container.innerHTML = DB_PRODUCTS.map(p => {
-    const discPct = p.original_price && p.original_price > p.price ? Math.round(((p.original_price - p.price) / p.original_price) * 100) : 0;
-    const isImageIco = (!p.image_url || p.image_url.length < 5);
-    
-    return `
-      <div class="pc" onclick="openProductDetailModal('${p.id}')">
-        ${p.original_price > p.price ? `<div class="pc-disc-ov">ลด ${discPct}%</div>` : ''}
-        <div class="pc-ff-ov">FF PLAN</div>
-        <button class="pc-heart" onclick="event.stopPropagation(); toggleHeartPop(this, '${p.id}')">♥</button>
-        <div class="pc-img">
-          ${isImageIco ? `<span class="pc-img-ico">${p.image_url||'🎁'}</span>` : `<img src="${p.image_url}" alt="${p.name}">`}
-        </div>
-        <div class="pc-body">
-          <div class="pc-name">${escapeHtml(p.name)}</div>
-          <div class="pc-price-row">
-            <span class="pc-price">${Number(p.price).toFixed(2)} USDT</span>
-            ${p.original_price > p.price ? `<span class="pc-orig">${Number(p.original_price).toFixed(2)}</span>` : ''}
-          </div>
-          <div class="pc-meta">
-            <div class="pc-stars">
-              ${generateStarsHtmlString(p.rating || 5.0)}
-            </div>
-            <span class="pc-sold">ขายแล้ว ${p.sold_count || 0} ชิ้น</span>
-          </div>
-          <div class="pc-shop-row">
-            <span class="pc-shop">🏪 ${escapeHtml(p.shop_name || 'TCC Store')}</span>
-            <span class="pc-veri">✓</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function filterShopItems() {
-  const q = document.getElementById('shop-search').value.toLowerCase().trim();
-  const pcs = document.querySelectorAll('#shop-grid .pc');
-  
-  DB_PRODUCTS.forEach((p, idx) => {
-    const cardEl = pcs[idx];
-    if(!cardEl) return;
-    const match = p.name.toLowerCase().includes(q) || (p.shop_name && p.shop_name.toLowerCase().includes(q));
-    cardEl.style.display = match ? 'flex' : 'none';
-  });
-}
-
-function toggleHeartPop(btn, pid) {
-  btn.classList.toggle('liked');
-  btn.classList.add('pop');
-  setTimeout(() => btn.classList.remove('pop'), 280);
-  showToast(btn.classList.contains('liked') ? '❤️ เพิ่มสินค้าเข้าในรายการโปรดแล้ว' : '💔 นำออกจากรายการโปรดแล้ว');
-}
-
-function generateStarsHtmlString(rate) {
-  let str = '';
-  const floor = Math.floor(rate);
-  for(let i=1; i<=5; i++) {
-    if(i <= floor) str += `<span class="pc-star f">★</span>`;
-    else if(i - 0.5 <= rate) str += `<span class="pc-star h">★</span>`;
-    else str += `<span class="pc-star">★</span>`;
-  }
-  return str;
-}
-
-// ═══════════════════════════════════════
-// PRODUCT DETAIL MODAL & DYNAMIC FORM
-// ═══════════════════════════════════════
-let selectedProductObjectContext = null;
-let selectedFFPlanDaysValue = null;
-
-function openProductDetailModal(pid) {
-  const p = DB_PRODUCTS.find(item => item.id === pid);
-  if(!p) return;
-  
-  selectedProductObjectContext = p;
-  SELECTED_PROD_ID_REVIEWS = pid;
-  
-  document.getElementById('pd-title-text').innerText = p.name;
-  document.getElementById('pd-rate-num').innerText = Number(p.rating || 5.0).toFixed(1);
-  document.getElementById('pd-sold-text').innerText = `ขายแล้ว ${p.sold_count || 0} ชิ้น`;
-  document.getElementById('pd-price-text').innerText = `${Number(p.price).toFixed(2)} USDT`;
-  
-  if(p.original_price && p.original_price > p.price) {
-    document.getElementById('pd-orig-text').innerText = `${Number(p.original_price).toFixed(2)} USDT`;
-    const pct = Math.round(((p.original_price - p.price) / p.original_price) * 100);
-    document.getElementById('pd-disc-pct-text').innerText = `${pct}% OFF`;
-    document.getElementById('pd-orig-text').style.display = 'inline';
-    document.getElementById('pd-disc-pct-text').style.display = 'inline';
-  } else {
-    document.getElementById('pd-orig-text').style.display = 'none';
-    document.getElementById('pd-disc-pct-text').style.display = 'none';
-  }
-  
-  // Render main image
-  const imgWrap = document.getElementById('pd-main-image-wrap');
-  const isImageIco = (!p.image_url || p.image_url.length < 5);
-  if(isImageIco) {
-    imgWrap.innerHTML = `<span style="font-size:5rem;">${p.image_url||'🎁'}</span>`;
-  } else {
-    imgWrap.innerHTML = `<img src="${p.image_url}" id="pd-zoom-target-img">`;
-  }
-  
-  // Thumbnails grid render
-  const thumbWrap = document.getElementById('pd-thumbnails-wrap');
-  thumbWrap.innerHTML = `
-    <div class="pd-thumb active">${isImageIco ? p.image_url||'🎁' : `<img src="${p.image_url}">`}</div>
-    <div class="pd-thumb">📦</div>
-    <div class="pd-thumb">✨</div>
-  `;
-  
-  // Shop details strip mapping
-  document.getElementById('pd-shop-name').innerText = p.shop_name || 'TCC Official Store';
-  
-  // Render Star vector strings inside modal header
-  document.getElementById('pd-stars-wrap').innerHTML = generateStarsHtmlString(p.rating || 5.0)
-    .replace(/pc-star/g, 'pd-star-lg'); // Map to larger css variables
-    
-  // Build FF Plan Day Pills selection view 
-  const pillsContainer = document.getElementById('pd-plans-pills-container');
-  pillsContainer.innerHTML = '';
-  
-  const daysArr = p.ff_days ? p.ff_days.split(',').map(x => x.trim()).filter(Boolean) : ['3'];
-  selectedFFPlanDaysValue = daysArr[0]; // Auto select first entry
-  
-  daysArr.forEach((d, i) => {
-    const pill = document.createElement('div');
-    pill.className = `pd-plan-chip ${i === 0 ? 'sel' : ''}`;
-    pill.innerText = `${d} วัน`;
-    pill.onclick = () => {
-      document.querySelectorAll('.pd-plan-chip').forEach(c => c.classList.remove('sel'));
-      pill.classList.add('sel');
-      selectedFFPlanDaysValue = d;
-      updateFFPayoutCalculationProjectionNote();
-    };
-    pillsContainer.appendChild(pill);
-  });
-  
-  updateFFPayoutCalculationProjectionNote();
-  buildDynamicFormInputFieldsGroup(p.extra_fields);
-  
-  // Mount Review Section Components
-  SELECTED_REVIEW_FILTER_SCORE = 'all';
-  renderReviewsDataFeedLayout();
-  
-  // ตรวจสอบเงื่อนไขการให้สิทธิ์รีวิวเฉพาะผู้ที่เคยซื้อสินค้าชิ้นนี้แล้ว
-  checkReviewEligibilityPermit(pid);
-  
-  openM('md-prod-detail');
-}
-
-function updateFFPayoutCalculationProjectionNote() {
-  if(!selectedProductObjectContext || !selectedFFPlanDaysValue) return;
-  const price = Number(selectedProductObjectContext.price);
-  const rate = Number(selectedProductObjectContext.ff_profit_rate || 0);
-  const totalReturn = price + (price * (rate / 100));
-  const typeText = selectedProductObjectContext.ff_type === 'daily' ? 'เฉลี่ยจ่ายปันผลคืนให้ทุกวัน' : 'จ่ายคืนก้อนเดียวรวมทุนเมื่อครบกำหนดอายุ';
-  
-  document.getElementById('pd-payout-calc-note').innerText = `✨ รวมแผนรับคืนสิ้นสุดสัญญา: ${totalReturn.toFixed(2)} USDT (กำไร +${rate}%) • ${typeText}`;
-}
-
-function buildDynamicFormInputFieldsGroup(fieldsString) {
-  const box = document.getElementById('pd-dynamic-fields-box');
-  box.innerHTML = '';
-  if(!fieldsString) return;
-  
-  try {
-    const arr = JSON.parse(fieldsString);
-    if(!Array.isArray(arr) || arr.length === 0) return;
-    
-    box.innerHTML = `<h4 style="font-size:12px;color:var(--gold);margin-bottom:8px;font-family:var(--fd);">📝 กรุณากรอกข้อมูลสำหรับยืนยันรับสิทธิ์ผลิตภัณฑ์</h4>`;
-    
-    arr.forEach(f => {
-      const fgrp = document.createElement('div');
-      fgrp.className = 'fgrp';
-      fgrp.innerHTML = `
-        <label class="lbl">${escapeHtml(f.label)} ${f.req ? '<span style="color:var(--err);">*</span>' : ''}</label>
-        <input type="${f.type||'text'}" class="inp pd-dyn-input" data-name="${f.name}" data-req="${f.req?'1':'0'}" placeholder="ระบุข้อมูลที่นี่...">
-      `;
-      box.appendChild(fgrp);
-    });
-  } catch(e) {
-    console.error("Failed parsing extra data JSON schema layout structure", e);
-  }
-}
-
-// ═══════════════════════════════════════
-// ACTION: SUBMIT ORDER PURCHASE
-// ═══════════════════════════════════════
-function submitPurchaseRequest() {
-  if(!CURRENT_USER || !selectedProductObjectContext) return;
-  
-  const price = Number(selectedProductObjectContext.price);
-  if(Number(CURRENT_USER.balance) < price) {
-    alert(`❌ ยอดเงิน USDT คงเหลือของคุณไม่เพียงพอสำหรับการซื้อผลิตภัณฑ์นี้\nยอดคงเหลือปัจจุบัน: ${Number(CURRENT_USER.balance).toFixed(2)} USDT\nราคาสินค้า: ${price.toFixed(2)} USDT`);
-    return;
-  }
-  
-  // Validate dynamic forms attributes 
-  const dynInputs = document.querySelectorAll('.pd-dyn-input');
-  let extraPayloadData = {};
-  for(let input of dynInputs) {
-    const val = input.value.trim();
-    const name = input.getAttribute('data-name');
-    const req = input.getAttribute('data-req') === '1';
-    
-    if(req && !val) {
-      alert(`กรุณากรอกข้อมูลช่องที่จำเป็นให้ครบถ้วนก่อนทำการสั่งซื้อครับ`);
-      input.focus();
-      return;
-    }
-    if(name) extraPayloadData[name] = val;
-  }
-  
-  if(!confirm(`⚠️ ยืนยันการชำระเงินตัดยอดกระเป๋าเพื่อซื้อสินค้าใช่หรือไม่?\nจำนวนเงินที่หัก: ${price.toFixed(2)} USDT\nสัญญาแผนงาน: ${selectedFFPlanDaysValue} วัน`)) return;
-  
-  const buyBtn = document.getElementById('pd-buy-btn');
-  buyBtn.disabled = true;
-  buyBtn.innerText = '⏳ กำลังประมวลผลสัญญาอัจฉริยะ...';
-  
-  if(typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler((res) => {
-        buyBtn.disabled = false;
-        buyBtn.innerText = '⚡ ชำระเงินและเปิดใช้งานคำสั่งซื้อ';
-        
-        if(res && res.status === 'success') {
-          closeM('md-prod-detail');
-          // Reload fresh data bundle packet structures 
-          initAppCoreSequence();
-          alert(`🎉 สั่งซื้อผลิตภัณฑ์สำเร็จเสร็จสมบูรณ์เรียบร้อยแล้ว!\nระบบได้เริ่มนับเวลาแผนงานและบันทึกประวัติลงกระเป๋าแล้ว`);
-          chPage('orders');
-        } else {
-          alert('❌ การสั่งซื้อล้มเหลว: ' + (res ? res.message : 'ข้อผิดพลาดระบบภายใน'));
-        }
-      })
-      .withFailureHandler((err) => {
-        buyBtn.disabled = false;
-        buyBtn.innerText = '⚡ ชำระเงินและเปิดใช้งานคำสั่งซื้อ';
-        alert('❌ เกิดข้อผิดพลาดทางเทคนิคในการส่งคำสั่งซื้อเข้าระบบคลาวด์ API');
-      })
-      .processUserOrderPurchaseAction(selectedProductObjectContext.id, selectedFFPlanDaysValue, JSON.stringify(extraPayloadData));
-  } else {
-    // Offline Mock fallback operations execution 
-    CURRENT_USER.balance -= price;
-    const mockId = "TX-" + Math.floor(10000 + Math.random() * 90000);
-    const nowStr = new Date().toISOString().replace('T',' ').substring(0,16);
-    
-    let endD = new Date();
-    endD.setDate(endD.getDate() + parseInt(selectedFFPlanDaysValue));
-    const endStr = endD.toISOString().replace('T',' ').substring(0,16);
-    
-    DB_ORDERS.unshift({
-      order_id: mockId,
-      timestamp: nowStr,
-      buyer_username: CURRENT_USER.username,
-      product_id: selectedProductObjectContext.id,
-      product_name: selectedProductObjectContext.name,
-      amount_paid: price,
-      ff_days_chosen: parseInt(selectedFFPlanDaysValue),
-      ff_end_time: endStr,
-      status: 'confirmed',
-      extra_data_filled: JSON.stringify(extraPayloadData)
-    });
-    
-    syncGlobalDashboardStatistics();
-    closeM('md-prod-detail');
-    chPage('orders');
-    showToast('🚀 [Mock] สั่งซื้อสำเร็จในโหมดออฟไลน์');
-  }
-}
-
-// ═══════════════════════════════════════
-// RENDER: ORDERS LIST & LIFETIME MANAGEMENT
-// ═══════════════════════════════════════
-function chOrdTab(t) {
-  ACTIVE_ORD_TAB = t;
-  document.getElementById('tb-ord-buy').className = t === 'buy' ? 'active' : '';
-  document.getElementById('tb-ord-sell').className = t === 'sell' ? 'active' : '';
-  PAG_CUR_ORD = 1;
-  renderOrdersTableList();
-}
-
-function renderOrdersTableList() {
-  const head = document.getElementById('ord-th-row');
-  const tbody = document.getElementById('ord-tbody');
-  if(!head || !tbody) return;
-  
-  // Filter active list 
-  let filtered = [];
-  if(ACTIVE_ORD_TAB === 'buy') {
-    filtered = DB_ORDERS.filter(o => o.buyer_username === CURRENT_USER.username);
-    head.innerHTML = `
-      <th>เลขสั่งซื้อ</th>
-      <th>วัน-เวลาที่สั่ง</th>
-      <th>ชื่อรายการสินค้า</th>
-      <th>ยอดชำระ (USDT)</th>
-      <th>สัญญานับถอยหลัง</th>
-      <th>สถานะ</th>
-      <th>การดำเนินการ</th>
-    `;
-  } else {
-    filtered = DB_ORDERS; // Admin Mode View list options 
-    head.innerHTML = `
-      <th>เลขสั่งซื้อ</th>
-      <th>ผู้ซื้อ</th>
-      <th>สินค้า</th>
-      <th>ยอดขาย (USDT)</th>
-      <th>สัญญานับถอยหลัง</th>
-      <th>สถานะ</th>
-      <th>การจัดการผู้รับสิทธิ์</th>
-    `;
-  }
-  
-  if(filtered.length === 0) {
-    tbody.innerHTML = nodata(7);
-    document.getElementById('ord-pag').innerHTML = '';
-    return;
-  }
-  
-  // Apply pagination slicing parameters logic 
-  const totalPages = Math.ceil(filtered.length / PAG_LIMIT_ORD);
-  if(PAG_CUR_ORD > totalPages) PAG_CUR_ORD = totalPages;
-  const startIdx = (PAG_CUR_ORD - 1) * PAG_LIMIT_ORD;
-  const paginated = filtered.slice(startIdx, startIdx + PAG_LIMIT_ORD);
-  
-  // Clear any residual timer blocks 
-  Object.values(cdTimers).forEach(clearInterval);
-  cdTimers = {};
-  
-  tbody.innerHTML = paginated.map(o => {
-    const timerId = `cd-${o.order_id}`;
-    let actionHtml = '';
-    
-    if(ACTIVE_ORD_TAB === 'buy') {
-      if(o.status === 'confirmed') {
-        actionHtml = `<button class="btn btn-ok btn-sm" onclick="triggerClientOrderCompletionFinish('${o.order_id}')">✅ ยืนยันได้รับสิทธิ์สมบูรณ์</button>`;
-      } else if(o.status === 'completed') {
-        actionHtml = `<span style="color:var(--t3);font-size:12px;">คำสั่งสิ้นสุดแล้ว</span>`;
-      } else {
-        actionHtml = `<span style="color:var(--t3);font-size:12px;">รอการยืนยันระบบ</span>`;
-      }
-    } else {
-      // Store/Admin perspective action options layout
-      if(o.status === 'paid') {
-        actionHtml = `<button class="btn btn-gold btn-sm" onclick="changeOrderStatusByAdmin('${o.order_id}','confirmed')">อนุมัติจัดส่ง</button>`;
-      } else {
-        actionHtml = `<span style="font-size:12px;color:var(--t2);">จัดการเสร็จสิ้น</span>`;
-      }
-    }
-    
-    // Check fields payload display button helper snippet code injection 
-    let detailsLink = '';
-    if(o.extra_data_filled && o.extra_data_filled.length > 2) {
-      detailsLink = `<br><span style="font-size:11px;color:var(--gold);cursor:pointer;" onclick="viewOrderDataPayload('${o.order_id}')">👁️ ดูข้อมูลรับสิทธิ์</span>`;
-    }
-    
-    // Render setup string row 
-    return `
-      <tr>
-        <td style="font-family:var(--fm);font-weight:600;color:var(--gold);">${o.order_id}</td>
-        <td><span style="font-size:12px;color:var(--t2);">${o.timestamp}</span></td>
-        <td>
-          <div style="font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(o.product_name)}</div>
-          ${ACTIVE_ORD_TAB === 'sell' ? `<small style="color:var(--gold);">By: ${o.buyer_username}</small>` : ''}
-          ${detailsLink}
-        </td>
-        <td style="font-family:var(--fm);font-weight:600;color:var(--err);">${Number(o.amount_paid).toFixed(2)}</td>
-        <td><div id="${timerId}" class="cd-pill">⏳ โหลดแผน...</div></td>
-        <td>${sb(o.status)}</td>
-        <td>${actionHtml}</td>
-      </tr>
-    `;
-  }).join('');
-  
-  // Attach clock listeners on DOM mount sequence
-  paginated.forEach(o => {
-    initOrderCountdownTimerClock(o.order_id, o.ff_end_time, o.status);
-  });
-  
-  renderPag('ord-pag', totalPages, PAG_CUR_ORD, 'chOrdPagPointer');
-}
-
-function chOrdPagPointer(p) {
-  PAG_CUR_ORD = p;
-  renderOrdersTableList();
-}
-
-function initOrderCountdownTimerClock(id, endTimeStr, status) {
-  const el = document.getElementById(`cd-${id}`);
-  if(!el || !endTimeStr) return;
-  
-  const target = new Date(endTimeStr.replace(' ', 'T')).getTime();
-  
-  function tick() {
-    const now = new Date().getTime();
-    const diff = target - now;
-    
-    if(status === 'completed') {
-      el.innerHTML = `🏁 สัญญาสิ้นสุด`;
-      el.style.borderColor = 'rgba(14,203,129,0.3)';
-      el.style.color = 'var(--ok)';
-      el.style.background = 'rgba(14,203,129,0.1)';
-      clearInterval(cdTimers[id]);
-      return;
-    }
-    
-    if(diff <= 0) {
-      el.innerHTML = `⏰ ครบกำหนดรอปิด`;
-      el.style.borderColor = 'rgba(240,185,11,0.3)';
-      el.style.color = 'var(--gold)';
-      el.style.background = 'rgba(240,185,11,0.1)';
-      clearInterval(cdTimers[id]);
-      return;
-    }
-    
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    el.innerHTML = `⏳ ${d}วัน ${pad(h)}:${pad(m)}:${pad(s)}`;
-  }
-  
-  tick();
-  cdTimers[id] = setInterval(tick, 1000);
-}
-
-function viewOrderDataPayload(oid) {
-  const o = DB_ORDERS.find(item => item.order_id === oid);
-  if(!o || !o.extra_data_filled) return;
-  
-  try {
-    const parsed = JSON.parse(o.extra_data_filled);
-    let str = `📋 ข้อมูลฟิลด์ที่ส่งมากับคำสั่งซื้อ [${oid}]:\n`;
-    for(let k in parsed) {
-      str += `• ${k}: ${parsed[k]}\n`;
-    }
-    alert(str);
-  } catch(e) {
-    alert(`ข้อมูลรับสิทธิ์ดิบ: ${o.extra_data_filled}`);
-  }
-}
-
-function triggerClientOrderCompletionFinish(oid) {
-  if(!confirm("📢 ยืนยันว่าคุณได้รับบริการ ผลิตภัณฑ์ หรือยอดเงินคืนปันผลสะสมของรอบสัญญาครบถ้วนถูกต้องแล้วใช่หรือไม่?\n*การกดยืนยันนี้จะทำให้สถานะออเดอร์เปลี่ยนเป็นสำเร็จสมบูรณ์ทันทีและไม่สามารถยกเลิกได้*")) return;
-  
-  showToast("⏳ กำลังปิดบล็อกสัญญาคำสั่งซื้อ...");
-  if(typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler((res) => {
-        if(res && res.status === 'success') {
-          initAppCoreSequence();
-          alert("🎉 ปิดสัญญาและกดยืนยันรายการสินค้าสำเร็จ ขอบพระคุณที่ใช้บริการครับ!");
-        } else {
-          alert("❌ ไม่สามารถยืนยันคำสั่งซื้อได้: " + (res ? res.message : "ข้อผิดพลาดที่ไม่รู้จัก"));
-        }
-      })
-      .withFailureHandler((err) => {
-        alert("❌ ข้อผิดพลาดของเซิร์ฟเวอร์ระบบคลาวด์ ไม่สามารถเปลี่ยนสถานะได้");
-      })
-      .changeOrderStatusByToken(oid, 'completed');
-  } else {
-    // Local mock action execution update 
-    const idx = DB_ORDERS.findIndex(item => item.order_id === oid);
-    if(idx !== -1) {
-      DB_ORDERS[idx].status = 'completed';
-      // If product layout structure specifies return profit yield 
-      const p = DB_PRODUCTS.find(i => i.id === DB_ORDERS[idx].product_id);
-      if(p) {
-        const reward = Number(DB_ORDERS[idx].amount_paid) * (1 + (Number(p.ff_profit_rate || 0)/100));
-        CURRENT_USER.balance += reward;
-      }
-      showToast("🚀 [Mock] อัปเดตรายการออเดอร์เป็นสำเร็จเสร็จสิ้น");
-      syncGlobalDashboardStatistics();
-      renderOrdersTableList();
-    }
-  }
-}
-
-// ═══════════════════════════════════════
-// WALLET MANAGEMENT DASHBOARD
-// ═══════════════════════════════════════
-function renderWalletSummaryDashboard() {
-  if(!CURRENT_USER) return;
-  document.getElementById('wal-bal').innerText = `${Number(CURRENT_USER.balance || 0).toFixed(2)} USDT`;
-  document.getElementById('wal-hold').innerText = `${Number(CURRENT_USER.hold_balance || 0).toFixed(2)} USDT`;
-  document.getElementById('wal-username').innerText = `User ID: ${CURRENT_USER.username}`;
-  document.getElementById('wal-role').innerText = `สิทธิ์บัญชีปัจจุบัน: ${CURRENT_USER.role || 'Member'}`;
-  
-  // Render dummy simulation ledger history tracking rows 
-  const txBox = document.getElementById('wal-tx-list');
-  txBox.innerHTML = '';
-  
-  // ดึงรายการคำสั่งซื้อของตนเองมาแสดงในกระเป๋าเป็นรายการรายจ่าย
-  const myCosts = DB_ORDERS.filter(o => o.buyer_username === CURRENT_USER.username);
-  if(myCosts.length === 0) {
-    txBox.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--t3);font-size:12px;">ไม่มีประวัติการทำรายการธุรกรรมการเงิน</div>`;
-    return;
-  }
-  
-  txBox.innerHTML = myCosts.map(o => `
-    <div class="tx-item" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); padding:10px; border-radius:var(--r); margin-bottom:6px; border:1px solid var(--bdr);">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--t1);">ชำระค่าสินค้าประจำกล่องออเดอร์ #${o.order_id}</div>
-        <small style="color:var(--t3);font-family:var(--fm);">${o.timestamp}</small>
-      </div>
-      <div style="font-family:var(--fm);font-weight:700;color:var(--err); text-align:right;">-${Number(o.amount_paid).toFixed(2)} USDT</div>
-    </div>
-  `).join('');
-}
-
-function saveBankProfile() {
-  const bank = document.getElementById('w-bankname').value.trim();
-  const acc = document.getElementById('w-bankacc').value.trim();
-  const name = document.getElementById('w-banknameuser').value.trim();
-  
-  if(!bank || !acc || !name) {
-    alert("❌ กรุณากรอกข้อมูลช่องรายละเอียดบัญชีธนาคารให้ครบถ้วนทุกช่องครับ");
-    return;
-  }
-  
-  showToast("⏳ กำลังบันทึกข้อมูลธนาคาร...");
-  if(typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler((res) => {
-        if(res && res.status === 'success') {
-          CURRENT_USER.bank_name = bank;
-          CURRENT_USER.bank_account = acc;
-          CURRENT_USER.bank_account_name = name;
-          showToast("✅ บันทึกข้อมูลบัญชีรับเงินธนาคารสำเร็จเรียบร้อย!");
-        } else {
-          alert("❌ ไม่สามารถบันทึกได้: " + (res ? res.message : "ข้อผิดพลาดทางเทคนิค"));
-        }
-      })
-      .withFailureHandler(() => showToast("❌ การเชื่อมต่อข้อมูลธนาคารคลาวด์ล้มเหลว"))
-      .updateUserBankProfileStructure(bank, acc, name);
-  } else {
-    CURRENT_USER.bank_name = bank;
-    CURRENT_USER.bank_account = acc;
-    CURRENT_USER.bank_account_name = name;
-    showToast("🚀 [Mock] บันทึกโปรไฟล์บัญชีธนาคารลงหน่วยความจำชั่วคราวแล้ว");
-  }
-}
-
-// ═══════════════════════════════════════
-// ADMIN VIEW MANAGEMENT LAYOUTS PANEL
-// ═══════════════════════════════════════
-function chAdmTab(t) {
-  ACTIVE_ADM_TAB = t;
-  document.getElementById('tb-adm-items').className = t === 'items' ? 'active' : '';
-  document.getElementById('tb-adm-orders').className = t === 'orders' ? 'active' : '';
-  
-  document.getElementById('adm-view-items').style.display = t === 'items' ? 'block' : 'none';
-  document.getElementById('adm-view-orders').style.display = t === 'orders' ? 'block' : 'none';
-  renderAdminViewLayout();
-}
-
-function renderAdminViewLayout() {
-  if(ACTIVE_ADM_TAB === 'items') {
-    const tbody = document.getElementById('adm-items-tbody');
-    if(!tbody) return;
-    
-    tbody.innerHTML = DB_PRODUCTS.map(p => `
-      <tr>
-        <td style="font-size:1.5rem; text-align:center;">${p.image_url && p.image_url.length < 5 ? p.image_url : '🎁'}</td>
-        <td>
-          <div style="font-weight:600;color:var(--gold);font-family:var(--fm);">${p.id}</div>
-          <div style="font-weight:600;white-space:normal;max-width:240px;">${escapeHtml(p.name)}</div>
-        </td>
-        <td style="font-family:var(--fm);font-weight:700;color:var(--ok);">${Number(p.price).toFixed(2)}</td>
-        <td style="font-family:var(--fm);font-size:12px;color:var(--t3);">${p.original_price ? Number(p.original_price).toFixed(2) : '-'}</td>
-        <td style="font-family:var(--fm);font-size:12px;">⭐️ ${p.rating} / 📦 ${p.sold_count}</td>
-        <td style="font-size:12px;color:var(--t2);">${escapeHtml(p.shop_name||'')}</td>
-        <td>
-          <div style="font-family:var(--fm);font-size:12px;color:var(--gold);">แผนคืน: ${p.ff_days} วัน</div>
-          <small style="color:var(--t3);">โบนัส +${p.ff_profit_rate}% (${p.ff_type})</small>
-        </td>
-        <td>
-          <button class="btn btn-ghost btn-sm" onclick="openEditProductAdminModal('${p.id}')">✏️ แก้ไข</button>
-        </td>
-      </tr>
-    `).join('');
-  } else {
-    const tbody = document.getElementById('adm-orders-tbody');
-    if(!tbody) return;
-    
-    tbody.innerHTML = DB_ORDERS.map(o => {
-      const timerId = `cd-adm-${o.order_id}`;
-      let admActions = '';
-      if(o.status === 'paid') {
-        admActions = `<button class="btn btn-gold btn-sm" onclick="changeOrderStatusByAdmin('${o.order_id}','confirmed')">อนุมัติคำสั่งซื้อ</button>`;
-      } else if(o.status === 'confirmed') {
-        admActions = `<button class="btn btn-ok btn-sm" onclick="changeOrderStatusByAdmin('${o.order_id}','completed')">บังคับสำเร็จ (Completed)</button>`;
-      } else {
-        admActions = `<span style="font-size:11px;color:var(--t3);">เรียบร้อยแล้ว</span>`;
-      }
-      
-      return `
-        <tr>
-          <td style="font-family:var(--fm);font-weight:600;color:var(--gold);">${o.order_id}</td>
-          <td style="font-size:11px;color:var(--t3);">${o.timestamp}</td>
-          <td style="font-weight:600;color:var(--inf);">${o.buyer_username}</td>
-          <td style="font-size:12px;white-space:normal;max-width:200px;">${escapeHtml(o.product_name)}</td>
-          <td style="font-family:var(--fm);font-weight:700;color:var(--err);">${Number(o.amount_paid).toFixed(2)}</td>
-          <td style="font-family:var(--fm);font-size:12px;">${o.ff_days_chosen} วัน</td>
-          <td><div id="${timerId}" class="cd-pill">⏳...</div></td>
-          <td>${sb(o.status)}</td>
-          <td>${admActions}</td>
-        </tr>
-      `;
-    }).join('');
-    
-    // Mount clock listeners on admin view list elements 
-    DB_ORDERS.forEach(o => {
-      const el = document.getElementById(`cd-adm-${o.order_id}`);
-      if(el) initOrderCountdownTimerClock(`adm-${o.order_id}`, o.ff_end_time, o.status);
-    });
-  }
-}
-
-function openAddProductModal() {
-  document.getElementById('pm-modal-title').innerText = "➕ เพิ่มสินค้าใหม่เข้าระบบคลาวด์ Sheet Database";
-  document.getElementById('pm-id').value = '';
-  document.getElementById('pm-name').value = '';
-  document.getElementById('pm-img').value = '🎁';
-  document.getElementById('pm-price').value = '100.00';
-  document.getElementById('pm-orig').value = '';
-  document.getElementById('pm-rate').value = '4.9';
-  document.getElementById('pm-sold').value = '10';
-  document.getElementById('pm-shop').value = 'TCC Official Store';
-  document.getElementById('pm-ff-days').value = '1,3,7,15,30';
-  document.getElementById('pm-ff-rate').value = '15';
-  document.getElementById('pm-ff-type').value = 'once';
-  document.getElementById('pm-fields').value = '';
-  openM('md-prod-manage');
-}
-
-function openEditProductAdminModal(pid) {
-  const p = DB_PRODUCTS.find(item => item.id === pid);
-  if(!p) return;
-  
-  document.getElementById('pm-modal-title').innerText = `✏️ แก้ไขข้อมูลสินค้า [ID: ${p.id}]`;
-  document.getElementById('pm-id').value = p.id;
-  document.getElementById('pm-name').value = p.name || '';
-  document.getElementById('pm-img').value = p.image_url || '';
-  document.getElementById('pm-price').value = p.price || '';
-  document.getElementById('pm-orig').value = p.original_price || '';
-  document.getElementById('pm-rate').value = p.rating || '5.0';
-  document.getElementById('pm-sold').value = p.sold_count || '0';
-  document.getElementById('pm-shop').value = p.shop_name || '';
-  document.getElementById('pm-ff-days').value = p.ff_days || '3';
-  document.getElementById('pm-ff-rate').value = p.ff_profit_rate || '0';
-  document.getElementById('pm-ff-type').value = p.ff_type || 'once';
-  document.getElementById('pm-fields').value = p.extra_fields || '';
-  openM('md-prod-manage');
-}
-
-function saveProductAdminSubmit() {
-  const payload = {
-    id: document.getElementById('pm-id').value.trim(),
-    name: document.getElementById('pm-name').value.trim(),
-    image_url: document.getElementById('pm-img').value.trim(),
-    price: parseFloat(document.getElementById('pm-price').value) || 0,
-    original_price: parseFloat(document.getElementById('pm-orig').value) || 0,
-    rating: parseFloat(document.getElementById('pm-rate').value) || 5.0,
-    sold_count: parseInt(document.getElementById('pm-sold').value) || 0,
-    shop_name: document.getElementById('pm-shop').value.trim(),
-    ff_days: document.getElementById('pm-ff-days').value.trim(),
-    ff_profit_rate: parseFloat(document.getElementById('pm-ff-rate').value) || 0,
-    ff_type: document.getElementById('pm-ff-type').value,
-    extra_fields: document.getElementById('pm-fields').value.trim()
-  };
-  
-  if(!payload.name || payload.price <= 0) {
-    alert("❌ กรุณากรอกชื่อสินค้าและตั้งราคาให้ถูกต้องเหมาะสมก่อนกดบันทึกครับ");
-    return;
-  }
-  
-  showToast("⏳ กำลังอัปโหลดข้อมูลบันทึกลง Google Sheets...");
-  if(typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler((res) => {
-        if(res && res.status === 'success') {
-          closeM('md-prod-manage');
-          initAppCoreSequence(); // Refresh data rows 
-          showToast("✅ บันทึกและซิงค์ข้อมูลสินค้าโครงสร้างสำเร็จ!");
-        } else {
-          alert("❌ เกิดปัญหาการบันทึก: " + (res ? res.message : "ไม่สามารถเขียนข้อมูลแถวได้"));
-        }
-      })
-      .withFailureHandler(() => alert("❌ ข้อผิดพลาดเครือข่าย API ไม่สามารถเข้าถึง Apps Script ได้"))
-      .saveProductFromAdminDashboardForm(JSON.stringify(payload));
-  } else {
-    // Offline database update injection simulation logic 
-    if(!payload.id) {
-      payload.id = "P" + Math.floor(100 + Math.random()*900);
-      DB_PRODUCTS.push(payload);
-    } else {
-      const idx = DB_PRODUCTS.findIndex(i => i.id === payload.id);
-      if(idx !== -1) DB_PRODUCTS[idx] = payload;
-    }
-    renderShopGridItems();
-    renderAdminViewLayout();
-    syncGlobalDashboardStatistics();
-    closeM('md-prod-manage');
-    showToast("🚀 [Mock] บันทึกสินค้าสำเร็จในโหมดทดสอบ");
-  }
-}
-
-function changeOrderStatusByAdmin(oid, targetStatus) {
-  if(!confirm(`⚠️ คุณแน่ใจใช่หรือไม่ที่จะเปลี่ยนสถานะออเดอร์ #${oid} เป็น [${targetStatus}] แบบมีผลทันที?`)) return;
-  
-  showToast("⏳ กำลังส่งคำสั่งอัปเดตสถานะ...");
-  if(typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler((res) => {
-        if(res && res.status === 'success') {
-          initAppCoreSequence();
-          showToast(`✅ อัปเดตสถานะออเดอร์เป็น ${targetStatus} สำเร็จ!`);
-        } else {
-          alert("❌ ไม่สามารถอัปเดตได้: " + (res ? res.message : "ปัญหาจากคลาวด์"));
-        }
-      })
-      .withFailureHandler(() => alert("❌ การเชื่อมต่อล้มเหลว"))
-      .changeOrderStatusByToken(oid, targetStatus);
-  } else {
-    const idx = DB_ORDERS.findIndex(i => i.order_id === oid);
-    if(idx !== -1) {
-      DB_ORDERS[idx].status = targetStatus;
-      showToast(`🚀 [Mock] เปลี่ยนสถานะออเดอร์เรียบร้อย`);
-      renderAdminViewLayout();
-      renderOrdersTableList();
-    }
-  }
-}
-
-// ═══════════════════════════════════════
-// NOTIFICATION DROPDOWN SIMULATION BUILDER
-// ═══════════════════════════════════════
-function toggleNotifDD(e) {
-  e.stopPropagation();
-  document.getElementById('notif-dd').classList.toggle('open');
-}
-window.addEventListener('click', () => {
-  const dd = document.getElementById('notif-dd');
-  if(dd) dd.classList.remove('open');
-});
-
-function buildNotificationDropdownItemsList() {
-  const box = document.getElementById('notif-list-box');
-  if(!box) return;
-  
-  const myOrders = DB_ORDERS.filter(o => o.buyer_username === CURRENT_USER.username);
-  if(myOrders.length === 0) {
-    box.innerHTML = `<div style="text-align:center;padding:1.5rem;font-size:12px;color:var(--t3);">ไม่มีการแจ้งเตือนในขณะนี้</div>`;
-    return;
-  }
-  
-  box.innerHTML = myOrders.slice(0,4).map(o => `
-    <div class="nd-item" onclick="chPage('orders')">
-      <div class="nd-dot ${o.status==='completed'?'r':''}"></div>
-      <div class="nd-text">
-        คำสั่งซื้อ <strong>#${o.order_id}</strong> (${escapeHtml(o.product_name)}) ได้รับการปรับสถานะเป็น [${o.status}]
-        <div class="nd-time">${o.timestamp}</div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function markAllNotifRead() {
-  document.getElementById('bell-count').innerText = '0';
-  showToast('📬 ทำเครื่องหมายอ่านข้อความทั้งหมดแล้ว');
-}
-
-// ═══════════════════════════════════════
-// REVIEWS INTEGRATION MODULE SYSTEM (WEB3 REDESIGN)
-// ═══════════════════════════════════════
-function initReviewStarsInteractiveListeners() {
-  const stars = document.querySelectorAll('#wr-stars-row .wr-star');
-  const label = document.getElementById('wr-rating-label');
-  const desc = {1:'😞 ปรับปรุงระบาย', 2:'😐 พอใช้ได้', 3:'🙂 ปานกลาง', 4:'✨ ดีเยี่ยมยอด', 5:'🔥 สมบูรณ์แบบสุดยอด'};
-  
-  stars.forEach(star => {
-    star.addEventListener('mouseenter', function() {
-      const v = parseInt(this.getAttribute('data-v'));
-      stars.forEach(s => {
-        const sv = parseInt(s.getAttribute('data-v'));
-        if(sv <= v) s.classList.add('hov');
-        else s.classList.remove('hov');
-      });
-    });
-    
-    star.addEventListener('mouseleave', function() {
-      stars.forEach(s => s.classList.remove('hov'));
-    });
-    
-    star.addEventListener('click', function() {
-      const v = parseInt(this.getAttribute('data-v'));
-      SELECTED_REVIEW_WRITE_SCORE_VAL = v;
-      stars.forEach(s => {
-        const sv = parseInt(s.getAttribute('data-v'));
-        if(sv <= v) s.classList.add('sel');
-        else s.classList.remove('sel');
-      });
-      if(label) label.innerText = desc[v] || '';
-    });
-  });
-}
-
-function checkReviewEligibilityPermit(productId) {
-  const block = document.getElementById('pd-write-review-block');
-  if(!block) return;
-  
-  // อนุญาตให้รีวิวได้ถ้าเคยมีประวัติการซื้อผลิตภัณฑ์ชิ้นนี้และสถานะออเดอร์เป็นอย่างน้อย confirmed หรือ completed
-  const hasPurchased = DB_ORDERS.some(o => o.product_id === productId && o.buyer_username === CURRENT_USER.username && (o.status === 'confirmed' || o.status === 'completed'));
-  block.style.display = hasPurchased ? 'block' : 'none';
-}
-
-// ฐานข้อมูลรีวิวจำลองแบบ Local Storage Mock Cache Object เผื่อในระบบคลาวด์ไม่มีชีทแยกเฉพาะ
-let CACHE_REVIEWS_STORE = {
-  "P101": [
-    { username: "cryptoking_tcc", score: 5, text: "ระบบเยี่ยมมาก ได้ปันผลรับเหรียญ USDT เข้าตรงทุกวันตามสัญญา Pro Elite เลย แนะนำครับ 👍", date: "2026-05-18 10:11" },
-    { username: "mana_rich", score: 4, text: "ใช้งานดีมาก คอนเฟิร์มออเดอร์ไว แต่อยากให้เพิ่มธนาคารปลายทางเยอะขึ้นอีกนิด", date: "2026-05-19 15:40" }
+// === DEMO DATA ===
+const D = {
+  products: [
+    {id:'P001',name:'MacBook Pro M3 14"',price:3299,seller:'TechVault',rating:4.9,ff:true},
+    {id:'P002',name:'iPhone 16 Pro Max',price:1499,seller:'NeoStore',rating:5.0,ff:true},
+    {id:'P003',name:'Sony WH-1000XM5',price:349,seller:'AudioForge',rating:4.8,ff:true},
   ]
 };
 
-function renderReviewsDataFeedLayout() {
-  const currentProdId = SELECTED_PROD_ID_REVIEWS;
-  const feed = document.getElementById('pd-reviews-feed-container');
-  const chipsRow = document.getElementById('rv-filter-chips-row');
-  if(!feed) return;
-  
-  let list = CACHE_REVIEWS_STORE[currentProdId] || [];
-  
-  // Calculate average rating parameters dynamically
-  const totalReviews = list.length;
-  let scoreSum = 0;
-  let starDistribution = {5:0, 4:0, 3:0, 2:0, 1:0};
-  
-  list.forEach(r => {
-    scoreSum += r.score;
-    if(starDistribution[r.score] !== undefined) starDistribution[r.score]++;
-  });
-  
-  const avgScore = totalReviews > 0 ? (scoreSum / totalReviews) : Number(selectedProductObjectContext.rating || 5.0);
-  const totalCountForSummary = totalReviews > 0 ? totalReviews : 12; // fallback dummy display constants
-  
-  // Update header summary numbers inside review widget box components
-  document.getElementById('rv-summary-average').innerText = avgScore.toFixed(1);
-  document.getElementById('rv-summary-total-count').innerText = `ทั้งหมด ${totalCountForSummary} ความคิดเห็น`;
-  document.getElementById('rv-summary-stars-lg').innerHTML = generateStarsHtmlString(avgScore).replace(/pc-star/g, 'pd-star-lg');
-  
-  // Render distribution layout metric charts rows
-  const barsContainer = document.getElementById('rv-summary-bars-container');
-  barsContainer.innerHTML = [5,4,3,2,1].map(num => {
-    const rawCount = starDistribution[num] || (num === 5 ? 10 : num === 4 ? 2 : 0); // fallback simulation values
-    const pctRatio = totalReviews > 0 ? ((starDistribution[num] / totalReviews) * 100) : (num === 5 ? 80 : num === 4 ? 20 : 0);
-    return `
-      <div class="rv-bar-row">
-        <span class="rv-bar-lbl">${num} ดาว</span>
-        <div class="rv-bar-track"><div class="rv-bar-fill" style="width: ${pctRatio}%;"></div></div>
-        <span class="rv-bar-cnt">${rawCount}</span>
-      </div>
-    `;
-  }).join('');
-  
-  // Setup filter filter category pills 
-  const currentFilter = SELECTED_REVIEW_FILTER_SCORE;
-  chipsRow.innerHTML = `
-    <button class="rv-fbtn ${currentFilter==='all'?'active':''}" onclick="setReviewFilterScoreTab('all')">ทั้งหมด (${totalCountForSummary})</button>
-    <button class="rv-fbtn ${currentFilter==='5'?'active':''}" onclick="setReviewFilterScoreTab('5')">5 ดาว</button>
-    <button class="rv-fbtn ${currentFilter==='4'?'active':''}" onclick="setReviewFilterScoreTab('4')">4 ดาว</button>
-    <button class="rv-fbtn ${currentFilter==='below3'?'active':''}" onclick="setReviewFilterScoreTab('below3')">3 ดาวลงไป</button>
-  `;
-  
-  // Filter core loop data list execution arrays
-  let displayedList = [...list];
-  if(currentFilter === '5') displayedList = list.filter(r => r.score === 5);
-  if(currentFilter === '4') displayedList = list.filter(r => r.score === 4);
-  if(currentFilter === 'below3') displayedList = list.filter(r => r.score <= 3);
-  
-  if(displayedList.length === 0 && list.length > 0) {
-    feed.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--t3);font-size:12.5px;">ไม่มีรีวิวตรงกับตัวกรองดาวที่คุณเลือก</div>`;
-    return;
-  }
-  
-  if(list.length === 0) {
-    // Inject default initial positive structural content layouts for blank products state entries
-    feed.innerHTML = `
-      <div class="rv-item">
-        <div class="rv-user-row">
-          <div class="rv-av">TCC</div>
-          <div class="rv-username">Smart_Trader_VIP</div>
-          <div class="rv-date">2026-05-12 11:02</div>
-        </div>
-        <div class="rv-stars-sm">${generateStarsHtmlString(5.0).replace(/pc-star/g, 'rv-star-sm')}</div>
-        <div class="rv-text">สินค้าและผลิตภัณฑ์สิทธิประโยชน์ใช้งานระบบแพลตฟอร์มได้ดีมากครับ ความปลอดภัยสูงและแอดมินบริการจัดการได้อย่างเป็นมืออาชีพ มั่นใจได้ร้อยเปอร์เซ็นต์</div>
-      </div>
-    `;
-    return;
-  }
-  
-  feed.innerHTML = displayedList.map(r => `
-    <div class="rv-item">
-      <div class="rv-user-row">
-        <div class="rv-av">${r.username.substring(0,2).toUpperCase()}</div>
-        <div class="rv-username">${escapeHtml(r.username)}</div>
-        <div class="rv-date">${r.date}</div>
-      </div>
-      <div class="rv-stars-sm">${generateStarsHtmlString(r.score).replace(/pc-star/g, 'rv-star-sm')}</div>
-      <div class="rv-text">${escapeHtml(r.text)}</div>
-      <div class="rv-actions-row">
-        <span class="rv-like-btn" onclick="this.classList.toggle('liked'); showToast('❤️ ขอบคุณที่ร่วมโหวตรีวิวนี้เป็นประโยชน์')">👍 มีประโยชน์ (0)</span>
-        <span class="rv-comment-btn">💬 ตอบกลับ</span>
+// Simple routing
+function go(page){ 
+  console.log(`🚀 Navigating to: ${page} (v6 Futuristic)`);
+  if(page==='marketplace') document.getElementById('h-products').scrollIntoView({behavior:'smooth'});
+}
+
+// Render products
+function renderHomeProducts(){
+  const container = document.getElementById('h-products');
+  container.innerHTML = D.products.map(p => `
+    <div class="pc glass cyber-border" onclick="alert('Opened ${p.name} — Product Detail v6')">
+      <div class="pc-img"><div style="width:100%;height:100%;background:linear-gradient(#1a1f2e,#2a2f3f);display:flex;align-items:center;justify-content:center;font-size:4rem;">${p.id==='P001'?'💻':p.id==='P002'?'📱':'🎧'}</div></div>
+      <div class="pc-body">
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-price">${p.price.toLocaleString()} USDT</div>
+        <div style="margin-top:8px;font-size:12px;color:var(--t2);">${p.seller}</div>
+        ${p.ff?'<div style="margin-top:8px;color:var(--gold);font-size:13px;">✨ Funding Free</div>':''}
       </div>
     </div>
   `).join('');
 }
 
-function setReviewFilterScoreTab(scoreMode) {
-  SELECTED_REVIEW_FILTER_SCORE = scoreMode;
-  renderReviewsDataFeedLayout();
-}
+// Pulse animation
+const style = document.createElement('style');
+style.innerHTML = `@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`;
+document.head.appendChild(style);
 
-function sendCustomerReview() {
-  const textEl = document.getElementById('wr-review-text');
-  const text = textEl.value.trim();
-  const currentProdId = SELECTED_PROD_ID_REVIEWS;
-  
-  if(!text) {
-    alert("❌ กรุณาพิมพ์รายละเอียดข้อความรีวิวก่อนกดส่งความคิดเห็นครับ");
-    return;
-  }
-  
-  const newReviewNode = {
-    username: CURRENT_USER ? CURRENT_USER.username : "anonymous_tcc",
-    score: SELECTED_REVIEW_WRITE_SCORE_VAL,
-    text: text,
-    date: new Date().toISOString().replace('T',' ').substring(0,16)
-  };
-  
-  if(!CACHE_REVIEWS_STORE[currentProdId]) CACHE_REVIEWS_STORE[currentProdId] = [];
-  CACHE_REVIEWS_STORE[currentProdId].unshift(newReviewNode);
-  
-  textEl.value = '';
-  showToast("🚀 ส่งรีวิวและความคิดเห็นของคุณสำเร็จเสร็จสิ้นเรียบร้อยแล้ว!");
-  renderReviewsDataFeedLayout();
-}
-
-// ═══════════════════════════════════════
-// GLOBAL UTILITY HELPERS ARCHITECTURES
-// ═══════════════════════════════════════
-function openM(id) {
-  const modal = document.getElementById(id);
-  if(modal) modal.classList.add('open');
-}
-
-function closeM(id) {
-  const modal = document.getElementById(id);
-  if(modal) modal.classList.remove('open');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  if(!t) return;
-  t.innerText = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-function pad(n) { return String(n).padStart(2, '0'); }
-
-function escapeHtml(str) {
-  if(!str) return '';
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-function nodata(cols) {
-  return `<tr><td colspan="${cols}" style="text-align:center;padding:2.5rem;color:var(--t3);font-size:13px;">ไม่มีรายการข้อมูลปรากฏในโหมดแถวนี้</td></tr>`;
-}
-
-function renderPag(id, total, cur, cb) {
-  const el = document.getElementById(id);
-  if(!el || total <= 1) { if(el) el.innerHTML = ''; return; }
-  
-  el.innerHTML = Array.from({length: total}, (_, i) => i + 1).map(p =>
-    `<button class="pbtn ${p === cur ? 'active' : ''}" onclick="${cb}(${p})">${p}</button>`
-  ).join('');
-}
-
-function logoutTCC() {
-  if(confirm("🚪 คุณต้องการออกจากระบบ TCC Marketplace ในเซสชั่นปัจจุบันใช่หรือไม่?")) {
-    showToast("👋 กำลังออกจากระบบอย่างปลอดภัย...");
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  }
-}
+// Init
+window.onload = () => {
+  renderHomeProducts();
+  console.log('%cTCC Marketplace v6 — Futuristic Web3 Edition Loaded Successfully', 'color:#F3BA2F;font-size:16px;font-weight:bold;');
+};
 </script>
-
 </body>
 </html>
