@@ -2786,6 +2786,21 @@ async function initRef() {
         )
       : [];
 
+    // [DEBUG] แสดงข้อมูลใน console เพื่อตรวจสอบ
+    console.log('[Referral Debug]', {
+      myCode,
+      myMemberId: SESSION.member_id,
+      totalMembers: Array.isArray(members) ? members.length : 'not array',
+      membersWithRef: Array.isArray(members)
+        ? members.filter(m => m.referred_by_code).map(m => ({
+            id: m.member_id,
+            email: m.email,
+            referred_by_code: m.referred_by_code
+          }))
+        : [],
+      referredMembersFound: referredMembers.length
+    });
+
     // สถิติ — commission จาก Referrals sheet
     const totalCom   = myRefs.reduce((s,r) => s + Number(r.commission_amount||0), 0);
     const pendingCom = myRefs.filter(r => r.commission_status !== 'paid')
