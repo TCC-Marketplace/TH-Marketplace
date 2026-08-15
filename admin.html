@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TCC Admin Panel</title>
+<link rel="icon" type="image/png" href="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png">
+<link rel="apple-touch-icon" href="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -183,13 +185,17 @@ textarea.fi{resize:vertical;min-height:70px;}
 #_aconfirm-box{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:2rem;max-width:400px;width:90%;text-align:center;}
 #_aconfirm-ico{font-size:2.5rem;margin-bottom:12px;}
 #_aconfirm-msg{font-size:14px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
+@keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
 </style>
 </head>
 <body>
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="logo">TCC<span>Admin</span></div>
+  <div class="logo" style="display:flex;align-items:center;gap:8px;">
+    <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="TCC Admin" style="width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0;filter:drop-shadow(0 0 5px rgba(246,70,93,.4));">
+    TCC<span>Admin</span>
+  </div>
   <span class="logo-badge">🔒 Admin Only</span>
   <div class="topbar-r">
     <div class="admin-user">เข้าสู่ระบบในฐานะ <strong id="admin-user-lbl">Admin</strong></div>
@@ -202,6 +208,12 @@ textarea.fi{resize:vertical;min-height:70px;}
 <div id="admin-login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:500;align-items:center;justify-content:center;flex-direction:column;overflow-y:auto;">
   <div style="width:100%;max-width:440px;padding:2rem;">
     <div style="text-align:center;margin-bottom:2rem;">
+      <div style="display:flex;justify-content:center;margin-bottom:12px;">
+        <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="TCC Admin"
+             style="width:80px;height:80px;object-fit:contain;border-radius:18px;
+                    filter:drop-shadow(0 0 20px rgba(246,70,93,.45));
+                    animation:logoFloat 4s ease-in-out infinite;">
+      </div>
       <div style="font-family:var(--fd);font-size:2rem;font-weight:800;color:var(--err);margin-bottom:8px;">TCC<span style="color:var(--t1);">Admin</span></div>
       <span style="background:rgba(246,70,93,.15);color:var(--err);font-size:11px;font-weight:700;padding:3px 12px;border-radius:50px;border:1px solid rgba(246,70,93,.3);">🔒 Secure Admin Portal</span>
     </div>
@@ -238,6 +250,15 @@ textarea.fi{resize:vertical;min-height:70px;}
 <div id="main-layout" class="layout" style="display:none;">
 
 <aside class="sidebar">
+  <!-- Sidebar logo header -->
+  <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--bdr);margin-bottom:4px;">
+    <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="TCC"
+         style="width:34px;height:34px;object-fit:contain;border-radius:8px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(246,70,93,.35));">
+    <div>
+      <div style="font-family:var(--fd);font-size:14px;font-weight:800;color:var(--err);line-height:1.1;">TCC<span style="color:var(--t1);">Admin</span></div>
+      <div style="font-size:10px;color:var(--t3);font-weight:600;letter-spacing:.5px;">CONTROL PANEL</div>
+    </div>
+  </div>
   <div class="sb-section">Overview</div>
   <div class="sb-item active" onclick="showSec('overview',this)"><span class="sb-ico">📊</span>Dashboard</div>
 
