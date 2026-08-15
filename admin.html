@@ -728,6 +728,17 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <script>
 // ═══════════════════════════════════════
+// DATE HELPER
+// ═══════════════════════════════════════
+// GAS คืน date field ได้ทั้ง string ISO "2025-05-01T..." และ Date object
+// fmtDate() แปลงทั้งสองแบบให้เป็น string ปลอดภัยก่อนตัด
+function fmtDate(v, len){
+  if(!v) return '';
+  const s = (v instanceof Date) ? v.toISOString() : String(v);
+  return s.substring(0, len||10);
+}
+
+// ═══════════════════════════════════════
 // API CONFIG — แก้ที่นี่ที่เดียว
 // ═══════════════════════════════════════
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzueH_flZKoh_6cOh-SpBLgOBUZd221TYtVfN4GwqFToamDdYAYY_F7aMRPyLRuBDxH/exec';
@@ -1051,7 +1062,7 @@ async function initUsers() {
           uid, email:emailOrPhone, role:m.role==='seller'?'Seller':'Member',
           kyc:m.kyc_status||'none', fa:!!m.two_fa_enabled,
           status:m.account_status||'active',
-          joined:m.joined_at?.substring(0,10)||'',
+          joined:fmtDate(m.joined_at,10),
           balance:Number(m.customer_wallet_usdt||0),
           rights:Number(m.ff_rights||0), member_id:uid
         };
@@ -1155,7 +1166,7 @@ async function loadUserDeposits(uid) {
           <td style="padding:6px 8px;" class="mono tok" style="font-weight:600;">+${safeAmt(t.amount_usdt)} USDT</td>
           <td style="padding:6px 8px;"><span class="bdg bdg-inf" style="font-size:10px;">${t.network||'TRC20'}</span></td>
           <td style="padding:6px 8px;">${txHash(t)}</td>
-          <td style="padding:6px 8px;" class="tm" style="white-space:nowrap;">${(t.created_at||'').substring(0,16)}</td>
+          <td style="padding:6px 8px;" class="tm" style="white-space:nowrap;">${fmtDate(t.created_at,16)}</td>
           <td style="padding:6px 8px;">${t.tx_status==='success'?'<span class="bdg bdg-ok" style="font-size:10px;">✓ สำเร็จ</span>':t.tx_status==='pending'?'<span class="bdg bdg-warn" style="font-size:10px;">⏳ รอ</span>':'<span class="bdg bdg-err" style="font-size:10px;">✗ ปฏิเสธ</span>'}</td>
           <td style="padding:6px 8px;">
             ${t.tx_status==='pending'
@@ -1822,7 +1833,7 @@ async function loadAdminApproval() {
         <div style="flex:1;">
           <div style="font-weight:600;font-size:13px;">${a.name||'(ไม่ระบุชื่อ)'}</div>
           <div class="tsm tm">${a.email}</div>
-          <div class="tsm" style="color:var(--t3);">สมัครเมื่อ: ${a.created_at?a.created_at.split('T')[0]:'-'}</div>
+          <div class="tsm" style="color:var(--t3);">สมัครเมื่อ: ${fmtDate(a.created_at,10)||'-'}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <select id="lvl-${a.admin_id}" style="padding:5px 8px;border-radius:6px;border:1px solid var(--br);background:var(--card);color:var(--t1);font-size:12px;">
@@ -1856,7 +1867,7 @@ async function loadAdminApproval() {
           <td style="padding:8px 4px;">
             <span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${a.admin_level==='superadmin'?'rgba(246,70,93,.15)':'rgba(240,185,11,.12)'};color:${a.admin_level==='superadmin'?'var(--err)':'var(--gold)'};">${a.admin_level}</span>
           </td>
-          <td style="padding:8px 4px;" class="tsm tm">${a.created_at?a.created_at.split('T')[0]:'-'}</td>
+          <td style="padding:8px 4px;" class="tsm tm">${fmtDate(a.created_at,10)||'-'}</td>
           <td style="padding:8px 4px;">
             <select onchange="changeAdminLevel('${a.admin_id}',this.value)" style="padding:4px 6px;border-radius:6px;border:1px solid var(--br);background:var(--card);color:var(--t1);font-size:11px;">
               <option value="">เปลี่ยน Level</option>
@@ -2177,7 +2188,7 @@ function filterReviews() {
           <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(r.review_text||'').replace(/"/g,'')}">${r.review_text||'—'}</td>
           <td class="mono">${r.helpful_count||0}</td>
           <td>${isRep ? '<span class="bdg bdg-err">🚨 Reported</span>' : '<span class="bdg bdg-muted">ปกติ</span>'}</td>
-          <td class="tsm tm">${(r.created_at||'').substring(0,10)||'-'}</td>
+          <td class="tsm tm">${fmtDate(r.created_at,10)||'-'}</td>
           <td>
             <button class="btn btn-inf btn-sm" onclick="openReviewModal('${r.review_id}')">💬 จัดการ</button>
           </td>
@@ -2199,14 +2210,14 @@ function openReviewModal(rvId) {
       <div class="fc btwn mb2"><span class="tm">Rating</span><span style="color:var(--gold);">${stars} (${r.rating||0})</span></div>
       <div class="fc btwn mb2"><span class="tm">Helpful</span><span>${r.helpful_count||0}</span></div>
       <div class="fc btwn mb2"><span class="tm">สถานะ</span><span>${isRep ? '<span class="bdg bdg-err">🚨 Reported</span>' : '<span class="bdg bdg-ok">ปกติ</span>'}</span></div>
-      <div class="fc btwn mb2"><span class="tm">วันที่</span><span>${(r.created_at||'').substring(0,16)||'-'}</span></div>
+      <div class="fc btwn mb2"><span class="tm">วันที่</span><span>${fmtDate(r.created_at,16)||'-'}</span></div>
     </div>
     <div class="card mt4" style="background:var(--card);">
       <div class="tsm tm mb2">รีวิว:</div>
       <div style="font-size:13px;">${r.review_text||'(ไม่มีข้อความ)'}</div>
     </div>
     ${r.reply_text ? `<div class="card mt4" style="background:rgba(14,203,129,.08);border-color:rgba(14,203,129,.2);">
-      <div class="tsm tok mb2">✅ ตอบแล้วโดย ${r.reply_by||'Admin'} เมื่อ ${(r.reply_at||'').substring(0,10)}</div>
+      <div class="tsm tok mb2">✅ ตอบแล้วโดย ${r.reply_by||'Admin'} เมื่อ ${fmtDate(r.reply_at,10)}</div>
       <div style="font-size:13px;">${r.reply_text}</div>
     </div>` : ''}
     <div class="d"></div>`;
@@ -2299,7 +2310,7 @@ initKYC = async function(){
           return {
             id:mid, uid:mid, name:doc?.full_name||displayName,
             doc:doc?(doc.id_doc_url?'มีเอกสาร':'รอตรวจสอบ'):'ยังไม่ส่ง',
-            submitted:m.joined_at?.substring(0,10)||'',
+            submitted:fmtDate(m.joined_at,10),
             status:m.kyc_status, member_id:mid,
             id_doc_url:doc?.id_doc_url||'',
             selfie_url:doc?.selfie_url||'',
@@ -2354,7 +2365,7 @@ initSA = async function(){
           name:a.owner_name || a.member_id,
           shop:a.shop_name||'-', cat:a.category||'-',
           kyc:a.kyc_verified==='true'||a.kyc_verified===true?'verified':'pending',
-          submitted:a.submitted_at?.substring(0,10)||'', status:a.status||'pending',
+          submitted:fmtDate(a.submitted_at,10), status:a.status||'pending',
           member_id:a.member_id, app_id:a.app_id,
           logo_url: a.logo_url||''
         }));
@@ -2398,7 +2409,7 @@ initProds = async function(){
         cat:p.category, price:Number(p.price_usdt)||0,
         // [FIX] payout_option ใน Sheet เป็น Number (15/30/45/60) ไม่ใช่ string '60'
         po: String(p.payout_option||'').trim()+'d',
-        submitted:p.submitted_at?.substring(0,10)||'',
+        submitted:fmtDate(p.submitted_at,10),
         // [FIX] ไม่ fallback เป็น 'pending' ถ้า approval_status เป็น null — ใช้ค่าจริงจาก Sheet
         status:p.approval_status||'unknown',
         ico:p.emoji_icon||'📦', product_id:p.product_id,
@@ -2493,7 +2504,7 @@ initWallets = async function(){
                   ? `<a href="https://tronscan.org/#/transaction/${t.blockchain_hash}" target="_blank" class="tsm tg">🔍 TronScan</a>`
                   : `<a href="https://bscscan.com/tx/${t.blockchain_hash}" target="_blank" class="tsm tg">🔍 BscScan</a>`}
               </td>
-              <td class="tsm tm">${(t.created_at||'').substring(0,16)}</td>
+              <td class="tsm tm">${fmtDate(t.created_at,16)}</td>
               <td>
                 <div class="fc g8">
                   <button class="btn btn-ok btn-sm" onclick="doApproveDeposit('${t.tx_id}','${t.member_id}',${Number(t.amount_usdt)})">✅ Approve</button>
@@ -2510,7 +2521,7 @@ initWallets = async function(){
         const amt = Number(a.amount_usdt);
         const amtDisp = isNaN(amt) ? '—' : amt.toFixed(2);
         return `<div class="fc btwn mb2 tsm" style="padding:6px 0;border-bottom:1px solid var(--bdr);">
-          <div><div>${a.wallet_type}</div><div class="tm txs">${(a.created_at||'').substring(0,10)} · ${a.member_id}</div></div>
+          <div><div>${a.wallet_type}</div><div class="tm txs">${fmtDate(a.created_at,10)} · ${a.member_id}</div></div>
           <span class="mono ${a.direction==='IN'?'tok':'terr'}">${a.direction==='IN'?'+':'-'}${amtDisp}</span>
         </div>`;
       }).join('')||'<div class="tsm tm">ยังไม่มีรายการ Adjustment</div>';
@@ -2655,7 +2666,7 @@ initGTX = async function(){
         const amt = Number(t.amount_usdt);
         const amtStr = isNaN(amt) ? '—' : (t.direction==='IN'?'+':'-')+amt.toFixed(2);
         return {
-          id:t.tx_id, date:t.created_at?.substring(0,16)||'',
+          id:t.tx_id, date:fmtDate(t.created_at,16),
           wallet:t.wallet_type||'Customer', uid:t.member_id,
           type:t.tx_type, desc:t.description||'',
           amt: amtStr,
@@ -2680,7 +2691,7 @@ initFFAdmin = async function(){
       DA.ff_requests=reqs.map(r=>({
         id:r.request_id, uid:r.member_id, email:r.member_id,
         total_buy:Number(r.total_buy||0), old_rights:Number(r.old_rights||0),
-        submitted:r.submitted_at?.substring(0,10)||'', status:r.status||'pending',
+        submitted:fmtDate(r.submitted_at,10), status:r.status||'pending',
         member_id:r.member_id, request_id:r.request_id
       }));
       filterFF('all',null);
