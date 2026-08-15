@@ -935,15 +935,7 @@ const DA = {
     {id:'SA-003',uid:'U-0003',name:'TechStore Team',shop:'TechStore TH',cat:'Electronics',kyc:'verified',submitted:'2025-01-10',status:'approved'},
     {id:'SA-004',uid:'U-0011',name:'นิดา สวรรค์',shop:'HomeDecor Plus',cat:'Home',kyc:'pending',submitted:'2025-05-01',status:'rejected'},
   ],
-  products:[
-    {id:'PRD-001',name:'MacBook Pro M3',seller:'TechStore TH',cat:'Electronics',price:3299,po:'45d',submitted:'2025-05-01',status:'pending',ico:'💻'},
-    {id:'PRD-002',name:'Adidas Ultra Boost',seller:'SportZone',cat:'Sports',price:249,po:'60d',submitted:'2025-05-02',status:'pending',ico:'👟'},
-    {id:'PRD-003',name:'Gucci Belt Leather',seller:'LuxTime',cat:'Luxury',price:850,po:'60d',submitted:'2025-05-02',status:'pending',ico:'👜'},
-    {id:'PRD-004',name:'iPad Pro 12.9"',seller:'TechStore TH',cat:'Electronics',price:999,po:'45d',submitted:'2025-04-30',status:'pending',ico:'📱'},
-    {id:'PRD-005',name:'Dyson Airwrap',seller:'HomeKing',cat:'Home',price:599,po:'60d',submitted:'2025-04-29',status:'pending',ico:'💨'},
-    {id:'PRD-006',name:'Sony Alpha A7 IV',seller:'PhotoPro',cat:'Electronics',price:3199,po:'45d',submitted:'2025-04-20',status:'approved',ico:'📷'},
-    {id:'PRD-007',name:'Zara Shirt Premium',seller:'FashionHub',cat:'Fashion',price:89,po:'60d',submitted:'2025-04-18',status:'rejected',ico:'👕'},
-  ],
+  products:[], // โหลดจาก GAS จริงใน initProds()
   wallets:{
     tcc:{name:'TCC Fund',bal:128450.00,change:'+2,340'},
     fee:{name:'Market Fee',bal:15230.50,change:'+890'},
@@ -1377,7 +1369,7 @@ function rejectSA(sid) {
 // ═══════════════════════════════════════
 // PRODUCT APPROVAL
 // ═══════════════════════════════════════
-function initProds() { filterProds('all', null); }
+// initProds() — async version ถูก override ด้านล่าง (บรรทัด initProds = async function)
 function filterProds(st, btn) {
   document.querySelectorAll('#prod-fbar .fbtn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -1387,7 +1379,7 @@ function filterProds(st, btn) {
     <td>${p.seller}</td>
     <td><span class="bdg bdg-muted">${p.cat}</span></td>
     <td class="mono tg">${p.price.toLocaleString()} USDT</td>
-    <td><span class="bdg ${p.po==='45d'?'bdg-warn':'bdg-ok'}">${p.po}</span></td>
+    <td><span class="bdg ${p.po==='60d'?'bdg-ok':p.po==='30d'?'bdg-inf':p.po==='15d'?'bdg-muted':'bdg-warn'}">${p.po}</span></td>
     <td class="mono">${p.rating_avg > 0 ? '<span style="color:var(--gold)">★</span> ' + p.rating_avg : '—'}</td>
     <td class="mono tsm">${p.total_reviews || 0}</td>
     <td class="tsm tm">${p.submitted}</td>
@@ -1414,7 +1406,7 @@ function openProdModal(pid) {
       <div class="fc btwn mb2"><span class="tm">ร้านค้า</span><span>${p.seller}</span></div>
       <div class="fc btwn mb2"><span class="tm">หมวดหมู่</span><span>${p.cat}</span></div>
       <div class="fc btwn mb2"><span class="tm">ราคา</span><span class="mono tg">${p.price.toLocaleString()} USDT</span></div>
-      <div class="fc btwn mb2"><span class="tm">Payout Option</span><span class="bdg ${p.po==='45d'?'bdg-warn':'bdg-ok'}">${p.po} (${p.po==='45d'?'Seller ได้ 90%':'Seller ได้ 100%'})</span></div>
+      <div class="fc btwn mb2"><span class="tm">Payout Option</span><span class="bdg ${p.po==='60d'?'bdg-ok':p.po==='30d'?'bdg-inf':p.po==='15d'?'bdg-muted':'bdg-warn'}">${p.po} (${p.po==='60d'?'Seller ได้ 100%':p.po==='45d'?'Seller ได้ 90%':p.po==='30d'?'Seller ได้ 85%':'Seller ได้ 80%'})</span></div>
       <div class="fc btwn mb2"><span class="tm">จำนวนรูป</span><span>${imgs.length} รูป</span></div>
       ${p.video_url ? `<div class="fc btwn mb2"><span class="tm">วิดีโอ</span><span><a href="${p.video_url}" target="_blank" style="color:var(--acc);font-size:12px;">▶ ดูวิดีโอ</a></span></div>` : ''}
       <div class="fc btwn"><span class="tm">ส่งเมื่อ</span><span>${p.submitted}</span></div>
@@ -2396,7 +2388,6 @@ rejectSA = async function(sid){
 };
 
 initProds = async function(){
-  filterProds('all',null);
   showLoad('กำลังโหลดสินค้า...');
   try{
     const prods=await apiGet({action:'read',sheet:'Products'});
@@ -2405,15 +2396,21 @@ initProds = async function(){
       DA.products=prods.map(p=>({
         id:p.product_id, name:p.product_name, seller:p.shop_name||p.seller_member_id,
         cat:p.category, price:Number(p.price_usdt)||0,
-        po:p.payout_option==='60'?'60d':'45d', submitted:p.submitted_at?.substring(0,10)||'',
-        status:p.approval_status||'pending', ico:p.emoji_icon||'📦', product_id:p.product_id,
+        // [FIX] payout_option ใน Sheet เป็น Number (15/30/45/60) ไม่ใช่ string '60'
+        po: String(p.payout_option||'').trim()+'d',
+        submitted:p.submitted_at?.substring(0,10)||'',
+        // [FIX] ไม่ fallback เป็น 'pending' ถ้า approval_status เป็น null — ใช้ค่าจริงจาก Sheet
+        status:p.approval_status||'unknown',
+        ico:p.emoji_icon||'📦', product_id:p.product_id,
         rating_avg:Number(p.rating_avg||0), total_reviews:Number(p.total_reviews||0),
-        images_json:p.images_json||'[]',  // [FIX v7] เพิ่มเพื่อแสดงรูปใน modal
-        video_url:p.video_url||''             // [v5] video embed URL (YouTube/mp4)
+        images_json:p.images_json||'[]',
+        video_url:p.video_url||''
       }));
       filterProds('all',null);
+    } else {
+      showToast('⚠️ ไม่พบข้อมูลสินค้าจาก GAS','err');
     }
-  }catch(e){hideLoad();}
+  }catch(e){hideLoad();showToast('❌ โหลดสินค้าล้มเหลว: '+e.message,'err');}
 };
 
 approveProd = async function(pid){
