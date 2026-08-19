@@ -692,10 +692,6 @@ textarea.fi{resize:vertical;min-height:80px;}
 .popt{border:2px solid var(--bdr);border-radius:var(--rl);padding:1.25rem;cursor:pointer;transition:all .2s;}
 .popt.sel{border-color:var(--gold);background:rgba(240,185,11,.06);}
 .popt-pct{font-family:var(--fm);font-size:1.8rem;font-weight:700;color:var(--ok);}
-/* FF Plan Cards [v2] */
-.ff-plan-card{border:2px solid var(--bdr);border-radius:var(--r);padding:10px;cursor:pointer;transition:all .2s;text-align:center;}
-.ff-plan-card.sel{border-color:#52c41a;background:rgba(82,196,26,.07);box-shadow:0 0 0 3px rgba(82,196,26,.12);}
-.ff-plan-card:hover{border-color:var(--acc);}
 /* SHOP BANNER */
 .shop-banner{height:160px;background:linear-gradient(135deg,#1E2329,#2B3139);border-radius:var(--rl) var(--rl) 0 0;padding:1rem;display:flex;align-items:flex-end;}
 .shop-av{width:64px;height:64px;border-radius:50%;background:var(--card);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
@@ -1771,266 +1767,6 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 }
 </style>
 
-<!-- ══ [v3] TCC Bitcoin Fund Tab CSS ══ -->
-<style>
-/* ── CSS variables bridge (worker uses --gold/--green/--dark etc.) ── */
-#ds-btcfund{
-  --btcf-gold:#F0B90B;--btcf-gold2:#D4A20A;
-  --btcf-dark:#0B0E11;--btcf-dark2:#1E2329;--btcf-dark3:#2B3139;--btcf-dark4:#161A1E;
-  --btcf-white:#FFFFFF;--btcf-green:#0ECB81;--btcf-red:#F6465D;
-  --btcf-blue:#1890FF;--btcf-purple:#8B5CF6;--btcf-gray:#848E9C;--btcf-lgray:#C0C4CC;
-  --btcf-gold-bg:rgba(240,185,11,0.08);--btcf-green-bg:rgba(14,203,129,0.08);
-  --btcf-blue-bg:rgba(24,144,255,0.08);--btcf-red-bg:rgba(246,70,93,0.08);
-  font-family:'IBM Plex Mono',monospace,'Plus Jakarta Sans',sans-serif;
-}
-/* Section header */
-#ds-btcfund .btcf-header{
-  border-left:3px solid var(--btcf-gold);padding:14px 20px;
-  background:rgba(240,185,11,0.08);border-radius:0 12px 12px 0;
-  margin-bottom:20px;display:flex;align-items:center;
-  justify-content:space-between;flex-wrap:wrap;gap:10px;
-}
-#ds-btcfund .btcf-title{font-size:1.1rem;font-weight:700;color:var(--btcf-gold);font-family:'Plus Jakarta Sans',sans-serif;}
-#ds-btcfund .btcf-sub{font-size:12px;color:var(--btcf-gray);margin-top:3px;}
-/* Live badge */
-#ds-btcfund .btcf-live-badge{
-  display:inline-flex;align-items:center;gap:6px;font-size:11px;
-  color:var(--btcf-green);background:var(--btcf-green-bg);
-  border:1px solid rgba(14,203,129,0.25);border-radius:20px;padding:4px 12px;
-  white-space:nowrap;flex-shrink:0;
-}
-#ds-btcfund .btcf-live-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--btcf-green);
-  animation:btcf-livepulse 1.8s infinite;
-}
-@keyframes btcf-livepulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-/* Address card */
-#ds-btcfund .btcf-addr-card{
-  background:var(--btcf-dark2);border:1px solid var(--btcf-dark3);
-  border-radius:14px;padding:18px 20px;margin-bottom:14px;
-}
-#ds-btcfund .btcf-addr-top{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:12px;flex-wrap:wrap;gap:8px;
-}
-#ds-btcfund .btcf-addr-label{font-size:11px;color:var(--btcf-gray);text-transform:uppercase;letter-spacing:1px;}
-#ds-btcfund .btcf-addr-badges{display:flex;gap:6px;}
-#ds-btcfund .btcf-badge{font-size:10px;border-radius:20px;padding:3px 10px;border:1px solid;font-weight:600;}
-#ds-btcfund .btcf-badge.g{color:var(--btcf-green);background:var(--btcf-green-bg);border-color:rgba(14,203,129,0.3);}
-#ds-btcfund .btcf-badge.b{color:var(--btcf-blue);background:var(--btcf-blue-bg);border-color:rgba(24,144,255,0.3);}
-#ds-btcfund .btcf-addr-display{
-  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--btcf-lgray);
-  word-break:break-all;line-height:1.8;background:var(--btcf-dark4);
-  border-radius:8px;padding:10px 14px;
-}
-#ds-btcfund .btcf-addr-display .vis{color:var(--btcf-gold);font-weight:600;}
-#ds-btcfund .btcf-addr-display .hid{color:#3a3a3a;}
-#ds-btcfund .btcf-copy-btn{
-  margin-top:10px;background:transparent;border:1px solid var(--btcf-dark3);
-  color:var(--btcf-gray);border-radius:7px;padding:6px 14px;font-size:12px;
-  cursor:pointer;transition:all 0.2s;font-family:'Plus Jakarta Sans',sans-serif;
-}
-#ds-btcfund .btcf-copy-btn:hover{border-color:var(--btcf-gold);color:var(--btcf-gold);}
-/* Price bar */
-#ds-btcfund .btcf-price-bar{
-  background:linear-gradient(135deg,#1E2329 0%,#161A1E 100%);
-  border:1px solid var(--btcf-dark3);border-radius:12px;
-  padding:14px 18px;margin-bottom:14px;display:flex;
-  align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
-}
-#ds-btcfund .btcf-price-main{
-  font-family:'IBM Plex Mono',monospace;font-size:clamp(16px,3.5vw,26px);
-  font-weight:600;color:var(--btcf-gold);
-}
-#ds-btcfund .btcf-price-change{
-  font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;
-  background:var(--btcf-green-bg);color:var(--btcf-green);
-}
-#ds-btcfund .btcf-price-change.neg{background:var(--btcf-red-bg);color:var(--btcf-red);}
-/* Fund value banner */
-#ds-btcfund .btcf-fund-banner{
-  background:linear-gradient(135deg,rgba(240,185,11,0.12) 0%,rgba(240,185,11,0.04) 100%);
-  border:1.5px solid rgba(240,185,11,0.35);border-radius:16px;
-  padding:20px 22px;margin-bottom:12px;display:flex;
-  align-items:center;gap:20px;flex-wrap:wrap;
-}
-#ds-btcfund .btcf-fund-icon{font-size:2.2rem;flex-shrink:0;}
-#ds-btcfund .btcf-fund-main{flex:1;min-width:140px;}
-#ds-btcfund .btcf-fund-label{font-size:10px;color:var(--btcf-gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-#ds-btcfund .btcf-fund-usd{
-  font-family:'IBM Plex Mono',monospace;font-size:clamp(18px,4.5vw,30px);
-  font-weight:800;color:var(--btcf-gold);line-height:1;
-}
-#ds-btcfund .btcf-fund-btc{font-size:12px;color:var(--btcf-lgray);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
-#ds-btcfund .btcf-fund-side{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
-#ds-btcfund .btcf-fund-mini{text-align:right;}
-#ds-btcfund .btcf-fund-mini-label{font-size:10px;color:var(--btcf-gray);}
-#ds-btcfund .btcf-fund-mini-val{font-size:13px;font-weight:700;font-family:'IBM Plex Mono',monospace;}
-#ds-btcfund .btcf-fund-mini-val.gold{color:var(--btcf-gold);}
-#ds-btcfund .btcf-fund-mini-val.green{color:var(--btcf-green);}
-#ds-btcfund .btcf-fund-mini-val.red{color:var(--btcf-red);}
-/* Data source bar */
-#ds-btcfund .btcf-src-bar{
-  display:flex;align-items:center;gap:8px;padding:8px 12px;
-  background:rgba(0,0,0,0.2);border-radius:8px;margin-bottom:12px;flex-wrap:wrap;
-}
-#ds-btcfund .btcf-src-item{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--btcf-gray);}
-#ds-btcfund .btcf-src-dot{width:5px;height:5px;border-radius:50%;background:var(--btcf-green);flex-shrink:0;}
-#ds-btcfund .btcf-src-dot.warn{background:var(--btcf-gold);}
-#ds-btcfund .btcf-src-dot.err{background:var(--btcf-red);}
-/* Stats grid */
-#ds-btcfund .btcf-stats-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;
-}
-@media(min-width:560px){#ds-btcfund .btcf-stats-grid{grid-template-columns:repeat(4,1fr);}}
-#ds-btcfund .btcf-stat{
-  background:var(--btcf-dark2);border:1px solid var(--btcf-dark3);
-  border-radius:12px;padding:14px;transition:border-color 0.2s,transform 0.2s;
-}
-#ds-btcfund .btcf-stat:hover{border-color:var(--btcf-gold);transform:translateY(-2px);}
-#ds-btcfund .btcf-stat-lbl{font-size:10px;color:var(--btcf-gray);margin-bottom:6px;}
-#ds-btcfund .btcf-stat-val{
-  font-family:'IBM Plex Mono',monospace;font-size:clamp(11px,2.5vw,15px);
-  font-weight:600;word-break:break-all;color:var(--btcf-white);
-}
-#ds-btcfund .btcf-stat-val.gold{color:var(--btcf-gold);}
-#ds-btcfund .btcf-stat-val.green{color:var(--btcf-green);}
-#ds-btcfund .btcf-stat-val.blue{color:var(--btcf-blue);}
-#ds-btcfund .btcf-stat-val.red{color:var(--btcf-red);}
-#ds-btcfund .btcf-stat-sub{font-size:10px;color:var(--btcf-gray);margin-top:3px;}
-/* Market ticker */
-#ds-btcfund .btcf-ticker{
-  display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;
-  padding-bottom:4px;scrollbar-width:none;
-}
-#ds-btcfund .btcf-ticker::-webkit-scrollbar{display:none;}
-#ds-btcfund .btcf-ticker-chip{
-  flex-shrink:0;background:var(--btcf-dark2);border:1px solid var(--btcf-dark3);
-  border-radius:10px;padding:10px 14px;min-width:100px;
-}
-#ds-btcfund .btcf-tk-name{font-size:10px;color:var(--btcf-gray);margin-bottom:4px;}
-#ds-btcfund .btcf-tk-price{font-size:13px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--btcf-white);}
-#ds-btcfund .btcf-tk-chg{font-size:10px;font-weight:600;margin-top:2px;}
-#ds-btcfund .btcf-tk-chg.up{color:var(--btcf-green);}
-#ds-btcfund .btcf-tk-chg.dn{color:var(--btcf-red);}
-/* Dashboard row */
-#ds-btcfund .btcf-dash-row{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;
-}
-@media(max-width:500px){#ds-btcfund .btcf-dash-row{grid-template-columns:1fr;}}
-#ds-btcfund .btcf-card{
-  background:var(--btcf-dark2);border:1px solid var(--btcf-dark3);
-  border-radius:12px;padding:16px 18px;transition:border-color 0.2s,transform 0.2s;
-}
-#ds-btcfund .btcf-card:hover{border-color:rgba(240,185,11,0.4);transform:translateY(-2px);}
-#ds-btcfund .btcf-card-title{
-  font-size:10px;color:var(--btcf-gray);text-transform:uppercase;
-  letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-}
-#ds-btcfund .btcf-card-title .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-/* Fear & greed gauge */
-#ds-btcfund .btcf-fg-wrap{display:flex;flex-direction:column;align-items:center;padding:6px 0;}
-#ds-btcfund .btcf-fg-arc-wrap{position:relative;width:130px;height:75px;overflow:hidden;margin-bottom:8px;}
-#ds-btcfund .btcf-fg-arc-bg{
-  width:130px;height:130px;border-radius:50%;
-  border:14px solid var(--btcf-dark3);
-  border-bottom-color:transparent;border-right-color:transparent;
-  transform:rotate(45deg);position:absolute;top:0;left:0;
-}
-#ds-btcfund .btcf-fg-arc-fill{
-  width:130px;height:130px;border-radius:50%;
-  border:14px solid var(--btcf-green);
-  border-bottom-color:transparent;border-right-color:transparent;
-  transform:rotate(45deg);position:absolute;top:0;left:0;
-  transition:transform 0.8s ease;
-}
-#ds-btcfund .btcf-fg-needle{
-  position:absolute;bottom:0;left:50%;transform-origin:bottom center;
-  width:2px;height:58px;background:var(--btcf-white);border-radius:2px;
-  transition:transform 0.8s ease;transform:rotate(-90deg);
-}
-#ds-btcfund .btcf-fg-val{font-size:1.8rem;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--btcf-white);}
-#ds-btcfund .btcf-fg-label{font-size:11px;color:var(--btcf-gray);}
-/* Dominance bar */
-#ds-btcfund .btcf-dom-track{
-  height:10px;background:var(--btcf-dark3);border-radius:10px;
-  overflow:hidden;display:flex;margin-bottom:8px;margin-top:8px;
-}
-#ds-btcfund .btcf-dom-seg{height:100%;transition:width 0.8s ease;}
-#ds-btcfund .btcf-dom-legend{display:flex;flex-wrap:wrap;gap:8px;}
-#ds-btcfund .btcf-dom-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--btcf-lgray);}
-#ds-btcfund .btcf-dom-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
-/* Network stats */
-#ds-btcfund .btcf-net-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-#ds-btcfund .btcf-net-item{background:var(--btcf-dark4);border-radius:8px;padding:10px 12px;}
-#ds-btcfund .btcf-net-label{font-size:10px;color:var(--btcf-gray);margin-bottom:4px;}
-#ds-btcfund .btcf-net-val{font-size:12px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--btcf-white);}
-/* Halving */
-#ds-btcfund .btcf-halving-center{text-align:center;padding:6px 0;}
-#ds-btcfund .btcf-halving-blocks{
-  font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:800;
-  color:var(--btcf-gold);margin-bottom:4px;
-}
-#ds-btcfund .btcf-halving-sub{font-size:11px;color:var(--btcf-gray);margin-bottom:8px;}
-#ds-btcfund .btcf-halving-prog{height:6px;background:var(--btcf-dark3);border-radius:10px;overflow:hidden;}
-#ds-btcfund .btcf-halving-fill{
-  height:100%;background:linear-gradient(90deg,var(--btcf-gold),var(--btcf-gold2));
-  border-radius:10px;transition:width 0.8s ease;
-}
-#ds-btcfund .btcf-halving-row{
-  display:flex;justify-content:space-between;font-size:10px;color:var(--btcf-gray);margin-top:6px;
-}
-#ds-btcfund .btcf-dash-row-item{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);
-}
-#ds-btcfund .btcf-dash-row-item:last-child{border-bottom:none;}
-#ds-btcfund .btcf-dash-row-label{font-size:12px;color:var(--btcf-gray);}
-#ds-btcfund .btcf-dash-row-val{font-size:12px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--btcf-white);}
-#ds-btcfund .btcf-dash-row-val.gold{color:var(--btcf-gold);}
-/* Fund metrics card */
-#ds-btcfund .btcf-metrics-card{
-  background:var(--btcf-dark2);border:1px solid var(--btcf-dark3);
-  border-radius:12px;padding:16px 18px;margin-bottom:12px;
-}
-#ds-btcfund .btcf-metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
-/* Chart */
-#ds-btcfund .btcf-chart-wrap{
-  background:var(--btcf-dark2);border:1px solid var(--btcf-dark3);
-  border-radius:12px;padding:16px;margin-bottom:14px;
-}
-#ds-btcfund .btcf-chart-head{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:12px;flex-wrap:wrap;gap:8px;
-}
-#ds-btcfund .btcf-chart-title{font-size:12px;font-weight:600;color:var(--btcf-lgray);}
-#ds-btcfund .btcf-tab-row{display:flex;gap:4px;}
-#ds-btcfund .btcf-tab{
-  font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;
-  background:transparent;border:1px solid var(--btcf-dark3);color:var(--btcf-gray);
-  font-family:'Plus Jakarta Sans',sans-serif;transition:all 0.2s;
-}
-#ds-btcfund .btcf-tab.active{
-  background:var(--btcf-gold);color:var(--btcf-dark);
-  border-color:var(--btcf-gold);font-weight:700;
-}
-#ds-btcfund .btcf-chart-loading{
-  height:160px;display:flex;align-items:center;justify-content:center;
-  color:var(--btcf-gray);font-size:13px;
-}
-#ds-btcfund .btcf-footer-note{
-  margin-top:10px;font-size:10px;color:#555;text-align:center;
-}
-/* loading spinner */
-#ds-btcfund .btcf-spin{
-  width:20px;height:20px;border:2px solid var(--btcf-dark3);
-  border-top-color:var(--btcf-gold);border-radius:50%;
-  animation:btcf-spin 0.8s linear infinite;margin:0 auto 8px;
-}
-@keyframes btcf-spin{to{transform:rotate(360deg);}}
-</style>
-
 <!-- ══ TCC LOGIN PAGE CSS (ported from TCC_Main AUTH v3) ══ -->
 <style>
 /* ── Login page — alias undefined legacy tokens → TCC design system ── */
@@ -2293,7 +2029,6 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <div onclick="dTab('commission')" id="dt-commission" class="dash-tab">💰 Commission</div>
       <div onclick="dTab('notifications')" id="dt-notifications" class="dash-tab">🔔 การแจ้งเตือน</div>
       <div onclick="dTab('profile')" id="dt-profile" class="dash-tab">👤 โปรไฟล์</div>
-      <div onclick="dTab('btcfund')" id="dt-btcfund" class="dash-tab" style="border-left:2px solid rgba(240,185,11,0.4);margin-top:8px;">₿ TCC Bitcoin Fund</div>
     </div>
   </div>
 
@@ -2389,7 +2124,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <option value="MP Refund">MP Refund (คืนเงิน)</option>
           <option value="MP Sale">MP Sale (รับจากการขาย)</option>
           <option value="Seller Cashout">Seller Cashout</option>
-          <option value="Funding Fee">Funding Fee</option>
+          <option value="Funding">Funding Free</option>
           <option value="Commission">Commission</option>
         </select>
         <input type="date" class="fi" style="width:140px;" id="thdf" onchange="initTXH()">
@@ -2771,262 +2506,6 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════
-         [v3] TCC BITCOIN FUND TAB
-    ════════════════════════════════════════════════ -->
-    <div id="ds-btcfund" class="ds-panel" style="display:none;">
-      <div class="stitle">₿ TCC <span>Bitcoin Fund</span></div>
-
-      <!-- Section header -->
-      <div class="btcf-header">
-        <div>
-          <div class="btcf-title">₿ กองทุน Bitcoin แบบ Real-time</div>
-          <div class="btcf-sub">ยอดสินทรัพย์จริงบน Bitcoin Mainnet · ข้อมูลจาก blockchain.info & Binance</div>
-        </div>
-        <div class="btcf-live-badge">
-          <div class="btcf-live-dot"></div>Live On-Chain
-        </div>
-      </div>
-
-      <!-- Wallet Address Card -->
-      <div class="btcf-addr-card">
-        <div class="btcf-addr-top">
-          <span class="btcf-addr-label">Wallet Address (masked)</span>
-          <div class="btcf-addr-badges">
-            <span class="btcf-badge g">✓ SegWit P2WPKH</span>
-            <span class="btcf-badge b">Mainnet</span>
-          </div>
-        </div>
-        <div class="btcf-addr-display" id="btcf-addr-display">กำลังโหลด...</div>
-        <button class="btcf-copy-btn" onclick="btcfCopyAddr()">⧉ คัดลอก Address เต็ม</button>
-      </div>
-
-      <!-- Price Bar -->
-      <div class="btcf-price-bar">
-        <div>
-          <div style="font-size:11px;color:#848E9C;margin-bottom:4px;">Bitcoin (BTC/USD) · Binance</div>
-          <div class="btcf-price-main" id="btcf-btcPrice">—</div>
-        </div>
-        <div style="text-align:center;">
-          <div class="btcf-price-change" id="btcf-priceChange">—</div>
-          <div style="font-size:10px;color:#848E9C;margin-top:4px;">24h change</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;color:#848E9C;margin-bottom:4px;">อัปเดตล่าสุด</div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C0C4CC;" id="btcf-lastUpdate">—</div>
-        </div>
-      </div>
-
-      <!-- Fund Value Banner -->
-      <div class="btcf-fund-banner">
-        <div class="btcf-fund-icon">₿</div>
-        <div class="btcf-fund-main">
-          <div class="btcf-fund-label">มูลค่ากองทุน Bitcoin (USD)</div>
-          <div class="btcf-fund-usd" id="btcf-fundValueUSD">—</div>
-          <div class="btcf-fund-btc" id="btcf-fundValueBTC">—</div>
-        </div>
-        <div class="btcf-fund-side">
-          <div class="btcf-fund-mini">
-            <div class="btcf-fund-mini-label">ราคา BTC ณ ปัจจุบัน</div>
-            <div class="btcf-fund-mini-val gold" id="btcf-fundBTCPrice">—</div>
-          </div>
-          <div class="btcf-fund-mini">
-            <div class="btcf-fund-mini-label">เปลี่ยนแปลง 24h</div>
-            <div class="btcf-fund-mini-val" id="btcf-fundBTCChg">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Data Source Status Bar -->
-      <div class="btcf-src-bar">
-        <span style="font-size:10px;color:#848E9C;margin-right:4px;">แหล่งข้อมูล:</span>
-        <span class="btcf-src-item"><span class="btcf-src-dot" id="btcf-srcWallet"></span>Wallet (blockchain.info)</span>
-        <span class="btcf-src-item"><span class="btcf-src-dot" id="btcf-srcPrice"></span>ราคา (Bybit)</span>
-        <span class="btcf-src-item"><span class="btcf-src-dot" id="btcf-srcChart"></span>กราฟ (Bybit)</span>
-        <span class="btcf-src-item"><span class="btcf-src-dot" id="btcf-srcNetwork"></span>Network (Mempool)</span>
-        <span style="margin-left:auto;font-size:10px;color:#848E9C;" id="btcf-lastUpdate2">—</span>
-      </div>
-
-      <!-- BTC Stats Grid -->
-      <div class="btcf-stats-grid">
-        <div class="btcf-stat">
-          <div class="btcf-stat-lbl">ยอดคงเหลือ</div>
-          <div class="btcf-stat-val gold" id="btcf-statBal">—</div>
-          <div class="btcf-stat-sub" id="btcf-statBalUSD">—</div>
-        </div>
-        <div class="btcf-stat">
-          <div class="btcf-stat-lbl">มูลค่า (USD)</div>
-          <div class="btcf-stat-val green" id="btcf-statUSD">—</div>
-          <div class="btcf-stat-sub">at current price</div>
-        </div>
-        <div class="btcf-stat">
-          <div class="btcf-stat-lbl">รับทั้งหมด</div>
-          <div class="btcf-stat-val blue" id="btcf-statIn">—</div>
-          <div class="btcf-stat-sub">total received</div>
-        </div>
-        <div class="btcf-stat">
-          <div class="btcf-stat-lbl">กำไร/ขาดทุน (24h)</div>
-          <div class="btcf-stat-val" id="btcf-statPnl">—</div>
-          <div class="btcf-stat-sub" id="btcf-statPnlUSD">—</div>
-        </div>
-      </div>
-
-      <!-- Market Ticker -->
-      <div class="btcf-ticker">
-        <div class="btcf-ticker-chip">
-          <div class="btcf-tk-name">BTC/USDT</div>
-          <div class="btcf-tk-price" id="btcf-tk_btc">—</div>
-          <div class="btcf-tk-chg" id="btcf-tk_btc_c">—</div>
-        </div>
-        <div class="btcf-ticker-chip">
-          <div class="btcf-tk-name">ETH/USDT</div>
-          <div class="btcf-tk-price" id="btcf-tk_eth">—</div>
-          <div class="btcf-tk-chg" id="btcf-tk_eth_c">—</div>
-        </div>
-        <div class="btcf-ticker-chip">
-          <div class="btcf-tk-name">BNB/USDT</div>
-          <div class="btcf-tk-price" id="btcf-tk_bnb">—</div>
-          <div class="btcf-tk-chg" id="btcf-tk_bnb_c">—</div>
-        </div>
-        <div class="btcf-ticker-chip">
-          <div class="btcf-tk-name">SOL/USDT</div>
-          <div class="btcf-tk-price" id="btcf-tk_sol">—</div>
-          <div class="btcf-tk-chg" id="btcf-tk_sol_c">—</div>
-        </div>
-        <div class="btcf-ticker-chip">
-          <div class="btcf-tk-name">Market Cap</div>
-          <div class="btcf-tk-price" id="btcf-tk_mcap">—</div>
-          <div class="btcf-tk-chg" id="btcf-tk_mcap_c">—</div>
-        </div>
-      </div>
-
-      <!-- Row 1: Fear & Greed + Dominance -->
-      <div class="btcf-dash-row">
-        <div class="btcf-card">
-          <div class="btcf-card-title">
-            <span class="dot" style="background:#F0B90B;"></span>Fear &amp; Greed Index
-          </div>
-          <div class="btcf-fg-wrap">
-            <div class="btcf-fg-arc-wrap">
-              <div class="btcf-fg-arc-bg"></div>
-              <div class="btcf-fg-arc-fill" id="btcf-fgArcFill"></div>
-              <div class="btcf-fg-needle" id="btcf-fgNeedle"></div>
-            </div>
-            <div class="btcf-fg-val" id="btcf-fgVal">—</div>
-            <div class="btcf-fg-label" id="btcf-fgLabel">กำลังโหลด...</div>
-          </div>
-        </div>
-        <div class="btcf-card">
-          <div class="btcf-card-title">
-            <span class="dot" style="background:#1890FF;"></span>Bitcoin Dominance
-          </div>
-          <div class="btcf-dom-track">
-            <div class="btcf-dom-seg" id="btcf-domBTC" style="background:#F0B90B;width:0%;"></div>
-            <div class="btcf-dom-seg" id="btcf-domETH" style="background:#627EEA;width:0%;"></div>
-            <div class="btcf-dom-seg" id="btcf-domOther" style="background:#2B3139;width:0%;"></div>
-          </div>
-          <div class="btcf-dom-legend">
-            <div class="btcf-dom-item"><div class="btcf-dom-dot" style="background:#F0B90B;"></div><span id="btcf-domBTCPct">BTC —</span></div>
-            <div class="btcf-dom-item"><div class="btcf-dom-dot" style="background:#627EEA;"></div><span id="btcf-domETHPct">ETH —</span></div>
-            <div class="btcf-dom-item"><div class="btcf-dom-dot" style="background:#2B3139;border:1px solid #848E9C;"></div><span id="btcf-domOtherPct">Others —</span></div>
-          </div>
-          <div style="margin-top:14px;">
-            <div class="btcf-card-title" style="margin-bottom:6px;">
-              <span class="dot" style="background:#0ECB81;"></span>Market Cap
-            </div>
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;font-weight:700;color:#fff;" id="btcf-totalMcap">—</div>
-            <div style="font-size:10px;color:#848E9C;margin-top:2px;" id="btcf-totalVol">Vol 24h: —</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Row 2: Network Stats + Halving Countdown -->
-      <div class="btcf-dash-row">
-        <div class="btcf-card">
-          <div class="btcf-card-title">
-            <span class="dot" style="background:#8B5CF6;"></span>Bitcoin Network Stats
-          </div>
-          <div class="btcf-net-grid">
-            <div class="btcf-net-item"><div class="btcf-net-label">Block Height</div><div class="btcf-net-val" id="btcf-netHeight">—</div></div>
-            <div class="btcf-net-item"><div class="btcf-net-label">Mempool Size</div><div class="btcf-net-val" id="btcf-netMempool">—</div></div>
-            <div class="btcf-net-item"><div class="btcf-net-label">Fee (sat/vB)</div><div class="btcf-net-val" id="btcf-netFee">—</div></div>
-            <div class="btcf-net-item"><div class="btcf-net-label">Hashrate (EH/s)</div><div class="btcf-net-val" id="btcf-netHash">—</div></div>
-            <div class="btcf-net-item"><div class="btcf-net-label">Difficulty</div><div class="btcf-net-val" id="btcf-netDiff">—</div></div>
-            <div class="btcf-net-item"><div class="btcf-net-label">Unconfirmed TX</div><div class="btcf-net-val" id="btcf-netUnconf">—</div></div>
-          </div>
-        </div>
-        <div class="btcf-card">
-          <div class="btcf-card-title">
-            <span class="dot" style="background:#F0B90B;"></span>Halving Countdown
-          </div>
-          <div class="btcf-halving-center">
-            <div class="btcf-halving-blocks" id="btcf-halvingBlocks">—</div>
-            <div class="btcf-halving-sub">blocks เหลือถึง Halving ครั้งหน้า</div>
-            <div style="font-size:11px;color:#C0C4CC;margin-bottom:10px;" id="btcf-halvingEst">—</div>
-            <div class="btcf-halving-prog">
-              <div class="btcf-halving-fill" id="btcf-halvingFill" style="width:0%;"></div>
-            </div>
-            <div class="btcf-halving-row">
-              <span id="btcf-halvingCurrent">Block: —</span>
-              <span id="btcf-halvingNext">Halving: —</span>
-            </div>
-          </div>
-          <div style="margin-top:10px;">
-            <div class="btcf-dash-row-item">
-              <span class="btcf-dash-row-label">Block Reward ปัจจุบัน</span>
-              <span class="btcf-dash-row-val gold">3.125 BTC</span>
-            </div>
-            <div class="btcf-dash-row-item">
-              <span class="btcf-dash-row-label">Halving ครั้งที่</span>
-              <span class="btcf-dash-row-val">#5</span>
-            </div>
-            <div class="btcf-dash-row-item">
-              <span class="btcf-dash-row-label">BTC ที่ขุดแล้ว</span>
-              <span class="btcf-dash-row-val" id="btcf-halvingMined">—</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fund Performance Metrics -->
-      <div class="btcf-metrics-card">
-        <div class="btcf-card-title">
-          <span class="dot" style="background:#0ECB81;"></span>Fund Performance Metrics
-        </div>
-        <div class="btcf-metrics-grid">
-          <div class="btcf-net-item"><div class="btcf-net-label">All-Time High BTC</div><div class="btcf-net-val" style="color:#F0B90B;" id="btcf-mAth">—</div></div>
-          <div class="btcf-net-item"><div class="btcf-net-label">ATH Fund Value</div><div class="btcf-net-val" style="color:#F0B90B;" id="btcf-mAthUSD">—</div></div>
-          <div class="btcf-net-item"><div class="btcf-net-label">จาก ATH (%)</div><div class="btcf-net-val" id="btcf-mFromAth">—</div></div>
-          <div class="btcf-net-item"><div class="btcf-net-label">7D Change</div><div class="btcf-net-val" id="btcf-m7d">—</div></div>
-          <div class="btcf-net-item"><div class="btcf-net-label">30D Change</div><div class="btcf-net-val" id="btcf-m30d">—</div></div>
-          <div class="btcf-net-item"><div class="btcf-net-label">Circulating Supply</div><div class="btcf-net-val" id="btcf-mSupply">—</div></div>
-        </div>
-      </div>
-
-      <!-- BTC/USDT Price Chart -->
-      <div class="btcf-chart-wrap">
-        <div class="btcf-chart-head">
-          <span class="btcf-chart-title">BTC/USDT Price History</span>
-          <div class="btcf-tab-row">
-            <button class="btcf-tab active" id="btcf-tab7" onclick="btcfSwitchTab(7,this)">7D</button>
-            <button class="btcf-tab" id="btcf-tab14" onclick="btcfSwitchTab(14,this)">14D</button>
-            <button class="btcf-tab" id="btcf-tab30" onclick="btcfSwitchTab(30,this)">30D</button>
-          </div>
-        </div>
-        <div style="position:relative;height:160px;">
-          <div class="btcf-chart-loading" id="btcf-chartLoading">
-            <div><div class="btcf-spin"></div><div>⏳ กำลังโหลดกราฟ...</div></div>
-          </div>
-          <canvas id="btcf-priceChart" style="display:none;"></canvas>
-        </div>
-      </div>
-
-      <div class="btcf-footer-note">
-        ข้อมูลจาก blockchain.info (wallet) · Bybit (ราคา &amp; กราฟ) · Kraken (fallback) · alternative.me (F&amp;G) · Cache 30s · อัปเดตอัตโนมัติทุก 60 วินาที
-      </div>
-    </div>
-    <!-- ═══ END TCC BITCOIN FUND TAB ═══ -->
-
   </div><!-- end content -->
 </div><!-- end flex -->
 </div><!-- end p-dashboard -->
@@ -3166,7 +2645,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
   </nav>
   <div class="fc btwn mb4">
     <div class="stitle" style="margin:0;">📦 จัดการ <span>สินค้า</span></div>
-    <button class="btn btn-gold btn-sm" onclick="_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}setEmoji('📦');openM('m-addprod')">+ เพิ่มสินค้าใหม่</button>
+    <button class="btn btn-gold btn-sm" onclick="_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}openM('m-addprod')">+ เพิ่มสินค้าใหม่</button>
   </div>
   <div class="tbl ox tbl-card-mode"><table><thead><tr><th>สินค้า</th><th>ราคา (USDT)</th><th>Payout Option</th><th>Stock</th><th>สถานะ</th><th>ยอดขาย</th><th>จัดการ</th></tr></thead><tbody id="spr-b"></tbody></table></div>
   <div id="spr-b-cards"></div>
@@ -3471,11 +2950,11 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="fg"><label class="fl">ชื่อสินค้า *</label><input class="fi" placeholder="ชื่อสินค้า"></div>
     <div class="g2" style="gap:12px;">
       <div class="fg"><label class="fl">ราคา (USDT) *</label><input type="number" class="fi" placeholder="0.00" id="pp-price" oninput="updatePOPreview()"></div>
-      <div class="fg"><label class="fl">หมวดหมู่ *</label><select class="fi" id="prod-category"><option>Electronics</option><option>Fashion</option><option>Luxury</option><option>Home</option></select></div>
+      <div class="fg"><label class="fl">หมวดหมู่ *</label><select class="fi"><option>Electronics</option><option>Fashion</option><option>Luxury</option><option>Home</option></select></div>
     </div>
     <div class="g2" style="gap:12px;">
-      <div class="fg"><label class="fl">Stock</label><input type="number" class="fi" id="prod-stock" value="1"></div>
-      <div class="fg"><label class="fl">เวลาจัดส่ง</label><select class="fi" id="prod-delivery"><option>1-3 วัน</option><option selected>3-7 วัน</option><option>7-14 วัน</option><option>14-30 วัน</option></select></div>
+      <div class="fg"><label class="fl">Stock</label><input type="number" class="fi" value="1"></div>
+      <div class="fg"><label class="fl">เวลาจัดส่ง</label><select class="fi"><option>1-3 วัน</option><option>3-7 วัน</option><option>7-14 วัน</option><option>14-30 วัน</option></select></div>
     </div>
     <div class="fg"><label class="fl">คำอธิบายสินค้า</label><textarea class="fi" rows="3" placeholder="อธิบายสินค้าของคุณ..."></textarea></div>
     <div class="fg"><label class="fl">รูปภาพสินค้า (สูงสุด 10 รูป)</label>
@@ -3521,56 +3000,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       </div>
       <div class="alrt alrt-i mt2 tsm" id="po-prev">📍 ราคา 1,000 USDT → คุณได้รับ 900 USDT (45 วัน)</div>
     </div>
-    <!-- ─── FF Auto-fill Preview [v2] ─── -->
-    <div id="ff-autofill-wrap" style="display:none;margin-top:4px;">
-      <div style="font-size:12px;font-weight:700;color:var(--acc);margin-bottom:8px;">🎁 Funding Free ที่ลูกค้าจะได้รับ</div>
-      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;font-size:12px;color:var(--t2);">
-        <span>FF Rate: <strong id="ff-rate-disp" style="color:var(--acc);">—</strong></span>
-        <span>·</span>
-        <span>FF Amount: <strong id="ff-amt-disp" style="color:#52c41a;">—</strong></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;" id="ff-plan-cards">
-        <div class="ff-plan-card sel" id="ff-plan-A" onclick="selFFPlan('A')">
-          <div style="font-weight:700;font-size:12px;">Plan A</div>
-          <div id="ff-plan-A-label" style="font-size:11px;color:var(--t2);margin:2px 0;">—</div>
-          <div id="ff-plan-A-amt" style="font-size:13px;font-weight:700;color:#52c41a;">—</div>
-          <div id="ff-plan-A-interval" style="font-size:11px;color:var(--t2);">—</div>
-        </div>
-        <div class="ff-plan-card" id="ff-plan-B" onclick="selFFPlan('B')">
-          <div style="font-weight:700;font-size:12px;">Plan B</div>
-          <div id="ff-plan-B-label" style="font-size:11px;color:var(--t2);margin:2px 0;">—</div>
-          <div id="ff-plan-B-amt" style="font-size:13px;font-weight:700;color:#52c41a;">—</div>
-          <div id="ff-plan-B-interval" style="font-size:11px;color:var(--t2);">—</div>
-        </div>
-        <div class="ff-plan-card" id="ff-plan-C" onclick="selFFPlan('C')">
-          <div style="font-weight:700;font-size:12px;">Plan C</div>
-          <div id="ff-plan-C-label" style="font-size:11px;color:var(--t2);margin:2px 0;">—</div>
-          <div id="ff-plan-C-amt" style="font-size:13px;font-weight:700;color:#52c41a;">—</div>
-          <div id="ff-plan-C-interval" style="font-size:11px;color:var(--t2);">—</div>
-        </div>
-      </div>
-      <div class="alrt alrt-i tsm mt2">💡 FF จ่ายจาก TCC Reserve Fund — ไม่หักจาก Seller · Admin อาจปรับเพิ่มได้ตอน Approve</div>
-    </div>
-    <!-- ─── end FF preview ─── -->
-    <div class="g2" style="gap:12px;">
-      <div class="fg"><label class="fl">Variants <span class="tm tsm">(ไม่บังคับ)</span></label><input class="fi" id="prod-variants" placeholder="เช่น สี: ดำ,ขาว · ขนาด: S,M,L"></div>
-      <div class="fg"><label class="fl">Emoji Icon</label>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <span id="prod-emoji-preview" style="font-size:1.6rem;line-height:1;min-width:32px;text-align:center;">📦</span>
-          <input class="fi" id="prod-emoji" placeholder="📦" value="📦" maxlength="8" oninput="document.getElementById('prod-emoji-preview').textContent=this.value||'📦'" style="max-width:90px;">
-          <div style="display:flex;gap:4px;flex-wrap:wrap;">
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('📦')">📦</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('🛍️')">🛍️</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('👗')">👗</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('💻')">💻</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('📱')">📱</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('🏠')">🏠</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('💎')">💎</span>
-            <span style="cursor:pointer;font-size:1.2rem;" onclick="setEmoji('🍖')">🍖</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="fg"><label class="fl">Variants <span class="tm tsm">(ไม่บังคับ)</span></label><input class="fi" placeholder="เช่น สี: ดำ,ขาว · ขนาด: S,M,L"></div>
     <div class="alrt alrt-w tsm">⏳ สินค้าจะอยู่สถานะ "รอ Admin อนุมัติ" ก่อนแสดงในตลาด</div>
     <button class="btn btn-gold w100 mt2" onclick="submitProd()">📤 ส่งสินค้าเพื่อตรวจสอบ</button>
   </div>
@@ -3720,7 +3150,7 @@ function go(pg){
   const dashMap={
     'wallet':'wallet','txh':'wallet','orders':'orders','ord-det':'orders',
     'funding':'funding','referrals':'referrals','notifications':'notifications',
-    'profile':'profile','btcfund':'btcfund'
+    'profile':'profile'
   };
   if(dashMap[pg]!==undefined){
     const targetTab = dashMap[pg];
@@ -3740,8 +3170,7 @@ function go(pg){
       const tabInit={
         'wallet':()=>{ initWallet(); },'orders':initOrders,
         'funding':initFF,'referrals':initRef,'notifications':initNotifs,
-        'shop':initShop,
-        'btcfund':()=>{ if(typeof initBtcFund==='function') initBtcFund(); }
+        'shop':initShop
       };
       if(tabInit[targetTab]) tabInit[targetTab]();
     }
@@ -3782,8 +3211,7 @@ function dTab(tab){
     'wallet':()=>{ if(typeof initWallet==='function') initWallet(); },
     'funding':()=>{ if(typeof initFF==='function') initFF(); },
     'referrals':()=>{ if(typeof initRef==='function') initRef(); },
-    'notifications':()=>{ if(typeof initNotifs==='function') initNotifs(); },
-    'btcfund':()=>{ if(typeof initBtcFund==='function') initBtcFund(); }
+    'notifications':()=>{ if(typeof initNotifs==='function') initNotifs(); }
   };
   if(tabInit[tab]) tabInit[tab]();
 }
@@ -4479,37 +3907,11 @@ function renderWTX(){
     '<div style="text-align:center;color:var(--t3);padding:24px;font-size:13px;">ไม่มีรายการ</div>';
   renderPag('wpag',Math.ceil(txs.length/TX_PP),txPage,p=>{txPage=p;renderWTX();});
 }
-// [v26 FIX] แปลง tx_type ดิบจาก DB → ชื่อที่อ่านออก (ทั้ง Transactions + MP_Transactions)
-function _txTypeLabel(rawType) {
-  const map = {
-    // MP_Transactions types
-    'mp buy':          'MP Buy (ซื้อสินค้า)',
-    'mp topup':        'MP Topup (โอนเข้า MP)',
-    'mp withdraw':     'MP Withdraw (โอนกลับ TCC)',
-    'mp deposit':      'MP Deposit (Admin อนุมัติ)',
-    'mp refund':       'MP Refund (คืนเงิน)',
-    'mp sale':         'MP Sale (รับจากการขาย)',
-    'seller cashout':  'Seller Cashout (ถอน Seller)',
-    'funding fee':     'Funding Fee',
-    'ff payout':       'Funding Fee',
-    // Transactions sheet types (TCC-only)
-    'deposit':         'Deposit (เติมเงิน)',
-    'withdraw':        'Withdraw (ถอน)',
-    'team_commission': 'Commission',
-    'market_fee':      'Market Fee',
-  };
-  const lc = String(rawType||'').toLowerCase().trim();
-  // ตรวจ payout_*d (เช่น Payout_45d, Payout_undefinedd)
-  if (lc.startsWith('payout_')) return 'Seller Payout';
-  return map[lc] || rawType || '—';
-}
-
 function txRow(t){
   const plus=String(t.amt).startsWith('+'),minus=String(t.amt).startsWith('-');
   const ac=plus?'tok':minus?'terr':'tg';
   const sb=t.status==='success'?'<span class="bdg bdg-ok">✓</span>':t.status==='pending'?'<span class="bdg bdg-warn">⏳</span>':'<span class="bdg bdg-err">✗</span>';
-  const lbl = _txTypeLabel(t.type);
-  return `<tr><td class="tsm tm">${t.date}</td><td><span class="bdg bdg-muted">${lbl}</span></td><td class="tsm">${t.desc}</td><td class="mono ${ac}" style="font-weight:600;">${t.amt} USDT</td><td>${sb}</td></tr>`;
+  return `<tr><td class="tsm tm">${t.date}</td><td><span class="bdg bdg-muted">${t.type}</span></td><td class="tsm">${t.desc}</td><td class="mono ${ac}" style="font-weight:600;">${t.amt} USDT</td><td>${sb}</td></tr>`;
 }
 // [v24] Mobile card builder — ใช้ร่วมกับ renderWTX() และ _renderTXH()
 function txMobCard(t, src){
@@ -4526,13 +3928,12 @@ function txMobCard(t, src){
         ? '<span class="bdg bdg-muted" style="font-size:9px;">MP</span>'
         : '<span class="bdg bdg-muted" style="font-size:9px;">TCC</span>')
     : '';
-  const lbl = _txTypeLabel(t.type);
   // encode data สำหรับ popup
-  const dataAttr = `data-txid="${_esc(t.id)}" data-txdate="${_esc(t.date)}" data-txtype="${_esc(lbl)}" data-txdesc="${_esc(t.desc)}" data-txamt="${_esc(t.amt)}" data-txstatus="${_esc(t.status)}" data-txsym="${_esc(t.symbol||'USDT')}" data-txsrc="${src}"`;
+  const dataAttr = `data-txid="${_esc(t.id)}" data-txdate="${_esc(t.date)}" data-txtype="${_esc(t.type)}" data-txdesc="${_esc(t.desc)}" data-txamt="${_esc(t.amt)}" data-txstatus="${_esc(t.status)}" data-txsym="${_esc(t.symbol||'USDT')}" data-txsrc="${src}"`;
   return `<div class="tx-mob-card" onclick="openTxDetail(this)" ${dataAttr}>
     <div class="tx-mob-left">
       <div class="tx-mob-type">
-        <span class="bdg bdg-muted" style="font-size:11px;">${_esc(lbl)}</span>
+        <span class="bdg bdg-muted" style="font-size:11px;">${_esc(t.type)}</span>
         ${srcBadge}
       </div>
       <div class="tx-mob-desc" title="${_esc(t.desc)}">${_esc(t.desc)||'—'}</div>
@@ -5695,55 +5096,13 @@ function openEditProd(prodId) {
   // prefill description
   const descArea = document.querySelector('#m-addprod textarea');
   if(descArea){ descArea.value = p.description||''; }
-  // [v29 FIX] prefill category + delivery_days ด้วย id โดยตรง
-  const _catSel = document.getElementById('prod-category');
-  if(_catSel && p.category){
-    const _co = Array.from(_catSel.options).find(o => o.value === p.category);
-    if(_co) _catSel.value = p.category;
-  }
-  const _delSel = document.getElementById('prod-delivery');
-  if(_delSel){
-    const _do = Array.from(_delSel.options).find(o => o.value === (p.delivery_days||'3-7 วัน'));
-    _delSel.value = _do ? (p.delivery_days||'3-7 วัน') : '3-7 วัน';
-  }
-  // prefill stock
-  const _stockIn = document.getElementById('prod-stock');
-  if(_stockIn) _stockIn.value = p.stock || 1;
-  // prefill variants
-  const _varIn = document.getElementById('prod-variants');
-  if(_varIn) _varIn.value = p.variants || '';
-  // [v34 FIX] prefill emoji_icon
-  const _emojiIn = document.getElementById('prod-emoji');
-  if(_emojiIn){ _emojiIn.value = p.emoji_icon || '📦'; document.getElementById('prod-emoji-preview').textContent = p.emoji_icon || '📦'; }
   // prefill video_url
   const vidInput = document.getElementById('prod-video-url');
   if(vidInput){ vidInput.value = p.video_url||''; updateVideoPreview(); }
-  // prefill payout_option
-  const _po = Number(p.payout_option) || 45;
-  const _poCard = document.querySelector(`#popt-cards .popt[onclick*="selPO(${_po},"]`);
-  if(_poCard){ document.querySelectorAll('#popt-cards .popt').forEach(c=>c.classList.remove('sel')); _poCard.classList.add('sel'); selPO(_po, _poCard); }
-  // [v33 FIX] prefill ff_selected_plan — เดิมไม่ได้ set selFFPlan_ ตอนแก้ไข
-  // → submitProd ส่ง selFFPlan_='A' เสมอ ทั้งที่ Seller อาจเลือก Plan อื่นไว้ก่อนหน้า
-  if (p.ff_selected_plan) {
-    selFFPlan_ = p.ff_selected_plan;
-    // highlight FF plan card ที่ถูกต้อง
-    document.querySelectorAll('.ff-plan-card').forEach(function(c) {
-      const match = c.getAttribute('onclick') && c.getAttribute('onclick').includes("'" + p.ff_selected_plan + "'");
-      c.classList.toggle('sel', !!match);
-    });
-  }
   openM('m-addprod');
 }
 
 // Preview video URL แบบ live ขณะ seller พิมพ์ link
-// [v34] setEmoji — helper สำหรับ emoji picker ใน addprod modal
-function setEmoji(emoji) {
-  const inp = document.getElementById('prod-emoji');
-  const prev = document.getElementById('prod-emoji-preview');
-  if(inp)  inp.value = emoji;
-  if(prev) prev.textContent = emoji;
-}
-
 function updateVideoPreview(){
   const url = (document.getElementById('prod-video-url')?.value||'').trim();
   const wrap = document.getElementById('prod-video-preview');
@@ -5782,25 +5141,6 @@ async function submitProd() {
   if (pending.length) { showToast('กรุณารอรูปภาพอัปโหลดเสร็จ...', 'warn'); return; }
 
   const imgUrls = getImgUrls('prod-img-preview');
-
-  // [v29 FIX] อ่านค่าทุก field ก่อน closeM() — หลัง closeM DOM ยังอยู่แต่ modal ซ่อน
-  // ใช้ getElementById แทน querySelectorAll[n] — ป้องกัน index ผิดเมื่อ modal อื่นเปิดอยู่
-  const _category     = document.getElementById('prod-category')?.value || '';
-  const _stock        = document.getElementById('prod-stock')?.value || 1;
-  const _description  = document.querySelector('#m-addprod textarea')?.value || '';
-  const _video_url    = document.getElementById('prod-video-url')?.value.trim() || '';
-  const _delivery     = document.getElementById('prod-delivery')?.value || '3-7 วัน';
-  const _variants     = document.getElementById('prod-variants')?.value.trim() || '';
-  const _emojiIcon    = document.getElementById('prod-emoji')?.value.trim() || '📦';
-  const _shopName     = (() => { const raw=SELLER_DATA?.shop?.shop_name||''; return isImgUrl(raw)?(SELLER_DATA?.shop?.owner_name||''):raw; })();
-
-  // [v29 FIX] กรอง imgUrls ให้มีแค่ image URL จริง — ตัด video URL ที่หลุดเข้ามาออก
-  const _imgUrlsClean = imgUrls.filter(u => {
-    if (!u || typeof u !== 'string') return false;
-    if (/youtu\.be|youtube\.com|tiktok\.com|vimeo\.com/i.test(u)) return false;
-    return true;
-  });
-
   closeM('m-addprod');
   showLoad(_editingProdId ? 'กำลังแก้ไขสินค้า...' : 'กำลังส่งสินค้า...');
   try {
@@ -5810,39 +5150,22 @@ async function submitProd() {
       seller_id:     SESSION.member_id,
       name,
       price,
-      category:      _category,
-      stock:         _stock,
-      description:   _description,
-      images:        JSON.stringify(_imgUrlsClean),
-      video_url:     _video_url,
-      variants:      _variants,
-      payout_option:    String(selPO_),
-      // [v2] FF Auto-fill fields
-      ff_selected_plan: selFFPlan_,
-      ff_rate:          (FF_CONFIG_FE[selPO_]||FF_CONFIG_FE[45]).ff_rate,
-      ff_amount:        (parseFloat(price)||0) * (FF_CONFIG_FE[selPO_]||FF_CONFIG_FE[45]).ff_rate,
-      ff_plan_config:   JSON.stringify((FF_CONFIG_FE[selPO_]||FF_CONFIG_FE[45]).plans),
-      shop_name:     _shopName,
-      delivery_days: _delivery,
-      emoji_icon:    _emojiIcon
+      category:      document.querySelector('#m-addprod select')?.value,
+      stock:         document.querySelector('#m-addprod input[type="number"]:not(#pp-price)')?.value||1,
+      description:   document.querySelector('#m-addprod textarea')?.value,
+      images:        JSON.stringify(imgUrls),
+      video_url:     document.getElementById('prod-video-url')?.value.trim()||'',
+      payout_option: String(selPO_),
+      shop_name:     (() => { const raw=SELLER_DATA?.shop?.shop_name||''; return isImgUrl(raw)?(SELLER_DATA?.shop?.owner_name||''):raw; })(),
+      delivery_days: document.querySelectorAll('#m-addprod select')[1]?.value||'3-7 วัน'
     };
     const res = await apiPost(body);
     hideLoad();
     if (res.success) {
-      const wasEditing = !!_editingProdId; // [v20 FIX] บันทึกก่อน reset — _editingProdId = null ก่อน showToast ทำให้ toast ผิดเสมอ
       clearImgStore('prod-img-preview');
       _editingProdId = null;
       SELLER_DATA = null;
-      // [v33] แสดง toast แตกต่างกันตาม needsReReview จาก server
-      let toastMsg;
-      if (!wasEditing) {
-        toastMsg = '✅ ส่งสินค้าเพื่อตรวจสอบแล้ว — รอ Admin อนุมัติ';
-      } else if (res.needsReReview === false) {
-        toastMsg = '✅ แก้ไขสินค้าแล้ว (ไม่ต้อง re-review — สถานะคงเดิม)';
-      } else {
-        toastMsg = '✅ แก้ไขสินค้าแล้ว — รอ Admin อนุมัติใหม่';
-      }
-      showToast(toastMsg);
+      showToast('✅ ' + (_editingProdId ? 'แก้ไขสินค้าแล้ว' : 'ส่งสินค้าเพื่อตรวจสอบแล้ว — รอ Admin อนุมัติ'));
       initSProds();
     } else { showToast(res.error||'เกิดข้อผิดพลาด', 'err'); }
   } catch(e) { hideLoad(); showToast('❌ '+e.message, 'err'); }
@@ -6064,91 +5387,30 @@ async function submitSA() {
 function tryParseJSON(str) { try { return JSON.parse(str); } catch(e) { return null; } }
 
 // ─── Payout Option selector ───
-// [v2] FF Config Map — ต้อง sync กับ FF_CONFIG ใน GAS_MP_News_v2.js
-const FF_CONFIG_FE = {
-  15: { ff_rate:0.50, seller_pct:0.80,
-    plans:{
-      A:{pct_per_round:0.05,rounds:10,interval_days:30,label:'5% × 10 เดือน'},
-      B:{pct_per_round:0.125,rounds:4,interval_days:15,label:'12.5% × 4 ครั้ง'},
-      C:{pct_per_round:0.25,rounds:2,interval_days:30,label:'25% × 2 ครั้ง'}
-    }},
-  30: { ff_rate:0.60, seller_pct:0.85,
-    plans:{
-      A:{pct_per_round:0.06,rounds:10,interval_days:30,label:'6% × 10 เดือน'},
-      B:{pct_per_round:0.15,rounds:4,interval_days:15,label:'15% × 4 ครั้ง'},
-      C:{pct_per_round:0.30,rounds:2,interval_days:30,label:'30% × 2 ครั้ง'}
-    }},
-  45: { ff_rate:0.80, seller_pct:0.90,
-    plans:{
-      A:{pct_per_round:0.08,rounds:10,interval_days:30,label:'8% × 10 เดือน'},
-      B:{pct_per_round:0.20,rounds:4,interval_days:15,label:'20% × 4 ครั้ง'},
-      C:{pct_per_round:0.40,rounds:2,interval_days:30,label:'40% × 2 ครั้ง'}
-    }},
-  60: { ff_rate:1.00, seller_pct:1.00,
-    plans:{
-      A:{pct_per_round:0.10,rounds:10,interval_days:30,label:'10% × 10 เดือน'},
-      B:{pct_per_round:0.25,rounds:4,interval_days:15,label:'25% × 4 ครั้ง'},
-      C:{pct_per_round:0.50,rounds:2,interval_days:30,label:'50% × 2 ครั้ง'}
-    }}
-};
-let selFFPlan_ = 'A';  // Plan ที่ Seller เลือก (default A)
-
-function selFFPlan(plan) {
-  selFFPlan_ = plan;
-  ['A','B','C'].forEach(k => {
-    document.getElementById('ff-plan-'+k)?.classList.toggle('sel', k === plan);
-  });
-}
-
 function selPO(d, el) {
   selPO_ = d;
   document.querySelectorAll('#popt-cards .popt').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   updatePOPreview();
 }
-
 function updatePOPreview() {
-  const price = parseFloat(document.getElementById('pp-price')?.value) || 0;
-  const el    = document.getElementById('po-prev');
-  const cfg   = FF_CONFIG_FE[selPO_] || FF_CONFIG_FE[45];
-  const pct   = cfg.seller_pct;
-  const recv  = price * pct;
-  const fee   = price - recv;
-
-  if (el) {
-    if (pct >= 1.0)
-      el.textContent = `📍 ราคา ${price.toLocaleString()} USDT → คุณได้รับ ${recv.toLocaleString()} USDT เต็มจำนวน`;
-    else
-      el.textContent = `📍 ราคา ${price.toLocaleString()} USDT → คุณได้รับ ${recv.toLocaleString()} USDT (ตัด ${fee.toLocaleString()} Market Fee)`;
-  }
-
-  // [v2] FF Auto-fill
-  const ffWrap = document.getElementById('ff-autofill-wrap');
-  if (!ffWrap) return;
-  if (!price || price <= 0) { ffWrap.style.display='none'; return; }
-  ffWrap.style.display = '';
-
-  const ff_amount = price * cfg.ff_rate;
-  document.getElementById('ff-rate-disp').textContent = (cfg.ff_rate*100).toFixed(0) + '%';
-  document.getElementById('ff-amt-disp').textContent  = ff_amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' USDT';
-
-  ['A','B','C'].forEach(key => {
-    const plan = cfg.plans[key];
-    const amtPerRound = ff_amount * plan.pct_per_round;
-    const totalLabel  = ff_amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    const el_label    = document.getElementById('ff-plan-'+key+'-label');
-    const el_amt      = document.getElementById('ff-plan-'+key+'-amt');
-    const el_intv     = document.getElementById('ff-plan-'+key+'-interval');
-    if(el_label) el_label.textContent = plan.label;
-    if(el_amt)   el_amt.textContent   = '≈ ' + amtPerRound.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + ' USDT/ครั้ง';
-    if(el_intv)  el_intv.textContent  = 'รวม ' + totalLabel + ' USDT · ทุก ' + plan.interval_days + 'วัน';
-  });
+  const p   = parseFloat(document.getElementById('pp-price')?.value)||1000;
+  const el  = document.getElementById('po-prev');
+  if (!el) return;
+  const poMap = { 15: 0.8, 30: 0.85, 45: 0.9, 60: 1.0 };
+  const pct   = poMap[selPO_] ?? 0.9;
+  const recv  = p * pct;
+  const fee   = p - recv;
+  if (pct >= 1.0)
+    el.textContent = `📍 ราคา ${p.toLocaleString()} USDT → คุณได้รับ ${recv.toLocaleString()} USDT เต็มจำนวน`;
+  else
+    el.textContent = `📍 ราคา ${p.toLocaleString()} USDT → คุณได้รับ ${recv.toLocaleString()} USDT (ตัด ${fee.toLocaleString()} Market Fee)`;
 }
 
 // ─── Payout Option selector ───
 // ⚠️ [v13] ต้อง deploy GAS_MP_TH_V10e_v13.gs แล้วอัปเดต URL ด้านล่าง
 // วิธี: GAS Editor → Deploy → Manage Deployments → อัปเดต Version ใหม่ → Copy Web App URL
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzueH_flZKoh_6cOh-SpBLgOBUZd221TYtVfN4GwqFToamDdYAYY_F7aMRPyLRuBDxH/exec'; // [v20] ชี้ GAS deployment เดียวกับ Admin panel
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzcz2_GAFL1khgbNH26G6ZyXhWtFBNsJlJFMVbsJgE-cYLMCKprDJkV69uo41xDMEY2/exec'; // [v14] อัปเดต URL นี้หลัง deploy GAS v14 ใหม่
 
 // ✅ apiGet: mode cors + redirect follow (GAS redirects to final URL)
 async function apiGet(params){
@@ -7122,19 +6384,10 @@ function _applyWalletData(txs, mpWalRes, mpTxs) {
     const myUid      = String(SESSION.uid      || '').trim();
     const myMemId    = String(SESSION.member_id|| '').trim();
     const myBnbId    = String(SESSION.bnb_id   || '').trim();
-    // [v26 FIX] TCC_ONLY_TYPES — ประเภทที่มีเฉพาะใน Transactions sheet เท่านั้น
-    // ไม่ log ซ้ำใน MP_Transactions → แสดงได้โดยไม่ซ้ำ
-    // ประเภทที่ถูก log ทั้ง 2 ที่ (Purchase→MP Buy, Refund→MP Refund,
-    // Payout_*d→MP Sale, Funding_Free→Funding Fee) → ตัดออก
-    // เพราะ MP_Transactions มีครบแล้ว ไม่ต้องแสดงซ้ำ
-    const TCC_ONLY_TYPES = ['deposit', 'withdraw', 'team_commission', 'market_fee'];
     D.txs = txs
       .filter(t => {
-        const rowId  = String(t.member_id || t.uid || '').trim();
-        const typeLC = String(t.tx_type || t.type || '').toLowerCase();
-        const isMyTx    = rowId && (rowId === myUid || rowId === myMemId || rowId === myBnbId);
-        const isTccOnly = TCC_ONLY_TYPES.some(x => typeLC.includes(x));
-        return isMyTx && isTccOnly;
+        const rowId = String(t.member_id || t.uid || '').trim();
+        return rowId && (rowId === myUid || rowId === myMemId || rowId === myBnbId);
       })
       .map(t => {
         const raw   = parseFloat(t.amount_usdt ?? t.amount) || 0;
@@ -7147,7 +6400,7 @@ function _applyWalletData(txs, mpWalRes, mpTxs) {
                  type: t.tx_type || t.type || '', desc: t.description || t.note || '',
                  amt: fmt, status: st, symbol: t.network || t.symbol || '' };
       });
-    console.log('[initWallet v26] D.txs (TCC-only):', D.txs.length, 'rows (myUid='+myUid+', myMemId='+myMemId+')');
+    console.log('[initWallet v21] D.txs mapped:', D.txs.length, 'rows (myUid='+myUid+', myMemId='+myMemId+')');
   } else {
     D.txs = D.txs || [];
   }
@@ -7603,11 +6856,10 @@ async function doSellerWithdraw() {
 }
 
 function exportCSV(){
-  const rows = [['TX ID','วันที่','ประเภท','รายละเอียด','จำนวน','สถานะ','ระบบ']];
-  // [v26 FIX] Export เฉพาะ D.txs ที่ผ่านการกรอง TCC_ONLY แล้ว
-  // (D.txs ถูก filter ใน _applyWalletData แล้ว จึงไม่มีรายการซ้ำ)
+  const rows = [['TX ID','วันที่','ประเภท','รายละเอียด','จำนวน','สถานะ']];
+  // Export TCC Transactions
   (D.txs||[]).forEach(t=>rows.push([t.id,t.date,t.type,t.desc,t.amt,t.status,'TCC']));
-  // Export MP Transactions ทั้งหมด (MP Buy, MP Topup, MP Withdraw, MP Sale, Funding Fee ฯลฯ)
+  // Export MP Transactions
   (D.mpTxs||[]).forEach(t=>rows.push([t.id,t.date,t.type,t.desc,t.amt,t.status,'MP']));
   const csv = rows.map(r=>r.join(',')).join('\n');
   const a = document.createElement('a');
@@ -8570,21 +7822,12 @@ async function shopCheckout(){
     let successCount = 0;
     for(const item of shopCart){
       for(let q = 0; q < item.qty; q++){
-        // [v26 FIX] เพิ่ม buyer_id / amount / product_name / seller_id
-        // ให้ GAS handler ทั้ง purchaseProduct (alias) และ placeOrder
-        // รับ field ได้ถูกต้องครบถ้วน
         const res = await apiPost({
-          action:       'purchaseProduct',
-          member_id:    SESSION.member_id,
-          uid:          SESSION.uid || SESSION.member_id,
-          buyer_id:     SESSION.uid || SESSION.member_id,
-          product_id:   item.prod.id,
-          product_name: item.prod.name || '',
-          seller_id:    item.prod.seller || '',
-          ff_plan:      item.prod.ff_plan || 'A',
-          amount_usdt:  item.prod.price,
-          amount:       item.prod.price,
-          payout_option: item.prod.po ? String(item.prod.po) : '45',
+          action:     'purchaseProduct',
+          member_id:  SESSION.member_id,
+          product_id: item.prod.id,
+          ff_plan:    'A',
+          amount_usdt: item.prod.price,
         });
         if(res?.success || res?.order_id){ successCount++; }
         else {
@@ -8599,11 +7842,8 @@ async function shopCheckout(){
     const newBal = mpBal - total;
     SESSION.customer_wallet_usdt = newBal;
     D.balance = newBal;
-    // [v26 FIX] invalidate wallet + MP Transactions cache ให้ครบ
-    // เพื่อให้ประวัติธุรกรรมโหลดใหม่และแสดง MP Buy ที่เพิ่งเกิดขึ้น
-    const _cacheUid = SESSION.uid || SESSION.member_id;
-    delete _apiCache['mpwal_'  + _cacheUid];
-    delete _apiCache['mptxs_' + _cacheUid];
+    // invalidate wallet cache
+    delete _apiCache['mpwal_'  + (SESSION.uid||SESSION.member_id)];
     delete _apiCache['member_' + SESSION.member_id];
     delete _apiCache['orders_' + SESSION.uid];  // [v18 FIX] key เปลี่ยนเป็น uid แล้ว
 
@@ -8627,456 +7867,6 @@ async function shopCheckout(){
 
   }catch(e){ hideLoad(); showToast('❌ เกิดข้อผิดพลาด: '+e.message,'err'); }
 }
-</script>
-
-<!-- ══ [v3] TCC Bitcoin Fund JS ══ -->
-<script>
-(function(){
-'use strict';
-
-// ── CONFIG ──────────────────────────────────────────────────────────
-const BTCF_ADDR = 'bc1qry9rxrgvgzr2t29f3x2qfpwxda9f6x5fgxss2a';
-const BTCF_SAT  = 1e8;
-// ชี้ Proxy ผ่าน worker_TCC_present (BROCHURE_URL มีอยู่แล้วใน global scope)
-const BTCF_PROXY = (typeof BROCHURE_URL !== 'undefined' ? BROCHURE_URL : 'https://tcc-present.tcc-team-developer.workers.dev');
-
-// state
-let btcf_btcUSD = 0;
-let btcf_chartInst = null;
-let btcf_currentDays = 7;
-let btcf_initialized = false;
-let btcf_intervals = [];
-
-// ── MASK ADDRESS ────────────────────────────────────────────────────
-(function(){
-  const el = document.getElementById('btcf-addr-display');
-  if(!el) return;
-  const f = BTCF_ADDR.slice(0,6), b = BTCF_ADDR.slice(-5), m = BTCF_ADDR.slice(6,-5);
-  el.innerHTML = '<span class="vis">'+f+'</span><span class="hid">'+m+'</span><span class="vis">'+b+'</span>';
-})();
-
-// ── HELPERS ─────────────────────────────────────────────────────────
-function btcfSetEl(id, val, cls){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.textContent = val;
-  if(cls) el.className = cls;
-}
-function btcfSetDot(id, state){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.className = 'btcf-src-dot' + (state==='ok' ? '' : state==='warn' ? ' warn' : ' err');
-}
-const btcfFmt  = (n,d=2) => Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-const btcfFmtK = (n) => n>=1e12?'$'+(n/1e12).toFixed(2)+'T':n>=1e9?'$'+(n/1e9).toFixed(2)+'B':n>=1e6?'$'+(n/1e6).toFixed(2)+'M':'$'+btcfFmt(n);
-
-// ── PROXY FETCH ─────────────────────────────────────────────────────
-async function btcfPf(url){
-  const r = await fetch(BTCF_PROXY + '/proxy?target=' + encodeURIComponent(url));
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  return r.json();
-}
-async function btcfPfAny(...urls){
-  for(const url of urls){
-    try{ return await btcfPf(url); }catch(e){ console.warn('[BTCF] source failed:',url,e.message); }
-  }
-  throw new Error('All sources failed');
-}
-
-// ── COPY ADDRESS ────────────────────────────────────────────────────
-window.btcfCopyAddr = function(){
-  navigator.clipboard.writeText(BTCF_ADDR).then(()=>{
-    const btn = document.querySelector('#ds-btcfund .btcf-copy-btn');
-    if(!btn) return;
-    btn.textContent = '✓ คัดลอกแล้ว';
-    btn.style.color = '#0ECB81';
-    setTimeout(()=>{ btn.textContent='⧉ คัดลอก Address เต็ม'; btn.style.color=''; }, 2000);
-  });
-};
-
-// ── UPDATE USD (เรียกหลัง price หรือ wallet โหลด) ────────────────────
-function btcfUpdateUSD(){
-  const bal = window._btcf_btcBal || 0;
-  if(!bal || !btcf_btcUSD) return;
-  const usd = bal * btcf_btcUSD;
-  btcfSetEl('btcf-statUSD',   '$'+btcfFmt(usd));
-  btcfSetEl('btcf-statBalUSD','≈ $'+btcfFmt(usd));
-  btcfSetEl('btcf-fundValueUSD', btcfFmtK(usd).replace('$','$'));
-  btcfSetEl('btcf-fundValueBTC', btcfFmt(bal,8)+' BTC');
-  btcfSetEl('btcf-fundBTCPrice','$'+btcfFmt(btcf_btcUSD));
-}
-
-// ── UPDATE PnL (24h) ─────────────────────────────────────────────────
-function btcfUpdatePnL(){
-  const bal = window._btcf_btcBal || 0;
-  if(!bal || !btcf_btcUSD || window._btcf_chgPct===undefined) return;
-  const pnlBtc = bal * window._btcf_chgPct;
-  const pnlUsd = bal * (window._btcf_chgUSD || 0);
-  const isPos  = pnlBtc >= 0, sign = isPos ? '+' : '';
-  btcfSetEl('btcf-statPnl',    sign+pnlBtc.toFixed(6)+' BTC', 'btcf-stat-val '+(isPos?'green':'red'));
-  btcfSetEl('btcf-statPnlUSD', sign+'$'+btcfFmt(Math.abs(pnlUsd)));
-}
-
-// ── LOAD PRICE — Bybit V5 → Kraken fallback ─────────────────────────
-async function btcfLoadPrice(){
-  try{
-    let price, chgPct, chgUSD;
-    try{
-      const d = await btcfPf('https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT');
-      const t = d.result && d.result.list && d.result.list[0];
-      if(!t) throw new Error('No data');
-      price  = parseFloat(t.lastPrice);
-      chgPct = parseFloat(t.price24hPcnt) * 100;
-      chgUSD = parseFloat(t.prevPrice24h) ? price - parseFloat(t.prevPrice24h) : 0;
-      btcfSetDot('btcf-srcPrice','ok');
-    }catch(e1){
-      const d = await btcfPf('https://api.kraken.com/0/public/Ticker?pair=XBTUSD');
-      const t = d.result && d.result['XXBTZUSD'];
-      if(!t) throw new Error('Kraken no data');
-      price  = parseFloat(t.c[0]);
-      const open = parseFloat(t.o);
-      chgPct = (price - open) / open * 100;
-      chgUSD = price - open;
-      btcfSetDot('btcf-srcPrice','warn');
-    }
-    btcf_btcUSD = price;
-    window._btcf_chgPct = chgPct / 100;
-    window._btcf_chgUSD = chgUSD;
-
-    btcfSetEl('btcf-btcPrice', '$'+btcfFmt(price));
-    const chgEl = document.getElementById('btcf-priceChange');
-    if(chgEl){
-      chgEl.textContent = (chgPct>=0?'+':'')+chgPct.toFixed(2)+'%';
-      chgEl.className   = 'btcf-price-change'+(chgPct<0?' neg':'');
-    }
-    btcfSetEl('btcf-fundBTCChg', (chgPct>=0?'+':'')+chgPct.toFixed(2)+'%',
-      'btcf-fund-mini-val '+(chgPct>=0?'green':'red'));
-
-    const now = new Date().toLocaleTimeString('th-TH');
-    btcfSetEl('btcf-lastUpdate',  now);
-    btcfSetEl('btcf-lastUpdate2', 'อัปเดต: '+now);
-
-    btcfSetEl('btcf-tk_btc',   '$'+btcfFmt(price));
-    btcfSetEl('btcf-tk_btc_c', (chgPct>=0?'+':'')+chgPct.toFixed(2)+'%',
-      'btcf-tk-chg '+(chgPct>=0?'up':'dn'));
-
-    btcfUpdateUSD(); btcfUpdatePnL();
-  }catch(e){
-    btcfSetEl('btcf-btcPrice','โหลดไม่ได้');
-    btcfSetDot('btcf-srcPrice','err');
-  }
-}
-
-// ── LOAD WALLET — blockchain.info → mempool.space ───────────────────
-async function btcfLoadWallet(){
-  try{
-    let bal, recv;
-    try{
-      const d = await btcfPf('https://blockchain.info/address/'+BTCF_ADDR+'?format=json&limit=5');
-      bal  = d.final_balance / BTCF_SAT;
-      recv = d.total_received / BTCF_SAT;
-      btcfSetDot('btcf-srcWallet','ok');
-    }catch(e1){
-      const d = await btcfPf('https://mempool.space/api/address/'+BTCF_ADDR);
-      bal  = (d.chain_stats.funded_txo_sum - d.chain_stats.spent_txo_sum) / BTCF_SAT;
-      recv = d.chain_stats.funded_txo_sum / BTCF_SAT;
-      btcfSetDot('btcf-srcWallet','warn');
-    }
-    window._btcf_btcBal = bal;
-    const balInt = Math.floor(bal), balDec = (bal-balInt).toFixed(8).slice(1);
-    btcfSetEl('btcf-statBal', balInt.toLocaleString('en-US')+balDec+' BTC');
-    const recvInt = Math.floor(recv), recvDec = (recv-recvInt).toFixed(4).slice(1);
-    btcfSetEl('btcf-statIn', recvInt.toLocaleString('en-US')+recvDec+' BTC');
-    btcfUpdateUSD(); btcfUpdatePnL();
-  }catch(e){
-    console.warn('[BTCF] Wallet load failed:',e.message);
-    btcfSetDot('btcf-srcWallet','err');
-  }
-}
-
-// ── LOAD CHART — Bybit Klines ────────────────────────────────────────
-async function btcfLoadChart(days){
-  btcf_currentDays = days;
-  const loading = document.getElementById('btcf-chartLoading');
-  const canvas  = document.getElementById('btcf-priceChart');
-  if(!loading || !canvas) return;
-  loading.style.display = 'flex'; canvas.style.display = 'none';
-  if(btcf_chartInst){ btcf_chartInst.destroy(); btcf_chartInst = null; }
-
-  if(typeof Chart === 'undefined'){
-    loading.innerHTML = '⚠ Chart.js ยังไม่โหลด — รอสักครู่...';
-    btcfSetDot('btcf-srcChart','warn');
-    return;
-  }
-  try{
-    const interval = days<=7 ? '240' : days<=14 ? '480' : 'D';
-    const limit    = days<=7 ? 42 : days<=14 ? 42 : 30;
-    const raw = await btcfPf('https://api.bybit.com/v5/market/kline?category=spot&symbol=BTCUSDT&interval='+interval+'&limit='+limit);
-    const d   = (raw.result && raw.result.list) || [];
-    if(!d.length) throw new Error('No kline data');
-    const sorted = [...d].reverse();
-    const labels = sorted.map(k=>{
-      const dt = new Date(parseInt(k[0]));
-      return days<=7
-        ? dt.toLocaleString('th-TH',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
-        : dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short'});
-    });
-    const closes = sorted.map(k=>parseFloat(k[4]));
-    const isUp   = closes[closes.length-1] >= closes[0];
-    const lineColor = isUp ? '#0ECB81' : '#F6465D';
-    const fillStart = isUp ? 'rgba(14,203,129,0.18)' : 'rgba(246,70,93,0.18)';
-
-    loading.style.display = 'none'; canvas.style.display = 'block';
-    canvas.height = 160;
-    const ctx = canvas.getContext('2d');
-    btcf_chartInst = new Chart(ctx, {
-      type:'line',
-      data:{labels, datasets:[{
-        data:closes, borderColor:lineColor, borderWidth:2, pointRadius:0, fill:true,
-        backgroundColor:(ctx2)=>{
-          const g = ctx2.chart.ctx.createLinearGradient(0,0,0,160);
-          g.addColorStop(0,fillStart); g.addColorStop(1,'rgba(0,0,0,0)'); return g;
-        }, tension:0.3
-      }]},
-      options:{
-        responsive:true, maintainAspectRatio:false, animation:{duration:500},
-        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'$'+btcfFmt(c.parsed.y)}}},
-        scales:{
-          x:{display:true, ticks:{color:'#848E9C',font:{size:9},maxTicksLimit:8,maxRotation:0}, grid:{color:'rgba(255,255,255,0.03)'}},
-          y:{display:true, position:'right', ticks:{color:'#848E9C',font:{size:9},callback:v=>'$'+(v/1000).toFixed(0)+'k'}, grid:{color:'rgba(255,255,255,0.04)'}}
-        }
-      }
-    });
-    btcfSetDot('btcf-srcChart','ok');
-  }catch(e){
-    if(loading) loading.innerHTML = '⚠ โหลดกราฟไม่ได้: '+e.message;
-    btcfSetDot('btcf-srcChart','err');
-  }
-}
-
-// ── SWITCH CHART TAB ─────────────────────────────────────────────────
-window.btcfSwitchTab = function(days, btn){
-  document.querySelectorAll('#ds-btcfund .btcf-tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  btcfLoadChart(days);
-};
-
-// ── LOAD MARKET — Bybit ETH/BNB/SOL + Dominance ─────────────────────
-async function btcfLoadMarket(){
-  try{
-    const [eth, bnb, sol] = await Promise.allSettled([
-      btcfPf('https://api.bybit.com/v5/market/tickers?category=spot&symbol=ETHUSDT'),
-      btcfPf('https://api.bybit.com/v5/market/tickers?category=spot&symbol=BNBUSDT'),
-      btcfPf('https://api.bybit.com/v5/market/tickers?category=spot&symbol=SOLUSDT'),
-    ]);
-    const setTk = (res, pId, cId) => {
-      if(res.status !== 'fulfilled') return;
-      const t = res.value.result && res.value.result.list && res.value.result.list[0];
-      if(!t) return;
-      const price = parseFloat(t.lastPrice);
-      const chg   = parseFloat(t.price24hPcnt) * 100;
-      btcfSetEl(pId, '$'+btcfFmt(price));
-      btcfSetEl(cId, (chg>=0?'+':'')+chg.toFixed(2)+'%', 'btcf-tk-chg '+(chg>=0?'up':'dn'));
-    };
-    setTk(eth, 'btcf-tk_eth','btcf-tk_eth_c');
-    setTk(bnb, 'btcf-tk_bnb','btcf-tk_bnb_c');
-    setTk(sol, 'btcf-tk_sol','btcf-tk_sol_c');
-  }catch(e){ console.warn('[BTCF] Ticker fail',e.message); }
-  // Dominance estimate
-  try{
-    const btcMcap = btcf_btcUSD * 19858000;
-    const ethRes  = await btcfPf('https://api.bybit.com/v5/market/tickers?category=spot&symbol=ETHUSDT');
-    const ethT    = ethRes.result && ethRes.result.list && ethRes.result.list[0];
-    const ethPrice= ethT ? parseFloat(ethT.lastPrice) : 0;
-    const ethMcap = ethPrice * 120180000;
-    const totalMcapEst = btcMcap / 0.58;
-    const btcD = btcMcap / totalMcapEst * 100;
-    const ethD = ethMcap / totalMcapEst * 100;
-    const othD = Math.max(0, 100 - btcD - ethD);
-    btcfSetEl('btcf-tk_mcap',   btcfFmtK(totalMcapEst));
-    btcfSetEl('btcf-tk_mcap_c', 'est.', 'btcf-tk-chg');
-    btcfSetEl('btcf-totalMcap', btcfFmtK(totalMcapEst));
-    btcfSetEl('btcf-totalVol',  'ประมาณการจาก BTC supply');
-    const dBTC = document.getElementById('btcf-domBTC');
-    const dETH = document.getElementById('btcf-domETH');
-    const dOTH = document.getElementById('btcf-domOther');
-    if(dBTC) dBTC.style.width = btcD.toFixed(1)+'%';
-    if(dETH) dETH.style.width = ethD.toFixed(1)+'%';
-    if(dOTH) dOTH.style.width = othD.toFixed(1)+'%';
-    btcfSetEl('btcf-domBTCPct',  'BTC '+btcD.toFixed(1)+'%');
-    btcfSetEl('btcf-domETHPct',  'ETH '+ethD.toFixed(1)+'%');
-    btcfSetEl('btcf-domOtherPct','Others '+othD.toFixed(1)+'%');
-  }catch(e){ console.warn('[BTCF] Dominance fail',e.message); }
-}
-
-// ── LOAD FEAR & GREED — alternative.me ──────────────────────────────
-async function btcfLoadFearGreed(){
-  try{
-    const d   = await btcfPf('https://api.alternative.me/fng/?limit=1&format=json');
-    const val = parseInt(d.data[0].value) || 50;
-    btcfRenderFG(val);
-  }catch(e){
-    const btcChg = window._btcf_chgPct ? window._btcf_chgPct * 100 : 0;
-    btcfRenderFG(Math.round(Math.min(100, Math.max(0, 50 + btcChg * 5))));
-  }
-}
-function btcfRenderFG(val){
-  btcfSetEl('btcf-fgVal', val);
-  const labels = ['Extreme Fear','Fear','Neutral','Greed','Extreme Greed'];
-  const colors = ['#F6465D','#FF8C00','#F0B90B','#0ECB81','#00B8A3'];
-  const idx = val<20?0:val<40?1:val<60?2:val<80?3:4;
-  btcfSetEl('btcf-fgLabel', labels[idx]);
-  const arcEl    = document.getElementById('btcf-fgArcFill');
-  const needleEl = document.getElementById('btcf-fgNeedle');
-  if(arcEl){
-    arcEl.style.borderColor = colors[idx]+' transparent transparent '+colors[idx];
-    arcEl.style.transform   = 'rotate('+(45+(val/100*180)-90)+'deg)';
-  }
-  if(needleEl){
-    const needleDeg = -90 + (val/100*180);
-    needleEl.style.background  = colors[idx];
-    needleEl.style.transform   = 'rotate('+needleDeg+'deg)';
-  }
-}
-
-// ── LOAD NETWORK — mempool.space ─────────────────────────────────────
-async function btcfLoadNetwork(){
-  try{
-    const [fees, stats, blocks] = await Promise.allSettled([
-      btcfPf('https://mempool.space/api/v1/fees/recommended'),
-      btcfPf('https://mempool.space/api/v1/mining/hashrate/3d'),
-      btcfPf('https://mempool.space/api/blocks/tip/height'),
-    ]);
-    btcfSetDot('btcf-srcNetwork','ok');
-    if(fees.status==='fulfilled'){
-      const f = fees.value;
-      btcfSetEl('btcf-netFee', f.fastestFee+' / '+f.halfHourFee+' / '+f.hourFee);
-    }
-    if(stats.status==='fulfilled' && stats.value.currentHashrate){
-      btcfSetEl('btcf-netHash', (stats.value.currentHashrate/1e18).toFixed(1)+' EH/s');
-    }
-    if(blocks.status==='fulfilled'){
-      const h = blocks.value;
-      btcfSetEl('btcf-netHeight', Number(h).toLocaleString('en-US'));
-      const HALVING_INTERVAL = 210000;
-      const nextHalving = Math.ceil(h/HALVING_INTERVAL) * HALVING_INTERVAL;
-      const blocksLeft  = nextHalving - h;
-      const estDays     = (blocksLeft*10/60/24).toFixed(0);
-      const estDate     = new Date(Date.now()+blocksLeft*10*60*1000)
-                          .toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
-      btcfSetEl('btcf-halvingBlocks',   Number(blocksLeft).toLocaleString('en-US'));
-      btcfSetEl('btcf-halvingEst',      'ประมาณ '+estDays+' วัน · '+estDate);
-      btcfSetEl('btcf-halvingCurrent',  'Block: '+Number(h).toLocaleString('en-US'));
-      btcfSetEl('btcf-halvingNext',     'Next: '+Number(nextHalving).toLocaleString('en-US'));
-      const prevHalving = nextHalving - HALVING_INTERVAL;
-      const pct = (h - prevHalving) / HALVING_INTERVAL * 100;
-      const fillEl = document.getElementById('btcf-halvingFill');
-      if(fillEl) fillEl.style.width = pct.toFixed(1)+'%';
-    }
-    try{
-      const mp = await btcfPf('https://mempool.space/api/mempool');
-      btcfSetEl('btcf-netUnconf',  Number(mp.count).toLocaleString('en-US'));
-      btcfSetEl('btcf-netMempool', btcfFmt(mp.vsize/1e6,1)+' MB');
-    }catch(e2){}
-    try{
-      const da = await btcfPf('https://mempool.space/api/v1/mining/difficulty-adjustments?interval=1d&limit=1');
-      if(da && da[0] && da[0].difficultyChange !== undefined){
-        btcfSetEl('btcf-netDiff', (da[0].difficultyChange>=0?'+':'')+da[0].difficultyChange.toFixed(2)+'%');
-      }
-    }catch(e3){}
-  }catch(e){
-    btcfSetDot('btcf-srcNetwork','err');
-    console.warn('[BTCF] Network fail:',e.message);
-  }
-}
-
-// ── LOAD FUND METRICS ────────────────────────────────────────────────
-async function btcfLoadFundMetrics(){
-  try{
-    const ATH_PRICE  = 109114;
-    const BTC_SUPPLY = 19858000;
-    const pct = (BTC_SUPPLY/21000000*100).toFixed(2);
-    btcfSetEl('btcf-mAth',    '$'+btcfFmt(ATH_PRICE));
-    btcfSetEl('btcf-mSupply', btcfFmt(BTC_SUPPLY,0)+' BTC');
-    btcfSetEl('btcf-halvingMined', btcfFmt(BTC_SUPPLY,0)+' BTC ('+pct+'%)');
-    if(btcf_btcUSD){
-      const fromAth = (btcf_btcUSD - ATH_PRICE) / ATH_PRICE * 100;
-      btcfSetEl('btcf-mFromAth', (fromAth>=0?'+':'')+fromAth.toFixed(2)+'%');
-      const mFromEl = document.getElementById('btcf-mFromAth');
-      if(mFromEl) mFromEl.style.color = fromAth>=0 ? '#0ECB81' : '#F6465D';
-      btcfSetEl('btcf-mAthUSD', '$'+btcfFmtK(ATH_PRICE*(window._btcf_btcBal||4157.57)).replace('$',''));
-    }
-    // 7D change
-    const k7 = await btcfPf('https://api.bybit.com/v5/market/kline?category=spot&symbol=BTCUSDT&interval=D&limit=8');
-    if(k7.result && k7.result.list && k7.result.list.length>=2){
-      const list = k7.result.list;
-      const now7 = parseFloat(list[0][4]), ago7 = parseFloat(list[list.length-1][4]);
-      const chg7 = (now7-ago7)/ago7*100;
-      btcfSetEl('btcf-m7d', (chg7>=0?'+':'')+chg7.toFixed(2)+'%');
-      const m7El = document.getElementById('btcf-m7d');
-      if(m7El) m7El.style.color = chg7>=0 ? '#0ECB81' : '#F6465D';
-    }
-    // 30D change
-    const k30 = await btcfPf('https://api.bybit.com/v5/market/kline?category=spot&symbol=BTCUSDT&interval=D&limit=31');
-    if(k30.result && k30.result.list && k30.result.list.length>=2){
-      const list = k30.result.list;
-      const now30= parseFloat(list[0][4]), ago30=parseFloat(list[list.length-1][4]);
-      const chg30= (now30-ago30)/ago30*100;
-      btcfSetEl('btcf-m30d', (chg30>=0?'+':'')+chg30.toFixed(2)+'%');
-      const m30El = document.getElementById('btcf-m30d');
-      if(m30El) m30El.style.color = chg30>=0 ? '#0ECB81' : '#F6465D';
-    }
-  }catch(e){ console.warn('[BTCF] Fund metrics fail:',e.message); }
-}
-
-// ── LAZY-LOAD CHART.JS แล้วเริ่ม sequence ──────────────────────────
-function btcfLoadChartJS(cb){
-  if(typeof Chart !== 'undefined'){ cb(); return; }
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-  s.onload = cb;
-  s.onerror = () => {
-    const el = document.getElementById('btcf-chartLoading');
-    if(el) el.innerHTML = '⚠ โหลด Chart.js ไม่ได้';
-    cb(); // เรียก cb ต่อเพื่อไม่ block ส่วนอื่น
-  };
-  document.head.appendChild(s);
-}
-
-// ── CLEAR INTERVALS (เมื่อออกจาก tab) ───────────────────────────────
-function btcfClearIntervals(){
-  btcf_intervals.forEach(id=>clearInterval(id));
-  btcf_intervals = [];
-}
-
-// ── INIT (เรียกครั้งแรกเมื่อกด tab) ────────────────────────────────
-window.initBtcFund = function(){
-  // ป้องกัน re-init ถ้า interval ทำงานอยู่แล้ว
-  if(btcf_initialized){ return; }
-  btcf_initialized = true;
-
-  btcfLoadChartJS(()=>{
-    // sequential: price ก่อน → wallet ใช้ราคาคำนวณ USD
-    btcfLoadPrice()
-      .then(()=>{
-        btcfLoadWallet();
-        btcfLoadFundMetrics();
-        btcfLoadFearGreed();
-      });
-    btcfLoadChart(7);
-    btcfLoadMarket();
-    btcfLoadNetwork();
-
-    // refresh intervals
-    btcf_intervals.push(
-      setInterval(()=>{ btcfLoadPrice().then(()=>{ btcfLoadWallet(); btcfUpdatePnL(); }); }, 60000),
-      setInterval(()=>{ btcfLoadMarket(); btcfLoadFearGreed(); btcfLoadFundMetrics(); }, 300000),
-      setInterval(()=>{ btcfLoadNetwork(); }, 120000)
-    );
-  });
-};
-
-})();
 </script>
 </body>
 </html>
