@@ -2124,7 +2124,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <option value="MP Refund">MP Refund (คืนเงิน)</option>
           <option value="MP Sale">MP Sale (รับจากการขาย)</option>
           <option value="Seller Cashout">Seller Cashout</option>
-          <option value="Funding">Funding Free</option>
+          <option value="Funding Fee">Funding Fee</option>
           <option value="Commission">Commission</option>
         </select>
         <input type="date" class="fi" style="width:140px;" id="thdf" onchange="initTXH()">
@@ -3907,11 +3907,37 @@ function renderWTX(){
     '<div style="text-align:center;color:var(--t3);padding:24px;font-size:13px;">ไม่มีรายการ</div>';
   renderPag('wpag',Math.ceil(txs.length/TX_PP),txPage,p=>{txPage=p;renderWTX();});
 }
+// [v26 FIX] แปลง tx_type ดิบจาก DB → ชื่อที่อ่านออก (ทั้ง Transactions + MP_Transactions)
+function _txTypeLabel(rawType) {
+  const map = {
+    // MP_Transactions types
+    'mp buy':          'MP Buy (ซื้อสินค้า)',
+    'mp topup':        'MP Topup (โอนเข้า MP)',
+    'mp withdraw':     'MP Withdraw (โอนกลับ TCC)',
+    'mp deposit':      'MP Deposit (Admin อนุมัติ)',
+    'mp refund':       'MP Refund (คืนเงิน)',
+    'mp sale':         'MP Sale (รับจากการขาย)',
+    'seller cashout':  'Seller Cashout (ถอน Seller)',
+    'funding fee':     'Funding Fee',
+    'ff payout':       'Funding Fee',
+    // Transactions sheet types (TCC-only)
+    'deposit':         'Deposit (เติมเงิน)',
+    'withdraw':        'Withdraw (ถอน)',
+    'team_commission': 'Commission',
+    'market_fee':      'Market Fee',
+  };
+  const lc = String(rawType||'').toLowerCase().trim();
+  // ตรวจ payout_*d (เช่น Payout_45d, Payout_undefinedd)
+  if (lc.startsWith('payout_')) return 'Seller Payout';
+  return map[lc] || rawType || '—';
+}
+
 function txRow(t){
   const plus=String(t.amt).startsWith('+'),minus=String(t.amt).startsWith('-');
   const ac=plus?'tok':minus?'terr':'tg';
   const sb=t.status==='success'?'<span class="bdg bdg-ok">✓</span>':t.status==='pending'?'<span class="bdg bdg-warn">⏳</span>':'<span class="bdg bdg-err">✗</span>';
-  return `<tr><td class="tsm tm">${t.date}</td><td><span class="bdg bdg-muted">${t.type}</span></td><td class="tsm">${t.desc}</td><td class="mono ${ac}" style="font-weight:600;">${t.amt} USDT</td><td>${sb}</td></tr>`;
+  const lbl = _txTypeLabel(t.type);
+  return `<tr><td class="tsm tm">${t.date}</td><td><span class="bdg bdg-muted">${lbl}</span></td><td class="tsm">${t.desc}</td><td class="mono ${ac}" style="font-weight:600;">${t.amt} USDT</td><td>${sb}</td></tr>`;
 }
 // [v24] Mobile card builder — ใช้ร่วมกับ renderWTX() และ _renderTXH()
 function txMobCard(t, src){
@@ -3928,12 +3954,13 @@ function txMobCard(t, src){
         ? '<span class="bdg bdg-muted" style="font-size:9px;">MP</span>'
         : '<span class="bdg bdg-muted" style="font-size:9px;">TCC</span>')
     : '';
+  const lbl = _txTypeLabel(t.type);
   // encode data สำหรับ popup
-  const dataAttr = `data-txid="${_esc(t.id)}" data-txdate="${_esc(t.date)}" data-txtype="${_esc(t.type)}" data-txdesc="${_esc(t.desc)}" data-txamt="${_esc(t.amt)}" data-txstatus="${_esc(t.status)}" data-txsym="${_esc(t.symbol||'USDT')}" data-txsrc="${src}"`;
+  const dataAttr = `data-txid="${_esc(t.id)}" data-txdate="${_esc(t.date)}" data-txtype="${_esc(lbl)}" data-txdesc="${_esc(t.desc)}" data-txamt="${_esc(t.amt)}" data-txstatus="${_esc(t.status)}" data-txsym="${_esc(t.symbol||'USDT')}" data-txsrc="${src}"`;
   return `<div class="tx-mob-card" onclick="openTxDetail(this)" ${dataAttr}>
     <div class="tx-mob-left">
       <div class="tx-mob-type">
-        <span class="bdg bdg-muted" style="font-size:11px;">${_esc(t.type)}</span>
+        <span class="bdg bdg-muted" style="font-size:11px;">${_esc(lbl)}</span>
         ${srcBadge}
       </div>
       <div class="tx-mob-desc" title="${_esc(t.desc)}">${_esc(t.desc)||'—'}</div>
@@ -6384,10 +6411,19 @@ function _applyWalletData(txs, mpWalRes, mpTxs) {
     const myUid      = String(SESSION.uid      || '').trim();
     const myMemId    = String(SESSION.member_id|| '').trim();
     const myBnbId    = String(SESSION.bnb_id   || '').trim();
+    // [v26 FIX] TCC_ONLY_TYPES — ประเภทที่มีเฉพาะใน Transactions sheet เท่านั้น
+    // ไม่ log ซ้ำใน MP_Transactions → แสดงได้โดยไม่ซ้ำ
+    // ประเภทที่ถูก log ทั้ง 2 ที่ (Purchase→MP Buy, Refund→MP Refund,
+    // Payout_*d→MP Sale, Funding_Free→Funding Fee) → ตัดออก
+    // เพราะ MP_Transactions มีครบแล้ว ไม่ต้องแสดงซ้ำ
+    const TCC_ONLY_TYPES = ['deposit', 'withdraw', 'team_commission', 'market_fee'];
     D.txs = txs
       .filter(t => {
-        const rowId = String(t.member_id || t.uid || '').trim();
-        return rowId && (rowId === myUid || rowId === myMemId || rowId === myBnbId);
+        const rowId  = String(t.member_id || t.uid || '').trim();
+        const typeLC = String(t.tx_type || t.type || '').toLowerCase();
+        const isMyTx    = rowId && (rowId === myUid || rowId === myMemId || rowId === myBnbId);
+        const isTccOnly = TCC_ONLY_TYPES.some(x => typeLC.includes(x));
+        return isMyTx && isTccOnly;
       })
       .map(t => {
         const raw   = parseFloat(t.amount_usdt ?? t.amount) || 0;
@@ -6400,7 +6436,7 @@ function _applyWalletData(txs, mpWalRes, mpTxs) {
                  type: t.tx_type || t.type || '', desc: t.description || t.note || '',
                  amt: fmt, status: st, symbol: t.network || t.symbol || '' };
       });
-    console.log('[initWallet v21] D.txs mapped:', D.txs.length, 'rows (myUid='+myUid+', myMemId='+myMemId+')');
+    console.log('[initWallet v26] D.txs (TCC-only):', D.txs.length, 'rows (myUid='+myUid+', myMemId='+myMemId+')');
   } else {
     D.txs = D.txs || [];
   }
@@ -6856,10 +6892,11 @@ async function doSellerWithdraw() {
 }
 
 function exportCSV(){
-  const rows = [['TX ID','วันที่','ประเภท','รายละเอียด','จำนวน','สถานะ']];
-  // Export TCC Transactions
+  const rows = [['TX ID','วันที่','ประเภท','รายละเอียด','จำนวน','สถานะ','ระบบ']];
+  // [v26 FIX] Export เฉพาะ D.txs ที่ผ่านการกรอง TCC_ONLY แล้ว
+  // (D.txs ถูก filter ใน _applyWalletData แล้ว จึงไม่มีรายการซ้ำ)
   (D.txs||[]).forEach(t=>rows.push([t.id,t.date,t.type,t.desc,t.amt,t.status,'TCC']));
-  // Export MP Transactions
+  // Export MP Transactions ทั้งหมด (MP Buy, MP Topup, MP Withdraw, MP Sale, Funding Fee ฯลฯ)
   (D.mpTxs||[]).forEach(t=>rows.push([t.id,t.date,t.type,t.desc,t.amt,t.status,'MP']));
   const csv = rows.map(r=>r.join(',')).join('\n');
   const a = document.createElement('a');
@@ -7822,12 +7859,21 @@ async function shopCheckout(){
     let successCount = 0;
     for(const item of shopCart){
       for(let q = 0; q < item.qty; q++){
+        // [v26 FIX] เพิ่ม buyer_id / amount / product_name / seller_id
+        // ให้ GAS handler ทั้ง purchaseProduct (alias) และ placeOrder
+        // รับ field ได้ถูกต้องครบถ้วน
         const res = await apiPost({
-          action:     'purchaseProduct',
-          member_id:  SESSION.member_id,
-          product_id: item.prod.id,
-          ff_plan:    'A',
-          amount_usdt: item.prod.price,
+          action:       'purchaseProduct',
+          member_id:    SESSION.member_id,
+          uid:          SESSION.uid || SESSION.member_id,
+          buyer_id:     SESSION.uid || SESSION.member_id,
+          product_id:   item.prod.id,
+          product_name: item.prod.name || '',
+          seller_id:    item.prod.seller || '',
+          ff_plan:      item.prod.ff_plan || 'A',
+          amount_usdt:  item.prod.price,
+          amount:       item.prod.price,
+          payout_option: item.prod.po ? String(item.prod.po) : '45',
         });
         if(res?.success || res?.order_id){ successCount++; }
         else {
@@ -7842,8 +7888,11 @@ async function shopCheckout(){
     const newBal = mpBal - total;
     SESSION.customer_wallet_usdt = newBal;
     D.balance = newBal;
-    // invalidate wallet cache
-    delete _apiCache['mpwal_'  + (SESSION.uid||SESSION.member_id)];
+    // [v26 FIX] invalidate wallet + MP Transactions cache ให้ครบ
+    // เพื่อให้ประวัติธุรกรรมโหลดใหม่และแสดง MP Buy ที่เพิ่งเกิดขึ้น
+    const _cacheUid = SESSION.uid || SESSION.member_id;
+    delete _apiCache['mpwal_'  + _cacheUid];
+    delete _apiCache['mptxs_' + _cacheUid];
     delete _apiCache['member_' + SESSION.member_id];
     delete _apiCache['orders_' + SESSION.uid];  // [v18 FIX] key เปลี่ยนเป็น uid แล้ว
 
