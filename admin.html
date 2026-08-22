@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<!-- TCC Admin Panel v22
-     v22 FIX 1 — DA.products map เพิ่ม ff_rate, ff_amount, ff_selected_plan, ff_plan_config
-                  (แก้ Modal แสดง FF = 0 ตลอด)
+<!-- TCC Admin Panel v23
+     v23 NEW  — เพิ่มระบบ Admin Note ถึงเจ้าของสินค้า
+                  • prod-reject-form: textarea id="prod-reject-note" (บังคับกรอก — ส่ง Notification พร้อมข้อความ)
+                  • prod-approve-form: textarea id="prod-approve-note" (optional — แนบพร้อมแจ้งอนุมัติ)
+                  • Modal แสดงโน้ตเดิมของ Admin (กรณีเคย reject แล้ว Seller ส่งใหม่)
+                  • DA.products map เพิ่ม admin_note
+                  • async approveProd/rejectProd ส่ง admin_note ไปกับ payload
+     v22 FIX 1 — DA.products map ff_rate, ff_amount, ff_selected_plan, ff_plan_config
      v22 FIX 2 — async approveProd() อ่าน FF Override จาก adm-ff-rate/adm-ff-amount
-                  (ฟังก์ชัน async ที่ override เดิมหาย FF Override logic)
      v22 FIX 5 — ลบ dead code function approveProd()/rejectProd() เวอร์ชันเก่า
-                  (ถูก override โดย async version อยู่แล้ว — ลดความสับสน)
 -->
 <html lang="th">
 <head>
@@ -502,10 +505,32 @@ textarea.fi{resize:vertical;min-height:70px;}
     <div class="mtitle">📦 ตรวจสอบสินค้า</div>
     <div id="prod-modal-info"></div>
     <div class="d"></div>
+    <!-- [v23] Reject form — เหตุผล + โน้ตถึง Seller -->
     <div id="prod-reject-form" style="display:none;">
       <div class="fg"><label class="fl">เหตุผลการปฏิเสธ</label>
-        <select class="fi" id="prod-reject-reason"><option>สินค้าต้องห้าม</option><option>ข้อมูลไม่ครบ</option><option>รูปภาพไม่ชัด</option><option>ราคาไม่เหมาะสม</option><option>อื่นๆ</option></select></div>
-      <div class="fg"><label class="fl">หมายเหตุ</label><textarea class="fi" placeholder="แจ้ง Seller..."></textarea></div>
+        <select class="fi" id="prod-reject-reason">
+          <option>สินค้าต้องห้าม</option>
+          <option>ข้อมูลไม่ครบ</option>
+          <option>รูปภาพไม่ชัด</option>
+          <option>ราคาไม่เหมาะสม</option>
+          <option>อื่นๆ</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">📝 โน้ตถึงเจ้าของสินค้า <span style="color:var(--t2);font-weight:400;font-size:11px;">(ส่งแจ้งเตือนถึง Seller โดยตรง)</span></label>
+        <textarea class="fi" id="prod-reject-note" rows="3"
+          placeholder="เช่น รูปภาพไม่ชัดเจน กรุณาอัปโหลดใหม่ / ราคาสูงเกินมาตรฐาน กรุณาปรับราคา / โปรดเพิ่มรายละเอียดสินค้าให้ครบถ้วน..."
+          style="resize:vertical;min-height:72px;"></textarea>
+      </div>
+    </div>
+    <!-- [v23] Approve-note form — โน้ตแนบเมื่ออนุมัติ (optional) -->
+    <div id="prod-approve-form" style="display:none;">
+      <div class="fg">
+        <label class="fl">📝 โน้ตถึงเจ้าของสินค้า <span style="color:var(--t2);font-weight:400;font-size:11px;">(ไม่บังคับ — ส่งพร้อมการแจ้งอนุมัติ)</span></label>
+        <textarea class="fi" id="prod-approve-note" rows="2"
+          placeholder="เช่น สินค้าผ่านการตรวจสอบแล้ว ขอบคุณที่ปฏิบัติตามเงื่อนไข / แนะนำให้เพิ่มรูปภาพเพื่อเพิ่มยอดขาย..."
+          style="resize:vertical;min-height:56px;"></textarea>
+      </div>
     </div>
     <div class="fc gap8 mt4" id="prod-actions"></div>
   </div>
@@ -1457,12 +1482,42 @@ function openProdModal(pid) {
         </div>
       </div>
       <div style="font-size:10px;color:var(--t2);margin-top:6px;">* ถ้าไม่แก้ไข ระบบใช้ค่าที่ Seller กำหนดไว้ · FF จ่ายจาก TCC Reserve Fund</div>
-    </div>`;
-  const rf = document.getElementById('prod-reject-form');
-  rf.style.display = 'none';
+    </div>
+    ${p.admin_note ? `
+    <!-- [v23] แสดงโน้ตเดิมที่ Admin เคยส่ง (กรณีเคย reject แล้ว Seller แก้ไขส่งใหม่) -->
+    <div style="border-top:1px solid var(--br);margin-top:12px;padding-top:12px;">
+      <div style="font-size:12px;font-weight:700;color:var(--warn,#faad14);margin-bottom:6px;">📝 โน้ตจาก Admin (ครั้งก่อน)</div>
+      <div style="font-size:12px;color:var(--t1);background:var(--bg2,rgba(255,255,255,.05));border:1px solid var(--br);border-radius:6px;padding:8px 10px;white-space:pre-line;line-height:1.6;">${p.admin_note.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    </div>` : ''}`;
+  // [v23] reset ทั้งสอง form + clear note fields ทุกครั้งที่เปิด modal
+  document.getElementById('prod-reject-form').style.display  = 'none';
+  document.getElementById('prod-approve-form').style.display = 'none';
+  const rejNote = document.getElementById('prod-reject-note');
+  const appNote = document.getElementById('prod-approve-note');
+  if (rejNote) rejNote.value = '';
+  if (appNote) appNote.value = '';
+  // [v23] ปุ่ม actions ใหม่ — แยก flow อนุมัติ/ปฏิเสธชัดเจน
   document.getElementById('prod-actions').innerHTML = `
-    <button class="btn btn-ok w100" onclick="approveProd('${p.id}')">✓ อนุมัติสินค้า</button>
-    <button class="btn btn-err w100" onclick="document.getElementById('prod-reject-form').style.display='';this.parentElement.innerHTML='<button class=\\'btn btn-ghost w100\\' onclick=\\'closeM(\\'m-prod\\')\\'>ยกเลิก</button><button class=\\'btn btn-err w100\\' onclick=\\'rejectProd(\\'${p.id}\\')\\'>ยืนยันปฏิเสธ</button>'">✗ ปฏิเสธ</button>`;
+    <button class="btn btn-ok w100" onclick="
+      const af=document.getElementById('prod-approve-form');
+      const rf=document.getElementById('prod-reject-form');
+      rf.style.display='none';
+      if(af.style.display==='none'){
+        af.style.display='';
+        this.textContent='✓ ยืนยันอนุมัติสินค้า';
+        this.setAttribute('onclick',\`approveProd('${p.id}')\`);
+      }
+    ">✓ อนุมัติสินค้า</button>
+    <button class="btn btn-err w100" onclick="
+      const rf=document.getElementById('prod-reject-form');
+      const af=document.getElementById('prod-approve-form');
+      af.style.display='none';
+      if(rf.style.display==='none'){
+        rf.style.display='';
+        this.textContent='✕ ยืนยันปฏิเสธสินค้า';
+        this.setAttribute('onclick',\`rejectProd('${p.id}')\`);
+      }
+    ">✗ ปฏิเสธ</button>`;
   openM('m-prod');
 }
 // [v22 FIX 5] ลบ function approveProd / rejectProd เวอร์ชันเก่าออก (dead code)
@@ -2388,7 +2443,9 @@ initProds = async function(){
         ff_rate:        Number(p.ff_rate||0),
         ff_amount:      Number(p.ff_amount||0),
         ff_selected_plan: p.ff_selected_plan||'A',
-        ff_plan_config: p.ff_plan_config||''
+        ff_plan_config: p.ff_plan_config||'',
+        // [v23] admin_note — โน้ตที่ Admin เคยส่งถึง Seller (แสดงใน Modal ถ้ามี)
+        admin_note:     p.admin_note||''
       }));
       filterProds('all',null);
     } else {
@@ -2403,12 +2460,14 @@ approveProd = async function(pid){
   // [v22 FIX 2] อ่าน FF Override จาก modal fields (เหมือน function เก่า บรรทัด 1460)
   const ffRateOverride   = parseFloat(document.getElementById('adm-ff-rate')?.value);
   const ffAmountOverride = parseFloat(document.getElementById('adm-ff-amount')?.value);
+  // [v23 FIX C] อ่าน approve-note → ส่งเป็น admin_note ถึง Seller
+  const approveNote = (document.getElementById('prod-approve-note')?.value||'').trim();
   showLoad('กำลังอนุมัติ...');
   try{
     const payload={action:'approveProduct',product_id:p.product_id||pid,status:'approved',approved_by:ADMIN.admin_id,admin_id:ADMIN.admin_id};
-    // ส่ง FF Override เฉพาะเมื่อมีค่าจริง (ไม่ส่งถ้า NaN)
     if(!isNaN(ffRateOverride))   payload.ff_rate   = ffRateOverride;
     if(!isNaN(ffAmountOverride)) payload.ff_amount = ffAmountOverride;
+    if(approveNote) payload.admin_note = approveNote;  // [v23] โน้ตถึง Seller (optional)
     const res=await apiPost(payload);
     hideLoad();
     if(res.success){p.status='approved';closeM('m-prod');filterProds('all',null);showToast('✅ อนุมัติสินค้าแล้ว!');}
@@ -2418,10 +2477,13 @@ approveProd = async function(pid){
 rejectProd = async function(pid){
   if(!ADMIN)return;
   const p=DA.products.find(x=>x.id===pid);if(!p)return;
-  const reason=document.getElementById('prod-reject-reason')?.value||'';
+  const reason   = document.getElementById('prod-reject-reason')?.value||'';
+  // [v23 FIX C] อ่าน reject-note → ส่งเป็น admin_note ถึง Seller (บังคับมีข้อความ)
+  const rejectNote = (document.getElementById('prod-reject-note')?.value||'').trim();
+  if(!rejectNote){ showToast('⚠️ กรุณาระบุโน้ตถึงเจ้าของสินค้า','warn'); return; }
   showLoad('กำลังปฏิเสธ...');
   try{
-    const res=await apiPost({action:'approveProduct',product_id:p.product_id||pid,status:'rejected',reason,approved_by:ADMIN.admin_id});
+    const res=await apiPost({action:'approveProduct',product_id:p.product_id||pid,status:'rejected',reason,admin_note:rejectNote,approved_by:ADMIN.admin_id});
     hideLoad();
     if(res.success){p.status='rejected';closeM('m-prod');filterProds('all',null);showToast('❌ ปฏิเสธสินค้าแล้ว');}
     else showToast(res.error||'ไม่สำเร็จ','err');
