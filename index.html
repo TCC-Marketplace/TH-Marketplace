@@ -5402,6 +5402,11 @@ async function submitKYC(){
     hideLoad();
     if(res.success){
       SESSION.kyc_status='pending';
+      // [v43 FIX] เก็บข้อมูลส่วนตัวที่เพิ่งยื่นไว้ใน SESSION ด้วย
+      // เพื่อให้ kyc-name/kyc-doc/kyc-nat แสดงทันทีใน profile โดยไม่ต้อง reload
+      SESSION.full_name   = _kycData.fullName;
+      SESSION.id_number   = _kycData.idNumber;
+      SESSION.nationality = _kycData.nationality;
       saveSession(SESSION);
       // [v43 FIX] KYC ใช้ Page (#p-kyc-wizard) ไม่ใช่ Modal — ไม่มี id="m-kyc" → closeM() จะ throw null.classList
       // แก้: ใช้ go('profile') เพื่อ navigate กลับไปหน้า profile แทน
@@ -6502,6 +6507,11 @@ async function loadSession(){
       if(m.ff_rights != null)            SESSION.ff_rights            = Number(m.ff_rights);
       if(m.ff_rights_status)             SESSION.ff_rights_status     = m.ff_rights_status;
       if(m.customer_wallet_usdt != null) SESSION.customer_wallet_usdt = Number(m.customer_wallet_usdt);
+      // [v43 FIX] copy KYC personal fields จาก Members sheet → SESSION เพื่อให้ updateAuthUI() แสดงใน profile
+      if(m.kyc_status)   SESSION.kyc_status   = m.kyc_status;
+      if(m.full_name)    SESSION.full_name     = m.full_name;
+      if(m.id_number)    SESSION.id_number     = m.id_number;
+      if(m.nationality)  SESSION.nationality   = m.nationality;
       D.rights        = Number(SESSION.ff_rights || 0);
       D.rights_status = SESSION.ff_rights_status || 'active';
       D.balance       = Number(SESSION.customer_wallet_usdt || 0);
@@ -6657,6 +6667,20 @@ function updateAuthUI(){
         kycLbl.textContent = 'ยังไม่ได้ยืนยัน';
         if(kycDate) kycDate.textContent = '';
       }
+      // [v43 FIX] แสดง full_name / เอกสาร / nationality ใน kyc-detail panel
+      // แสดงเมื่อ pending หรือ verified เท่านั้น (มีข้อมูลแล้ว)
+      const kycNameEl = document.getElementById('kyc-name');
+      const kycDocEl  = document.getElementById('kyc-doc');
+      const kycNatEl  = document.getElementById('kyc-nat');
+      if(ks === 'pending' || ks === 'verified'){
+        if(kycNameEl) kycNameEl.textContent = SESSION.full_name   || '—';
+        if(kycDocEl)  kycDocEl.textContent  = SESSION.id_number   ? 'บัตรประชาชน / Passport' : '—';
+        if(kycNatEl)  kycNatEl.textContent  = SESSION.nationality || '—';
+      } else {
+        if(kycNameEl) kycNameEl.textContent = '—';
+        if(kycDocEl)  kycDocEl.textContent  = '—';
+        if(kycNatEl)  kycNatEl.textContent  = '—';
+      }
     }
     renderNav();
     if(typeof bnUpdateRole==='function') bnUpdateRole();
@@ -6730,6 +6754,13 @@ function updateAuthUI(){
     if(kycIco)  { kycIco.textContent = '❓'; }
     if(kycLbl)  { kycLbl.textContent = '—'; kycLbl.style.color = 'var(--t3)'; }
     if(kycDate) { kycDate.textContent = '—'; }
+    // [v43 FIX] reset kyc detail fields on logout
+    const kycNameElG = document.getElementById('kyc-name');
+    const kycDocElG  = document.getElementById('kyc-doc');
+    const kycNatElG  = document.getElementById('kyc-nat');
+    if(kycNameElG) kycNameElG.textContent = '—';
+    if(kycDocElG)  kycDocElG.textContent  = '—';
+    if(kycNatElG)  kycNatElG.textContent  = '—';
     if(typeof bnUpdateRole==='function') bnUpdateRole();
     // ── toggle home sections ──
     toggleHomeSections();
