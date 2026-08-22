@@ -4,6 +4,10 @@
                   • initKYC .filter() mid: String().trim()
                   • initKYC .map()    mid: String().trim() → fixes k.id type so find() works
                   • KYC_Documents filter already used String() — now consistent
+     v26 FIX2 — KYC Modal แสดงข้อมูลผิด field (email label แสดงเบอร์โทร, ไม่มีชื่อจริง)
+                  • DA.kyc map: เก็บ phone/email แยก (m.phone, m.email)
+                  • openKYCModal: แสดง ชื่อจริง / เบอร์โทร / Email ถูก field
+                  • filterKYC table: แสดง full_name || phone || name
 <!-- TCC Admin Panel v23
      v23 NEW  — เพิ่มระบบ Admin Note ถึงเจ้าของสินค้า
                   • prod-reject-form: textarea id="prod-reject-note" (บังคับกรอก — ส่ง Notification พร้อมข้อความ)
@@ -1242,9 +1246,10 @@ function initKYC() { filterKYC(); }
 function filterKYC() {
   const f = document.getElementById('kyc-status-f').value;
   const items = f ? DA.kyc.filter(k => k.status === f) : DA.kyc;
+  // [v26 FIX] แสดงชื่อจริง (ถ้ามี) หรือ phone แทนใน column ชื่อ
   document.getElementById('kyc-table').innerHTML = items.map(k => `<tr>
     <td class="mono tg txs">${k.uid}</td>
-    <td>${k.name}</td>
+    <td>${k.full_name || k.phone || k.name || '-'}</td>
     <td><span class="bdg bdg-muted">${k.doc}</span></td>
     <td class="tsm tm">${k.submitted}</td>
     <td>${kycBdg(k.status)}</td>
@@ -1256,10 +1261,14 @@ function filterKYC() {
 function openKYCModal(kid) {
   const k = DA.kyc.find(x => x.id === kid); if (!k) return;
   document.getElementById('kyc-modal-title').textContent = `🪪 ตรวจสอบ KYC — ${k.uid}`;
+  // [v26 FIX] แสดง phone/email/ชื่อจริงถูก field
   document.getElementById('kyc-modal-info').innerHTML = `
     <div class="fc btwn mb2"><span class="tm">UID</span><span class="mono tg">${k.uid}</span></div>
-    <div class="fc btwn mb2"><span class="tm">Email</span><span>${k.name}</span></div>
-    ${k.full_name?`<div class="fc btwn mb2"><span class="tm">ชื่อจริง</span><span>${k.full_name}</span></div>`:''}
+    ${k.full_name
+      ? `<div class="fc btwn mb2"><span class="tm">ชื่อจริง</span><span>${k.full_name}</span></div>`
+      : `<div class="fc btwn mb2"><span class="tm">ชื่อ / ID</span><span class="tm tsm">ยังไม่ระบุ</span></div>`}
+    ${k.phone?`<div class="fc btwn mb2"><span class="tm">เบอร์โทร</span><span>${k.phone}</span></div>`:''}
+    ${k.email?`<div class="fc btwn mb2"><span class="tm">Email</span><span>${k.email}</span></div>`:''}
     ${k.id_number?`<div class="fc btwn mb2"><span class="tm">เลขบัตร</span><span class="mono">${k.id_number}</span></div>`:''}
     <div class="fc btwn mb2"><span class="tm">ส่งเมื่อ</span><span>${k.submitted}</span></div>
     <div class="fc btwn"><span class="tm">สถานะ</span><span>${kycBdg(k.status)}</span></div>`;
@@ -2334,7 +2343,10 @@ initKYC = async function(){
         })
         .map(m=>{
           const mid = String(m.member_id || m.member_uid || '').trim(); // [v26 FIX] normalize to string — GAS returns numbers
-          const displayName = m.email || m.phone || mid;
+          // [v26 FIX] แยก phone/email ให้ถูกต้อง — Members sheet จริงมี col phone + col email แยกกัน
+          const memberPhone = String(m.phone || '').trim();
+          const memberEmail = String(m.email || '').trim();
+          const displayName = memberEmail || memberPhone || mid;
           // [v25 FIX] filter 4 rows ของ member แล้วหา URL ตาม doc_type (id_card/id_back/selfie/address)
           const memberDocs = Array.isArray(kycDocs)
             ? kycDocs.filter(d => String(d.member_id||'').trim() === mid)
@@ -2345,8 +2357,8 @@ initKYC = async function(){
           const docSelf = getDoc('selfie');
           const docAddr = getDoc('address');
           // หา full_name / id_number จาก Members sheet โดยตรง
-          const fullName  = m.full_name  || '';
-          const idNumber  = m.id_number  || '';
+          const fullName  = String(m.full_name  || '').trim();
+          const idNumber  = String(m.id_number  || '').trim();
           // submitted_at จากแถวแรกที่เจอ (ทุก row มีเวลาเดียวกัน)
           const submittedAt = memberDocs.length > 0
             ? fmtDate(memberDocs[0].submitted_at, 10)
@@ -2355,6 +2367,8 @@ initKYC = async function(){
           return {
             id:mid, uid:mid,
             name: fullName || displayName,
+            phone: memberPhone,   // [v26 FIX] เก็บ phone แยก
+            email: memberEmail,   // [v26 FIX] เก็บ email แยก
             doc: hasAnyDoc ? (docId?.doc_url ? 'มีเอกสาร' : 'รอตรวจสอบ') : 'ยังไม่ส่ง',
             submitted: submittedAt,
             status: m.kyc_status, member_id: mid,
