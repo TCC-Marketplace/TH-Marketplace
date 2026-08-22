@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!-- TCC Admin Panel v26
+     v26 FIX  — KYC openKYCModal: normalize member_id to String (GAS returns number → === failed)
+                  • initKYC .filter() mid: String().trim()
+                  • initKYC .map()    mid: String().trim() → fixes k.id type so find() works
+                  • KYC_Documents filter already used String() — now consistent
 <!-- TCC Admin Panel v23
      v23 NEW  — เพิ่มระบบ Admin Note ถึงเจ้าของสินค้า
                   • prod-reject-form: textarea id="prod-reject-note" (บังคับกรอก — ส่ง Notification พร้อมข้อความ)
@@ -2323,12 +2328,12 @@ initKYC = async function(){
     if(Array.isArray(members)){
       DA.kyc=members
         .filter(m=>{
-          const mid = m.member_id || m.member_uid || '';
+          const mid = String(m.member_id || m.member_uid || '').trim(); // [v26 FIX] normalize to string — GAS returns numbers
           if (!mid) return false;
           return m.kyc_status==='pending'||m.kyc_status==='verified'||m.kyc_status==='rejected';
         })
         .map(m=>{
-          const mid = m.member_id || m.member_uid || '';
+          const mid = String(m.member_id || m.member_uid || '').trim(); // [v26 FIX] normalize to string — GAS returns numbers
           const displayName = m.email || m.phone || mid;
           // [v25 FIX] filter 4 rows ของ member แล้วหา URL ตาม doc_type (id_card/id_back/selfie/address)
           const memberDocs = Array.isArray(kycDocs)
