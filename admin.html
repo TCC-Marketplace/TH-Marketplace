@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!-- TCC Admin Panel v22
+     v22 FIX 1 — DA.products map เพิ่ม ff_rate, ff_amount, ff_selected_plan, ff_plan_config
+                  (แก้ Modal แสดง FF = 0 ตลอด)
+     v22 FIX 2 — async approveProd() อ่าน FF Override จาก adm-ff-rate/adm-ff-amount
+                  (ฟังก์ชัน async ที่ override เดิมหาย FF Override logic)
+     v22 FIX 5 — ลบ dead code function approveProd()/rejectProd() เวอร์ชันเก่า
+                  (ถูก override โดย async version อยู่แล้ว — ลดความสับสน)
+-->
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -741,7 +749,7 @@ function fmtDate(v, len){
 // ═══════════════════════════════════════
 // API CONFIG — แก้ที่นี่ที่เดียว
 // ═══════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzueH_flZKoh_6cOh-SpBLgOBUZd221TYtVfN4GwqFToamDdYAYY_F7aMRPyLRuBDxH/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzcz2_GAFL1khgbNH26G6ZyXhWtFBNsJlJFMVbsJgE-cYLMCKprDJkV69uo41xDMEY2/exec';
 // GAS_MAIN_URL ไม่จำเป็นสำหรับ Admin — ทุก action ชี้ GAS_URL เดียวกับ index_MP_TH
 
 // ✅ apiGet: redirect follow — GAS /exec redirects to final URL automatically
@@ -1457,49 +1465,9 @@ function openProdModal(pid) {
     <button class="btn btn-err w100" onclick="document.getElementById('prod-reject-form').style.display='';this.parentElement.innerHTML='<button class=\\'btn btn-ghost w100\\' onclick=\\'closeM(\\'m-prod\\')\\'>ยกเลิก</button><button class=\\'btn btn-err w100\\' onclick=\\'rejectProd(\\'${p.id}\\')\\'>ยืนยันปฏิเสธ</button>'">✗ ปฏิเสธ</button>`;
   openM('m-prod');
 }
-function approveProd(pid) {
-  // [v2] อ่าน FF Override จาก modal fields
-  const ffRateOverride   = parseFloat(document.getElementById('adm-ff-rate')?.value);
-  const ffAmountOverride = parseFloat(document.getElementById('adm-ff-amount')?.value);
-  showConfirm(
-    `อนุมัติสินค้า <strong>${pid}</strong>?<br><small class="tm">สินค้าจะแสดงในตลาดทันที</small>`,
-    async () => {
-      showLoad('กำลังอนุมัติ...');
-      try {
-        const payload = {
-          action:'approveProduct', product_id:pid,
-          status:'approved', approved_by:ADMIN?.admin_id,
-          admin_id:ADMIN?.admin_id
-        };
-        // [v2] ส่ง FF Override ถ้ามีการแก้ไข
-        if (!isNaN(ffRateOverride))   payload.ff_rate   = ffRateOverride;
-        if (!isNaN(ffAmountOverride)) payload.ff_amount = ffAmountOverride;
-        await apiPost(payload);
-        hideLoad();
-        const p = DA.products.find(x=>x.id===pid); if(p) p.status='approved';
-        closeM('m-prod'); filterProds('all',null);
-        showToast('✅ อนุมัติสินค้าแล้ว — ส่ง Notification ถึง Seller แล้ว');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '✅', 'อนุมัติ', 'btn-ok'
-  );
-}
-function rejectProd(pid) {
-  const reason = document.getElementById('prod-reject-reason')?.value || 'ไม่ผ่านเกณฑ์';
-  if (!reason) { showToast('กรุณาระบุเหตุผล','warn'); return; }
-  showConfirm(
-    `ปฏิเสธสินค้า <strong>${pid}</strong>?<br><small class="tm">เหตุผล: ${reason}</small>`,
-    async () => {
-      showLoad('กำลังดำเนินการ...');
-      try {
-        await apiPost({ action:'approveProduct', product_id:pid, reject:true, reason, admin_id:ADMIN?.admin_id });
-        hideLoad();
-        const p = DA.products.find(x=>x.id===pid); if(p) p.status='rejected';
-        closeM('m-prod'); filterProds('all',null);
-        showToast('❌ ปฏิเสธสินค้าแล้ว — ส่ง Notification ถึง Seller พร้อมเหตุผล','warn');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '❌', 'ยืนยันปฏิเสธ', 'btn-err'
-  );
-}
+// [v22 FIX 5] ลบ function approveProd / rejectProd เวอร์ชันเก่าออก (dead code)
+// → ถูก override โดย async version ด้านล่าง (approveProd = async function / rejectProd = async function)
+// → ตัวที่ทำงานจริงคือ async version เท่านั้น
 
 // ═══════════════════════════════════════
 // WALLETS
@@ -2415,7 +2383,12 @@ initProds = async function(){
         ico:p.emoji_icon||'📦', product_id:p.product_id,
         rating_avg:Number(p.rating_avg||0), total_reviews:Number(p.total_reviews||0),
         images_json:p.images_json||'[]',
-        video_url:p.video_url||''
+        video_url:p.video_url||'',
+        // [v22 FIX 1] map FF fields — Modal ต้องการค่าจริงจาก Sheet ไม่ใช่ 0/undefined
+        ff_rate:        Number(p.ff_rate||0),
+        ff_amount:      Number(p.ff_amount||0),
+        ff_selected_plan: p.ff_selected_plan||'A',
+        ff_plan_config: p.ff_plan_config||''
       }));
       filterProds('all',null);
     } else {
@@ -2427,9 +2400,16 @@ initProds = async function(){
 approveProd = async function(pid){
   if(!ADMIN)return;
   const p=DA.products.find(x=>x.id===pid);if(!p)return;
+  // [v22 FIX 2] อ่าน FF Override จาก modal fields (เหมือน function เก่า บรรทัด 1460)
+  const ffRateOverride   = parseFloat(document.getElementById('adm-ff-rate')?.value);
+  const ffAmountOverride = parseFloat(document.getElementById('adm-ff-amount')?.value);
   showLoad('กำลังอนุมัติ...');
   try{
-    const res=await apiPost({action:'approveProduct',product_id:p.product_id||pid,status:'approved',approved_by:ADMIN.admin_id});
+    const payload={action:'approveProduct',product_id:p.product_id||pid,status:'approved',approved_by:ADMIN.admin_id,admin_id:ADMIN.admin_id};
+    // ส่ง FF Override เฉพาะเมื่อมีค่าจริง (ไม่ส่งถ้า NaN)
+    if(!isNaN(ffRateOverride))   payload.ff_rate   = ffRateOverride;
+    if(!isNaN(ffAmountOverride)) payload.ff_amount = ffAmountOverride;
+    const res=await apiPost(payload);
     hideLoad();
     if(res.success){p.status='approved';closeM('m-prod');filterProds('all',null);showToast('✅ อนุมัติสินค้าแล้ว!');}
     else showToast(res.error||'ไม่สำเร็จ','err');
