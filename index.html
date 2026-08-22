@@ -5403,7 +5403,9 @@ async function submitKYC(){
     if(res.success){
       SESSION.kyc_status='pending';
       saveSession(SESSION);
-      closeM('m-kyc');
+      // [v43 FIX] KYC ใช้ Page (#p-kyc-wizard) ไม่ใช่ Modal — ไม่มี id="m-kyc" → closeM() จะ throw null.classList
+      // แก้: ใช้ go('profile') เพื่อ navigate กลับไปหน้า profile แทน
+      go('profile');
       Object.assign(_kycData,{fullName:'',idNumber:'',dob:'',nationality:'ไทย',phone:'',idDocUrl:'',idBackUrl:'',selfieUrl:'',addressUrl:''});
       ['kyc-front-prev','kyc-back-prev','kyc-selfie-prev','kyc-addr-prev'].forEach(id=>clearImgStore(id));
       showToast('✅ ส่งเอกสาร KYC แล้ว — Admin จะตรวจสอบภายใน 1-3 วันทำการ');
