@@ -197,95 +197,12 @@ textarea.fi{resize:vertical;min-height:70px;}
 #_aconfirm-ico{font-size:2.5rem;margin-bottom:12px;}
 #_aconfirm-msg{font-size:14px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
 @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
-
-/* ══ MOBILE RESPONSIVE — Admin Panel ══ */
-/* Hamburger toggle button — แสดงเฉพาะมือถือ */
-.ham-btn{
-  display:none;width:36px;height:36px;background:transparent;
-  border:1px solid var(--bdr);border-radius:var(--r);
-  cursor:pointer;font-size:18px;color:var(--t2);
-  align-items:center;justify-content:center;flex-shrink:0;
-}
-/* Sidebar overlay backdrop */
-.sb-overlay{
-  display:none;position:fixed;inset:0;z-index:149;
-  background:rgba(0,0,0,.6);backdrop-filter:blur(2px);
-}
-
-@media(max-width:768px){
-  /* ── Topbar ── */
-  .topbar{padding:0 .875rem;gap:.625rem;}
-  .ham-btn{display:flex;}
-  .admin-user{display:none;}
-  .topbar-r{gap:6px;}
-
-  /* ── Sidebar: hidden by default, slide in on toggle ── */
-  .sidebar{
-    position:fixed;top:56px;left:0;
-    height:calc(100vh - 56px);
-    transform:translateX(-100%);
-    transition:transform .28s cubic-bezier(.32,1,.23,1);
-    z-index:150;width:240px;
-  }
-  .sidebar.sb-open{transform:translateX(0);}
-  .sb-overlay.sb-open{display:block;}
-
-  /* ── Layout: sidebar no longer in flow ── */
-  .layout{display:block;}
-  .main{overflow-y:visible;}
-
-  /* ── Section ── */
-  .section{padding:1rem .875rem calc(20px + env(safe-area-inset-bottom));}
-
-  /* ── Tables → horizontal scroll ── */
-  .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .tbl table{min-width:560px;}
-  .tbl.ox table{min-width:640px;}
-
-  /* ── Grid: 2-col → 1-col ── */
-  .g2{grid-template-columns:1fr;}
-  .g3{grid-template-columns:1fr;}
-  .g4{grid-template-columns:repeat(2,1fr);}
-  .g5{grid-template-columns:repeat(2,1fr);}
-
-  /* ── Section title row ── */
-  .ptitle{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:1rem;}
-
-  /* ── Modals → bottom sheet ── */
-  .mover{align-items:flex-end !important;}
-  .modal{
-    width:100% !important;max-width:100% !important;
-    border-radius:var(--rxl) var(--rxl) 0 0 !important;
-    max-height:92vh !important;
-    padding:1.25rem 1rem max(1rem,env(safe-area-inset-bottom)) !important;
-  }
-  .modal::before{
-    content:'';display:block;width:36px;height:4px;border-radius:2px;
-    background:rgba(255,255,255,.15);margin:0 auto .75rem;
-  }
-  .modal-lg{max-width:100% !important;}
-
-  /* ── Cards compact ── */
-  .card{padding:1rem;}
-  .cval{font-size:1.2rem;}
-
-  /* ── filter/action bars ── */
-  .ptitle > div{flex-wrap:wrap;gap:6px;}
-  .ptitle .btn{font-size:12px;padding:5px 10px;}
-}
-
-@media(max-width:420px){
-  .g4{grid-template-columns:1fr;}
-  .g5{grid-template-columns:1fr;}
-  .section{padding:.75rem .75rem calc(16px + env(safe-area-inset-bottom));}
-}
 </style>
 </head>
 <body>
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <button class="ham-btn" id="ham-btn" onclick="toggleSidebar()" aria-label="เมนู">☰</button>
   <div class="logo" style="display:flex;align-items:center;gap:8px;">
     <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="TCC Admin" style="width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0;filter:drop-shadow(0 0 5px rgba(246,70,93,.4));">
     TCC<span>Admin</span>
@@ -2390,7 +2307,9 @@ async function doDeleteReview(rvId) {
 // ═══════════════════════════════════════
 // REAL API OVERRIDES
 // ═══════════════════════════════════════
-// ✅ [FIXED] initKYC — โหลด Members + KYC_Documents พร้อมกัน เพื่อแสดงรูปเอกสารจริง
+// ✅ [v24 FIX] initKYC — โหลด Members + KYC_Documents พร้อมกัน
+// KYC_Documents มี 3 rows ต่อ member (doc_type: id_card / selfie / address)
+// ใช้ filter+find แยก URL ตาม doc_type แทน find row เดียว
 initKYC = async function(){
   filterKYC();
   showLoad('กำลังโหลด KYC...');
@@ -2403,26 +2322,40 @@ initKYC = async function(){
     if(Array.isArray(members)){
       DA.kyc=members
         .filter(m=>{
-          // [v7 FIX] รองรับ member_uid fallback
           const mid = m.member_id || m.member_uid || '';
           if (!mid) return false;
           return m.kyc_status==='pending'||m.kyc_status==='verified'||m.kyc_status==='rejected';
         })
         .map(m=>{
-          // [v7 FIX] รองรับ member_uid fallback + phone-as-email
           const mid = m.member_id || m.member_uid || '';
           const displayName = m.email || m.phone || mid;
-          const doc=Array.isArray(kycDocs)?kycDocs.find(d=>(d.member_id||'')===mid):null;
+          // [v24 FIX] filter 3 rows ของ member แล้วหา URL ตาม doc_type
+          const memberDocs = Array.isArray(kycDocs)
+            ? kycDocs.filter(d => String(d.member_id||'').trim() === mid)
+            : [];
+          const getDoc = type => memberDocs.find(d => (d.doc_type||'') === type);
+          const docId   = getDoc('id_card');
+          const docSelf = getDoc('selfie');
+          const docAddr = getDoc('address');
+          // หา full_name / id_number จาก Members sheet โดยตรง
+          const fullName  = m.full_name  || '';
+          const idNumber  = m.id_number  || '';
+          // submitted_at จากแถวแรกที่เจอ (ทุก row มีเวลาเดียวกัน)
+          const submittedAt = memberDocs.length > 0
+            ? fmtDate(memberDocs[0].submitted_at, 10)
+            : fmtDate(m.joined_at, 10);
+          const hasAnyDoc = docId||docSelf||docAddr;
           return {
-            id:mid, uid:mid, name:doc?.full_name||displayName,
-            doc:doc?(doc.id_doc_url?'มีเอกสาร':'รอตรวจสอบ'):'ยังไม่ส่ง',
-            submitted:fmtDate(m.joined_at,10),
-            status:m.kyc_status, member_id:mid,
-            id_doc_url:doc?.id_doc_url||'',
-            selfie_url:doc?.selfie_url||'',
-            address_url:doc?.address_url||'',
-            full_name:doc?.full_name||'',
-            id_number:doc?.id_number||''
+            id:mid, uid:mid,
+            name: fullName || displayName,
+            doc: hasAnyDoc ? (docId?.doc_url ? 'มีเอกสาร' : 'รอตรวจสอบ') : 'ยังไม่ส่ง',
+            submitted: submittedAt,
+            status: m.kyc_status, member_id: mid,
+            id_doc_url:  docId?.doc_url   || '',
+            selfie_url:  docSelf?.doc_url  || '',
+            address_url: docAddr?.doc_url  || '',
+            full_name:   fullName,
+            id_number:   idNumber
           };
         });
       filterKYC();
@@ -2852,34 +2785,6 @@ rejectFF = async function(fid){
 loadAdminSession();
 if(ADMIN) initOverview();
 
-</script>
-
-<!-- ── Mobile sidebar overlay ── -->
-<div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
-
-<script>
-// ── Sidebar mobile toggle ──
-function toggleSidebar(){
-  const sb=document.querySelector('.sidebar');
-  const ov=document.getElementById('sb-overlay');
-  const isOpen=sb.classList.contains('sb-open');
-  if(isOpen){ closeSidebar(); } else {
-    sb.classList.add('sb-open');
-    ov.classList.add('sb-open');
-  }
-}
-function closeSidebar(){
-  document.querySelector('.sidebar').classList.remove('sb-open');
-  document.getElementById('sb-overlay').classList.remove('sb-open');
-}
-// ปิด sidebar หลัง showSec บนมือถือ
-const _origShowSec = typeof showSec === 'function' ? showSec : null;
-if(_origShowSec){
-  window.showSec = function(id, el){
-    _origShowSec(id, el);
-    if(window.innerWidth <= 768) closeSidebar();
-  };
-}
 </script>
 </body>
 </html>
