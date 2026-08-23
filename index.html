@@ -47,12 +47,12 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:15px;l
 .logo span{color:var(--t1);}
 .logo img{transition:transform .3s ease;filter:drop-shadow(0 0 6px rgba(240,185,11,.35));}
 .logo:hover img{transform:rotate(-5deg) scale(1.08);}
-.nav-links{display:flex;list-style:none;flex:1;}
+.nav-links{display:flex;list-style:none;flex:1;overflow:hidden;min-width:0;}
 .nav-links a{color:var(--t2);font-size:13px;font-weight:500;padding:0 14px;height:60px;display:flex;align-items:center;cursor:pointer;transition:color .15s;white-space:nowrap;position:relative;}
 .nav-links a:hover{color:var(--t1);}
 .nav-links a.active{color:var(--gold);}
 .nav-links a.active::after{content:'';position:absolute;bottom:0;left:14px;right:14px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px;}
-.nav-r{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.nav-r{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;}
 /* BELL */
 .bell-wrap{position:relative;}
 .bell-btn{width:36px;height:36px;border-radius:var(--r);background:transparent;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
@@ -663,6 +663,27 @@ textarea.fi{resize:vertical;min-height:80px;}
 .fbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1.5rem;}
 .fbtn{background:var(--card);border:1px solid var(--bdr);color:var(--t2);padding:6px 14px;border-radius:50px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;}
 .fbtn.active{background:rgba(240,185,11,.15);color:var(--gold);border-color:var(--bdg);}
+/* ── Order status filter dropdown ── */
+.sord-dd-wrap{position:relative;display:inline-block;margin-bottom:1.5rem;min-width:160px;}
+.sord-dd-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 14px;border-radius:50px;cursor:pointer;
+  background:var(--card);border:1px solid var(--bdg);color:var(--gold);
+  font-size:13px;font-weight:600;user-select:none;
+  -webkit-tap-highlight-color:transparent;}
+.sord-dd-arrow{font-size:9px;color:var(--t2);transition:transform .2s;}
+.sord-dd-panel{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;
+  min-width:100%;background:var(--sur);
+  border:1px solid rgba(243,186,47,.22);border-radius:12px;
+  box-shadow:0 12px 32px rgba(0,0,0,.6);z-index:150;
+  overflow:hidden;padding:4px 0;}
+.sord-dd-panel.open{display:block;}
+.sord-dd-item{padding:10px 16px;font-size:13px;color:var(--t2);cursor:pointer;
+  white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.sord-dd-item:hover{background:rgba(255,255,255,.04);color:var(--t1);}
+.sord-dd-item.active{color:var(--gold);background:rgba(243,186,47,.07);font-weight:600;}
+/* arrow rotates when open */
+#sord-fbar:has(.sord-dd-panel.open) .sord-dd-arrow{transform:rotate(180deg);}
 /* MODAL */
 .mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .mover.open{display:flex;}
@@ -697,8 +718,10 @@ textarea.fi{resize:vertical;min-height:80px;}
 .ff-plan-card.sel{border-color:#52c41a;background:rgba(82,196,26,.07);box-shadow:0 0 0 3px rgba(82,196,26,.12);}
 .ff-plan-card:hover{border-color:var(--acc);}
 /* SHOP BANNER */
-.shop-banner{height:160px;background:linear-gradient(135deg,#1E2329,#2B3139);border-radius:var(--rl) var(--rl) 0 0;padding:1rem;display:flex;align-items:flex-end;}
-.shop-av{width:64px;height:64px;border-radius:50%;background:var(--card);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;}
+.shop-banner{min-height:140px;background:linear-gradient(135deg,#1E2329,#2B3139);border-radius:var(--rl) var(--rl) 0 0;padding:1.25rem 1.25rem 1.5rem;display:flex;align-items:flex-end;}
+.shop-banner .fc.g16{flex-wrap:nowrap;align-items:center !important;gap:14px;}
+.shop-banner .fc.g16 > div{min-width:0;flex:1;}
+.shop-av{width:60px;height:60px;border-radius:50%;background:var(--card);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.75rem;flex-shrink:0;}
 /* CHART BAR */
 .chart-wrap{height:180px;background:var(--card);border-radius:var(--r);display:flex;align-items:flex-end;gap:6px;padding:1rem 1.5rem;}
 .cbar{flex:1;border-radius:3px 3px 0 0;}
@@ -791,6 +814,10 @@ body{
 .nav-links a{height:54px;}
 .nav-links a.active{color:var(--gold);}
 .nav-links a.active::after{box-shadow:0 0 8px rgba(243,186,47,0.6);}
+/* ── Desktop seller nav compact: 6 items ห้ามล้น ── */
+.nav-links.snav-desktop a{font-size:12px;padding:0 10px;}
+/* ── seller-mobile-nav: ซ่อนบน desktop แสดงบน mobile เท่านั้น ── */
+.seller-mobile-nav{display:none;}
 .role-sw{
   border-radius:50px;
   font-family:var(--fm);
@@ -1416,22 +1443,59 @@ tr:hover td{background:rgba(243,186,47,0.02);}
   /* ── Buttons ── */
   .fc.btwn{flex-wrap:wrap;gap:8px;}
 
-  /* ── Seller pages nav ── */
+  /* ── Seller pages nav — mobile dropdown ── */
   .seller-mobile-nav{
-    display:flex;overflow-x:auto;gap:6px;padding:.5rem .875rem;
-    background:var(--sur);border-bottom:1px solid var(--bdr);
+    display:block;
+    position:relative;
     margin:-0.875rem -.875rem .875rem;
-    scrollbar-width:none;
+    background:#000;
+    border-bottom:1px solid rgba(243,186,47,.18);
+    z-index:200;
   }
   .seller-mobile-nav::-webkit-scrollbar{display:none;}
-  .seller-mobile-nav .smn-btn{
-    flex-shrink:0;padding:6px 14px;border-radius:50px;
-    font-size:12px;font-weight:500;color:var(--t2);
-    background:var(--card);border:1px solid var(--bdr);cursor:pointer;
-    white-space:nowrap;-webkit-tap-highlight-color:transparent;
+  /* trigger row */
+  .smn-trigger{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 1rem;cursor:pointer;
+    user-select:none;-webkit-tap-highlight-color:transparent;
   }
+  .smn-trigger-label{
+    font-size:13px;font-weight:600;color:var(--gold);
+    display:flex;align-items:center;gap:6px;
+  }
+  .smn-trigger-arrow{
+    font-size:10px;color:var(--t2);transition:transform .2s;
+  }
+  .seller-mobile-nav.open .smn-trigger-arrow{transform:rotate(180deg);}
+  /* dropdown panel — absolute popup, does NOT push content down */
+  .smn-panel{
+    display:none;
+    flex-direction:column;
+    position:absolute;
+    top:100%;left:0;right:0;
+    background:#000;
+    border:1px solid rgba(243,186,47,.22);
+    border-top:none;
+    border-radius:0 0 12px 12px;
+    box-shadow:0 12px 32px rgba(0,0,0,.7);
+    padding:6px 0;
+    z-index:200;
+  }
+  .seller-mobile-nav.open .smn-panel{display:flex;}
+  /* each item */
+  .seller-mobile-nav .smn-btn{
+    padding:11px 1.25rem;
+    font-size:13px;font-weight:500;color:var(--t2);
+    cursor:pointer;white-space:nowrap;
+    border-left:3px solid transparent;
+    -webkit-tap-highlight-color:transparent;
+    background:transparent;
+  }
+  .seller-mobile-nav .smn-btn:active{background:rgba(255,255,255,.04);}
   .seller-mobile-nav .smn-btn.active{
-    color:var(--gold);background:rgba(243,186,47,.1);border-color:var(--bdg);
+    color:var(--gold);
+    border-left-color:var(--gold);
+    background:rgba(243,186,47,.06);
   }
 
   /* ── KYC steps compact ── */
@@ -3111,14 +3175,20 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 
 <!-- SELLER DASHBOARD -->
 <div id="p-seller-dashboard" class="page">
-  <nav class="seller-mobile-nav">
-    <div class="smn-btn active" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📊 Dashboard</div>
-    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🏪 ร้านค้า</div>
-    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📦 สินค้า</div>
-    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📋 Orders</div>
-    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">💰 Wallet</div>
-    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📈 Analytics</div>
-  </nav>
+  <nav class="seller-mobile-nav" onclick="if(event.target.classList.contains('smn-trigger')||event.target.closest('.smn-trigger'))this.classList.toggle('open')">
+  <div class="smn-trigger">
+    <span class="smn-trigger-label">📊 Dashboard</span>
+    <span class="smn-trigger-arrow">▼</span>
+  </div>
+  <div class="smn-panel">
+    <div class="smn-btn active" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📊 Dashboard</div>
+    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">🏪 ร้านค้า</div>
+    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📦 สินค้า</div>
+    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📋 Orders</div>
+    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">💰 Wallet</div>
+    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
+  </div>
+</nav>
   <div class="stitle">🏪 Seller <span>Dashboard</span></div>
   <div class="g4 mb4">
     <div class="card"><div class="clbl">📦 คำสั่งซื้อ</div><div class="cval mono" id="sd-orders">—</div><div class="csub" id="sd-orders-m">เดือนนี้ +0</div></div>
@@ -3137,29 +3207,35 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 
 <!-- SELLER SHOP -->
 <div id="p-seller-shop" class="page">
-  <nav class="seller-mobile-nav">
-    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📊 Dashboard</div>
-    <div class="smn-btn active" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🏪 ร้านค้า</div>
-    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📦 สินค้า</div>
-    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📋 Orders</div>
-    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">💰 Wallet</div>
-    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📈 Analytics</div>
-  </nav>
+  <nav class="seller-mobile-nav" onclick="if(event.target.classList.contains('smn-trigger')||event.target.closest('.smn-trigger'))this.classList.toggle('open')">
+  <div class="smn-trigger">
+    <span class="smn-trigger-label">🏪 ร้านค้า</span>
+    <span class="smn-trigger-arrow">▼</span>
+  </div>
+  <div class="smn-panel">
+    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📊 Dashboard</div>
+    <div class="smn-btn active" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">🏪 ร้านค้า</div>
+    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📦 สินค้า</div>
+    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📋 Orders</div>
+    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">💰 Wallet</div>
+    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
+  </div>
+</nav>
   <div class="fc btwn mb4">
     <div class="stitle" style="margin:0;">🏪 My <span>Shop</span></div>
     <button class="btn btn-gold btn-sm" onclick="openM('m-editshop')">✏️ แก้ไขร้านค้า</button>
   </div>
   <div class="card mb4" style="padding:0;overflow:hidden;">
     <div class="shop-banner">
-      <div class="fc g16" style="align-items:flex-end;">
+      <div class="fc g16">
         <div class="shop-av" id="shop-av-wrap">
           <img id="shop-logo-disp" src="" alt="" style="display:none;width:64px;height:64px;border-radius:50%;object-fit:cover;">
           <span id="shop-av-ico">🖥️</span>
         </div>
-        <div>
-          <div style="font-family:var(--fd);font-size:1.3rem;font-weight:700;" id="shop-name-disp">TechStore Pro</div>
-          <div class="tsm tm" id="shop-cat-disp">Electronics · สมาชิกตั้งแต่ มค. 2024</div>
-          <div class="fc g8 mt2"><span class="bdg bdg-ok">✓ Verified</span><span class="tsm tg" id="shop-rating-disp">⭐ 0.0 (0 รีวิว)</span><span class="tsm tm" id="shop-sales-disp">📦 0 ยอดขาย</span></div>
+        <div style="min-width:0;">
+          <div style="font-family:var(--fd);font-size:1.15rem;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;" id="shop-name-disp">TechStore Pro</div>
+          <div class="tsm tm" style="margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="shop-cat-disp">Electronics · สมาชิกตั้งแต่ มค. 2024</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center;"><span class="bdg bdg-ok">✓ Verified</span><span class="tsm tg" id="shop-rating-disp">⭐ 0.0 (0 รีวิว)</span><span class="tsm tm" id="shop-sales-disp">📦 0 ยอดขาย</span></div>
         </div>
       </div>
     </div>
@@ -3171,14 +3247,20 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 
 <!-- SELLER PRODUCTS -->
 <div id="p-seller-products" class="page">
-  <nav class="seller-mobile-nav">
-    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📊 Dashboard</div>
-    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🏪 ร้านค้า</div>
-    <div class="smn-btn active" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📦 สินค้า</div>
-    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📋 Orders</div>
-    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">💰 Wallet</div>
-    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📈 Analytics</div>
-  </nav>
+  <nav class="seller-mobile-nav" onclick="if(event.target.classList.contains('smn-trigger')||event.target.closest('.smn-trigger'))this.classList.toggle('open')">
+  <div class="smn-trigger">
+    <span class="smn-trigger-label">📦 สินค้า</span>
+    <span class="smn-trigger-arrow">▼</span>
+  </div>
+  <div class="smn-panel">
+    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📊 Dashboard</div>
+    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">🏪 ร้านค้า</div>
+    <div class="smn-btn active" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📦 สินค้า</div>
+    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📋 Orders</div>
+    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">💰 Wallet</div>
+    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
+  </div>
+</nav>
   <div class="fc btwn mb4">
     <div class="stitle" style="margin:0;">📦 จัดการ <span>สินค้า</span></div>
     <button class="btn btn-gold btn-sm" onclick="_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}setEmoji('📦');openM('m-addprod')">+ เพิ่มสินค้าใหม่</button>
@@ -3189,21 +3271,34 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 
 <!-- SELLER ORDERS -->
 <div id="p-seller-orders" class="page">
-  <nav class="seller-mobile-nav">
-    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📊 Dashboard</div>
-    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🏪 ร้านค้า</div>
-    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📦 สินค้า</div>
-    <div class="smn-btn active" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📋 Orders</div>
-    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">💰 Wallet</div>
-    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📈 Analytics</div>
-  </nav>
+  <nav class="seller-mobile-nav" onclick="if(event.target.classList.contains('smn-trigger')||event.target.closest('.smn-trigger'))this.classList.toggle('open')">
+  <div class="smn-trigger">
+    <span class="smn-trigger-label">📋 Orders</span>
+    <span class="smn-trigger-arrow">▼</span>
+  </div>
+  <div class="smn-panel">
+    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📊 Dashboard</div>
+    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">🏪 ร้านค้า</div>
+    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📦 สินค้า</div>
+    <div class="smn-btn active" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📋 Orders</div>
+    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">💰 Wallet</div>
+    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
+  </div>
+</nav>
   <div class="stitle">📋 Order <span>Management</span></div>
-  <div class="fbar" id="sord-fbar">
-    <button class="fbtn active" onclick="filterSOrd('all',this)">ทั้งหมด</button>
-    <button class="fbtn" onclick="filterSOrd('paid',this)">รอยืนยัน</button>
-    <button class="fbtn" onclick="filterSOrd('confirmed',this)">จัดส่งแล้ว</button>
-    <button class="fbtn" onclick="filterSOrd('exchange_requested',this)">ขอเปลี่ยน</button>
-    <button class="fbtn" onclick="filterSOrd('completed',this)">สำเร็จ</button>
+  <!-- Order status dropdown -->
+  <div class="sord-dd-wrap" id="sord-fbar">
+    <div class="sord-dd-trigger" onclick="document.getElementById('sord-dd').classList.toggle('open')">
+      <span id="sord-dd-label">📋 ทั้งหมด</span>
+      <span class="sord-dd-arrow">▼</span>
+    </div>
+    <div class="sord-dd-panel" id="sord-dd">
+      <div class="sord-dd-item active" onclick="filterSOrd('all',this)">📋 ทั้งหมด</div>
+      <div class="sord-dd-item" onclick="filterSOrd('paid',this)">⏳ รอยืนยัน</div>
+      <div class="sord-dd-item" onclick="filterSOrd('confirmed',this)">🚚 จัดส่งแล้ว</div>
+      <div class="sord-dd-item" onclick="filterSOrd('exchange_requested',this)">🔁 ขอเปลี่ยน</div>
+      <div class="sord-dd-item" onclick="filterSOrd('completed',this)">✅ สำเร็จ</div>
+    </div>
   </div>
   <div class="tbl ox tbl-card-mode"><table><thead><tr><th>Order #</th><th>สินค้า</th><th>ผู้ซื้อ</th><th>มูลค่า</th><th>Payout</th><th>สถานะ</th><th>วันที่</th><th>จัดการ</th></tr></thead><tbody id="sord-b"></tbody></table></div>
   <div id="sord-b-cards"></div>
@@ -3211,14 +3306,20 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 
 <!-- SELLER WALLET -->
 <div id="p-seller-wallet" class="page">
-  <nav class="seller-mobile-nav">
-    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📊 Dashboard</div>
-    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🏪 ร้านค้า</div>
-    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📦 สินค้า</div>
-    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📋 Orders</div>
-    <div class="smn-btn active" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">💰 Wallet</div>
-    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📈 Analytics</div>
-  </nav>
+  <nav class="seller-mobile-nav" onclick="if(event.target.classList.contains('smn-trigger')||event.target.closest('.smn-trigger'))this.classList.toggle('open')">
+  <div class="smn-trigger">
+    <span class="smn-trigger-label">💰 Wallet</span>
+    <span class="smn-trigger-arrow">▼</span>
+  </div>
+  <div class="smn-panel">
+    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📊 Dashboard</div>
+    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">🏪 ร้านค้า</div>
+    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📦 สินค้า</div>
+    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📋 Orders</div>
+    <div class="smn-btn active" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">💰 Wallet</div>
+    <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
+  </div>
+</nav>
   <div class="stitle">💼 Seller <span>Wallet</span></div>
   <div class="g2 mb4">
     <div class="card" style="background:linear-gradient(135deg,#1E2329,#2B3139);">
@@ -3247,14 +3348,20 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 
 <!-- SELLER ANALYTICS -->
 <div id="p-seller-analytics" class="page">
-  <nav class="seller-mobile-nav">
-    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📊 Dashboard</div>
-    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🏪 ร้านค้า</div>
-    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📦 สินค้า</div>
-    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📋 Orders</div>
-    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">💰 Wallet</div>
-    <div class="smn-btn active" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📈 Analytics</div>
-  </nav>
+  <nav class="seller-mobile-nav" onclick="if(event.target.classList.contains('smn-trigger')||event.target.closest('.smn-trigger'))this.classList.toggle('open')">
+  <div class="smn-trigger">
+    <span class="smn-trigger-label">📈 Analytics</span>
+    <span class="smn-trigger-arrow">▼</span>
+  </div>
+  <div class="smn-panel">
+    <div class="smn-btn" onclick="go('seller-dashboard');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📊 Dashboard</div>
+    <div class="smn-btn" onclick="go('seller-shop');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">🏪 ร้านค้า</div>
+    <div class="smn-btn" onclick="go('seller-products');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📦 สินค้า</div>
+    <div class="smn-btn" onclick="go('seller-orders');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📋 Orders</div>
+    <div class="smn-btn" onclick="go('seller-wallet');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">💰 Wallet</div>
+    <div class="smn-btn active" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
+  </div>
+</nav>
   <div class="stitle">📈 <span>Analytics</span></div>
   <div class="g4 mb4">
     <div class="card"><div class="clbl">ยอดขายวันนี้</div><div class="cval tg mono">1,299.00</div><div class="csub tok">▲ +12% vs เมื่อวาน</div></div>
@@ -3713,7 +3820,10 @@ const SNAV=[
 
 function renderNav(){
   const links=curRole==='seller'?SNAV:MNAV.filter(l=>!l.authRequired||SESSION);
-  document.getElementById('mnav').innerHTML=links.map(l=>`<li><a id="na-${l.id}" onclick="go('${l.id}')">${l.lbl}</a></li>`).join('');
+  const mnav=document.getElementById('mnav');
+  mnav.innerHTML=links.map(l=>`<li><a id="na-${l.id}" onclick="go('${l.id}')">${l.lbl}</a></li>`).join('');
+  // compact class เมื่อ seller (6 items)
+  mnav.classList.toggle('snav-desktop', curRole==='seller');
   document.getElementById('rico').textContent=curRole==='seller'?'🏪':'👤';
   document.getElementById('rlbl').textContent=curRole==='seller'?'Seller':'Member';
   updNav();
@@ -3863,7 +3973,11 @@ function renderBell(){
 }
 
 function toggleBell(){document.getElementById('ndd').classList.toggle('open');}
-document.addEventListener('click',e=>{if(!e.target.closest('.bell-wrap'))document.getElementById('ndd').classList.remove('open');});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.bell-wrap')) document.getElementById('ndd').classList.remove('open');
+  if(!e.target.closest('.seller-mobile-nav')) document.querySelectorAll('.seller-mobile-nav.open').forEach(n=>n.classList.remove('open'));
+  if(!e.target.closest('.sord-dd-wrap')) {const d=document.getElementById('sord-dd');if(d)d.classList.remove('open');}
+});
 
 async function markOneNotifRead(notifId){
   const n=_notifs.find(x=>x.notif_id===notifId);
@@ -6010,8 +6124,20 @@ function deleteProd(prodId) {
 // SELLER ORDERS — Real API
 // ═══════════════════════════════════════
 async function filterSOrd(st, btn) {
-  document.querySelectorAll('#sord-fbar .fbtn').forEach(b=>b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  // update dropdown active item + label
+  document.querySelectorAll('#sord-fbar .sord-dd-item').forEach(b=>b.classList.remove('active'));
+  if (btn && btn.classList.contains('sord-dd-item')) {
+    btn.classList.add('active');
+    const lbl = document.getElementById('sord-dd-label');
+    if (lbl) lbl.textContent = btn.textContent;
+    document.getElementById('sord-dd').classList.remove('open');
+  } else if (!btn) {
+    // called programmatically — sync active state
+    const allItem = document.querySelector('#sord-fbar .sord-dd-item');
+    if (allItem) allItem.classList.add('active');
+    const lbl = document.getElementById('sord-dd-label');
+    if (lbl) lbl.textContent = '📋 ทั้งหมด';
+  }
   if (!SELLER_DATA) await initSD();
   const ords = SELLER_DATA?.orders || [];
   const rows = st==='all' ? ords : ords.filter(o=>o.order_status===st);
@@ -6080,7 +6206,7 @@ function doConfirmShip(orderId) {
         if (res.success) {
           SELLER_DATA = null;
           showToast('✅ ยืนยันจัดส่งแล้ว');
-          filterSOrd('all', document.querySelector('#sord-fbar .fbtn'));
+          filterSOrd('all', null);
         } else showToast(res.error||'เกิดข้อผิดพลาด', 'err');
       } catch(e) { hideLoad(); showToast('❌ '+e.message, 'err'); }
     }, '📦', 'ยืนยันจัดส่ง');
