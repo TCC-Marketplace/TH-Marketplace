@@ -1637,6 +1637,10 @@ tr:hover td{background:rgba(243,186,47,0.02);}
   .pc-body{padding:7px 8px 9px;}
   .pc-name{font-size:11px;}
   .pc-price{font-size:12px;}
+  /* TX card — ลดขนาดเพิ่มบนหน้าจอแคบมาก */
+  .tx-mob-right{max-width:40%;}
+  .tx-mob-amt{font-size:12px;}
+  .mob-amt-big{font-size:13px;}
 }
 
 /* ── Tablet (768-1024px) ── */
@@ -1732,34 +1736,70 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 .cart-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);margin:10px auto 14px;}
 @media(max-width:768px){#ds-shop .g4{grid-template-columns:repeat(2,1fr)!important;gap:10px!important;}}
 
-/* ── [v21 FIX E] Wallet TX filter bars on mobile ── */
+/* ── [v21 FIX F] Wallet TX filter bars — desktop default widths ── */
+#wtf{ width:160px; }
+#wsf{ width:130px; }
+#thtype{ width:160px; }
+#thdf,#thdt{ width:140px; }
+#thsq{ width:180px; }
+
+/* ── [v21 FIX F] Wallet TX filter bars on mobile ── */
 @media(max-width:768px){
-  /* ประวัติธุรกรรม filter selects — ขยายเต็มแถวบนมือถือ */
+  /* ป้องกัน .fbar{flex-wrap:nowrap} override wallet filter bars */
+  #wtx-fbar,
+  #txh-fbar{
+    flex-wrap:wrap !important;
+    gap:6px !important;
+    overflow-x:visible !important;
+  }
+
+  /* ประวัติธุรกรรม — 2 selects side-by-side */
   #wtf,#wsf{
     width:calc(50% - 4px) !important;
     min-width:0 !important;
     flex:1 1 calc(50% - 4px) !important;
     font-size:12px !important;
+    box-sizing:border-box !important;
   }
-  /* Transaction History filter bar */
+  /* Export CSV button — full row */
+  #wtx-fbar .btn{
+    width:100% !important;
+    flex:1 1 100% !important;
+    justify-content:center;
+  }
+
+  /* Transaction History — type select เต็มแถว */
   #thtype{
     width:100% !important;
     min-width:0 !important;
     flex:1 1 100% !important;
     font-size:12px !important;
+    box-sizing:border-box !important;
   }
+  /* date inputs — 2 ช่องเคียงกัน */
   #thdf,#thdt{
     width:calc(50% - 4px) !important;
     min-width:0 !important;
     flex:1 1 calc(50% - 4px) !important;
     font-size:12px !important;
+    box-sizing:border-box !important;
   }
+  /* search input — เต็มแถว */
   #thsq{
     width:100% !important;
     min-width:0 !important;
     flex:1 1 100% !important;
     font-size:12px !important;
+    box-sizing:border-box !important;
   }
+  /* action buttons — side-by-side */
+  #txh-fbar .btn{
+    flex:1 1 calc(50% - 4px) !important;
+    min-width:0 !important;
+    justify-content:center;
+    font-size:12px !important;
+  }
+
   /* DS-wallet fbar จัด wrap ดี */
   #ds-wallet .fbar{
     flex-wrap:wrap !important;
@@ -1824,10 +1864,10 @@ tr:hover td{background:rgba(243,186,47,0.02);}
   .tx-mob-date{ font-size:11px;color:var(--t3);margin-top:3px; }
 
   /* ขวา: จำนวนเงิน + สถานะ */
-  .tx-mob-right{ text-align:right;flex-shrink:0; }
+  .tx-mob-right{ text-align:right;flex-shrink:0;max-width:44%;min-width:0; }
   .tx-mob-amt{
-    font-family:var(--fm);font-size:15px;font-weight:700;
-    white-space:nowrap;
+    font-family:var(--fb);font-size:13px;font-weight:700;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
   }
   .tx-mob-amt.tok{ color:var(--ok); }
   .tx-mob-amt.terr{ color:var(--err); }
@@ -2495,8 +2535,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         </div>
       </div>
       <div class="stitle-sm">ประวัติธุรกรรม</div>
-      <div class="fbar">
-        <select class="fi" style="width:160px;" id="wtf" onchange="renderWTX()">
+      <div class="fbar" id="wtx-fbar">
+        <select class="fi" id="wtf" onchange="renderWTX()">
           <option value="">ทุกประเภท</option>
           <option value="Deposit">Deposit (เติมเงิน)</option>
           <option value="Withdraw">Withdraw (ถอน)</option>
@@ -2510,7 +2550,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <option value="Funding Fee">Funding Fee</option>
           <option value="Commission">Commission</option>
         </select>
-        <select class="fi" style="width:140px;" id="wsf" onchange="renderWTX()">
+        <select class="fi" id="wsf" onchange="renderWTX()">
           <option value="">ทุกสถานะ</option><option value="success">สำเร็จ</option><option value="pending">รอ</option>
         </select>
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 Export CSV</button>
@@ -2522,8 +2562,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <div class="pag" id="wpag"></div>
       <div class="d mt4"></div>
       <div class="stitle-sm">📋 Transaction History (ทั้งหมด)</div>
-      <div class="fbar">
-        <select class="fi" style="width:160px;" id="thtype" onchange="initTXH()">
+      <div class="fbar" id="txh-fbar">
+        <select class="fi" id="thtype" onchange="initTXH()">
           <option value="">ทุกประเภท</option>
           <option value="Deposit">Deposit (เติมเงิน)</option>
           <option value="Withdraw">Withdraw (ถอน)</option>
@@ -2537,9 +2577,9 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <option value="Funding Fee">Funding Fee</option>
           <option value="Commission">Commission</option>
         </select>
-        <input type="date" class="fi" style="width:140px;" id="thdf" onchange="initTXH()">
-        <input type="date" class="fi" style="width:140px;" id="thdt" onchange="initTXH()">
-        <input class="fi" style="width:180px;" placeholder="🔍 TX ID / รายละเอียด" id="thsq"
+        <input type="date" class="fi" id="thdf" onchange="initTXH()">
+        <input type="date" class="fi" id="thdt" onchange="initTXH()">
+        <input class="fi" placeholder="🔍 TX ID / รายละเอียด" id="thsq"
                oninput="initTXH()">
         <button class="btn btn-gold btn-sm" onclick="initTXH()">ค้นหา</button>
         <button class="btn btn-ghost btn-sm" onclick="exportCSVTXH()">📥 Export CSV</button>
