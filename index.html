@@ -721,7 +721,19 @@ textarea.fi{resize:vertical;min-height:80px;}
 .shop-banner{min-height:140px;background:linear-gradient(135deg,#1E2329,#2B3139);border-radius:var(--rl) var(--rl) 0 0;padding:1.25rem 1.25rem 1.5rem;display:flex;align-items:flex-end;}
 .shop-banner .fc.g16{flex-wrap:nowrap;align-items:center !important;gap:14px;}
 .shop-banner .fc.g16 > div{min-width:0;flex:1;}
-.shop-av{width:80px;height:80px;border-radius:50%;background:var(--card);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.75rem;flex-shrink:0;overflow:hidden;}
+.shop-av{
+  width:80px;height:80px;
+  aspect-ratio:1/1;          /* lock square — ไม่ให้ flex stretch บีบ */
+  align-self:center;          /* ไม่ยืดตาม flex cross-axis */
+  flex-shrink:0;flex-grow:0;  /* ไม่ขยาย/หด */
+  border-radius:50%;
+  background:var(--card);
+  border:3px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.75rem;
+  overflow:hidden;
+  position:relative;          /* frame อิสระ สำหรับ img absolute */
+}
 /* CHART BAR */
 .chart-wrap{height:180px;background:var(--card);border-radius:var(--r);display:flex;align-items:flex-end;gap:6px;padding:1rem 1.5rem;}
 .cbar{flex:1;border-radius:3px 3px 0 0;}
@@ -3281,7 +3293,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="shop-banner">
       <div class="fc g16">
         <div class="shop-av" id="shop-av-wrap">
-          <img id="shop-logo-disp" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          <img id="shop-logo-disp" src="" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;">
           <span id="shop-av-ico">🖥️</span>
         </div>
         <div style="min-width:0;">
