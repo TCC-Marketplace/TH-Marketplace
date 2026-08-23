@@ -1,5 +1,17 @@
 <!DOCTYPE html>
-<!-- TCC Admin Panel v26
+<!-- TCC Admin Panel v27
+     v27 FIX  — Mobile Responsive + Modal Popup Fix
+                  • เพิ่ม @media (max-width:768px): sidebar drawer, hamburger, section padding, grid, modal
+                  • Sidebar toggle (hamburger) — ปุ่มบน TopBar, ปิดอัตโนมัติเมื่อเลือก menu
+                  • [BUG FIX] find() type mismatch — ทุก modal: normalize String().trim() ก่อน find()
+                    ครอบคลุม: openKYCModal, openSAModal, openProdModal, openFFModal,
+                               openTxDetail, openUserDetail, openReviewModal
+                  • [BUG FIX] status normalize — String().toLowerCase().trim() ทุก data load:
+                    initKYC, initProds, initSA, initFFAdmin
+                    → แก้ปัญหา === 'pending' fail เมื่อ GAS ส่ง 'Pending'/'PENDING'/space
+                  • [BUG FIX] approveKYC/rejectKYC/approveSA/rejectSA/approveProd/rejectProd/
+                               approveFF/rejectFF — normalize String().trim() ก่อน find()
+     v26 FIX  — KYC openKYCModal: normalize member_id to String (GAS returns number → === failed)
      v26 FIX  — KYC openKYCModal: normalize member_id to String (GAS returns number → === failed)
                   • initKYC .filter() mid: String().trim()
                   • initKYC .map()    mid: String().trim() → fixes k.id type so find() works
@@ -206,12 +218,100 @@ textarea.fi{resize:vertical;min-height:70px;}
 #_aconfirm-ico{font-size:2.5rem;margin-bottom:12px;}
 #_aconfirm-msg{font-size:14px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
 @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+
+/* ══════════════════════════════════════════════════
+   MOBILE RESPONSIVE — v27
+   ══════════════════════════════════════════════════ */
+
+/* Hamburger button (hidden on desktop) */
+.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;padding:6px;cursor:pointer;border-radius:var(--r);border:1px solid var(--bdr);background:transparent;flex-shrink:0;}
+.hamburger span{display:block;height:2px;border-radius:2px;background:var(--t1);transition:all .25s;}
+
+/* Sidebar overlay backdrop */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;backdrop-filter:blur(2px);}
+.sb-overlay.open{display:block;}
+
+@media (max-width: 768px) {
+  /* ── Sidebar: drawer from left ── */
+  .sidebar{
+    position:fixed;
+    top:0;left:0;
+    height:100vh;
+    z-index:160;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    width:260px;
+    top:0;
+  }
+  .sidebar.open{transform:translateX(0);}
+
+  /* ── Main content: full width ── */
+  .layout{display:block;}
+  .main{width:100%;}
+
+  /* ── Section padding: reduce on mobile ── */
+  .section{padding:1rem;}
+
+  /* ── TopBar ── */
+  .hamburger{display:flex;}
+  .topbar{padding:0 1rem;gap:8px;}
+  .admin-user{display:none;}
+  .topbar-r{gap:6px;}
+  .topbar-r .btn{font-size:11px;padding:5px 8px;}
+
+  /* ── ptitle: stack filter controls ── */
+  .ptitle{flex-direction:column;align-items:flex-start;}
+  .ptitle .fc{flex-wrap:wrap;width:100%;gap:6px;}
+  .ptitle .fi{width:100% !important;box-sizing:border-box;}
+
+  /* ── Filter bar: wrap ── */
+  .fbar{gap:6px;}
+  .fbar .fi{width:100% !important;}
+
+  /* ── Tables: horizontal scroll (already .ox) ── */
+  .tbl{overflow-x:auto;}
+  td,th{white-space:nowrap;}
+
+  /* ── Grids: force single column on very small screens ── */
+  .g2,.g3,.g4,.g5{grid-template-columns:1fr;}
+
+  /* ── Modals: full screen on mobile ── */
+  .modal,.modal-lg{
+    width:96%;
+    max-width:none;
+    padding:1.25rem;
+    max-height:88vh;
+    border-radius:var(--rl);
+  }
+
+  /* ── Dashboard stats: 2 columns on mobile ── */
+  #ov-stats.g5{grid-template-columns:repeat(2,1fr);}
+
+  /* ── Section content padding ── */
+  .card{padding:1rem;}
+
+  /* ── Global TX filter bar: wrap inputs ── */
+  #sec-global-tx .fbar{flex-direction:column;align-items:stretch;}
+  #sec-global-tx .fbar .fi,
+  #sec-global-tx .fbar .btn{width:100%;}
+}
+
+@media (max-width: 400px) {
+  #ov-stats.g5{grid-template-columns:1fr;}
+  .section{padding:.75rem;}
+}
 </style>
 </head>
 <body>
 
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
 <!-- TOP BAR -->
 <div class="topbar">
+  <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="เมนู">
+    <span></span><span></span><span></span>
+  </button>
   <div class="logo" style="display:flex;align-items:center;gap:8px;">
     <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="TCC Admin" style="width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0;filter:drop-shadow(0 0 5px rgba(246,70,93,.4));">
     TCC<span>Admin</span>
@@ -1135,7 +1235,8 @@ function filterUsers() {
   renderPag('u-pag', Math.ceil(users.length/U_PP), uPage, p => { uPage = p; filterUsers(); });
 }
 function openUserDetail(uid) {
-  const u = DA.users.find(x => x.uid === uid); if (!u) return;
+  const _uid = String(uid).trim(); // [v27 FIX] normalize type
+  const u = DA.users.find(x => String(x.uid).trim() === _uid); if (!u) return;
   document.getElementById('mud-title').textContent = `👤 ${u.email} (${u.uid})`;
   document.getElementById('mud-info').innerHTML = `
     <div>
@@ -1259,7 +1360,8 @@ function filterKYC() {
 }
 // ✅ [FIXED] openKYCModal — แสดงรูปเอกสารจริงจาก KYC_Documents sheet
 function openKYCModal(kid) {
-  const k = DA.kyc.find(x => x.id === kid); if (!k) return;
+  const _kid = String(kid).trim(); // [v27 FIX] normalize type — GAS อาจส่ง Number
+  const k = DA.kyc.find(x => String(x.id).trim() === _kid); if (!k) return;
   document.getElementById('kyc-modal-title').textContent = `🪪 ตรวจสอบ KYC — ${k.uid}`;
   // [v26 FIX] แสดง phone/email/ชื่อจริงถูก field
   document.getElementById('kyc-modal-info').innerHTML = `
@@ -1373,7 +1475,8 @@ function filterSA(st, btn) {
   document.getElementById('sb-sa-cnt').textContent = DA.seller_apps.filter(s => s.status==='pending').length;
 }
 function openSAModal(sid) {
-  const s = DA.seller_apps.find(x => x.id === sid); if (!s) return;
+  const _sid = String(sid).trim(); // [v27 FIX] normalize type
+  const s = DA.seller_apps.find(x => String(x.id).trim() === _sid); if (!s) return;
   document.getElementById('sa-modal-info').innerHTML = `
     <div style="font-size:13px;line-height:2.2;">
       ${s.logo_url ? `<div class="mb4" style="text-align:center;"><img src="${s.logo_url}" alt="Logo" style="max-height:80px;max-width:160px;border-radius:8px;object-fit:contain;border:1px solid var(--bdr);padding:4px;"></div>` : ''}
@@ -1448,7 +1551,8 @@ function filterProds(st, btn) {
   document.getElementById('sb-prod-cnt').textContent = DA.products.filter(p => p.status==='pending').length;
 }
 function openProdModal(pid) {
-  const p = DA.products.find(x => x.id === pid); if (!p) return;
+  const _pid = String(pid).trim(); // [v27 FIX] normalize type
+  const p = DA.products.find(x => String(x.id).trim() === _pid); if (!p) return;
   // [FIX v7] parse images_json และแสดงรูปสินค้า
   let imgs = [];
   try { imgs = JSON.parse(p.images_json || '[]'); } catch(e) {}
@@ -1657,7 +1761,8 @@ function filterFF(st, btn) {
   document.getElementById('sb-ff-cnt').textContent = DA.ff_requests.filter(f => f.status==='pending').length;
 }
 function openFFModal(fid) {
-  const f = DA.ff_requests.find(x => x.id === fid); if (!f) return;
+  const _fid = String(fid).trim(); // [v27 FIX] normalize type
+  const f = DA.ff_requests.find(x => String(x.id).trim() === _fid); if (!f) return;
   document.getElementById('ff-modal-info').innerHTML = `
     <div style="font-size:13px;line-height:2.2;">
       <div class="fc btwn mb2"><span class="tm">Request ID</span><span class="mono tg">${f.id}</span></div>
@@ -2236,7 +2341,8 @@ function filterReviews() {
 }
 
 function openReviewModal(rvId) {
-  const r = _allReviews.find(x => x.review_id === rvId); if (!r) return;
+  const _rvId = String(rvId).trim(); // [v27 FIX] normalize type
+  const r = _allReviews.find(x => String(x.review_id).trim() === _rvId); if (!r) return;
   const isRep = r.is_reported == true || r.is_reported === 'true';
   const stars = '★'.repeat(Math.min(5, Number(r.rating)||0));
   document.getElementById('rv-modal-info').innerHTML = `
@@ -2371,7 +2477,8 @@ initKYC = async function(){
             email: memberEmail,   // [v26 FIX] เก็บ email แยก
             doc: hasAnyDoc ? (docId?.doc_url ? 'มีเอกสาร' : 'รอตรวจสอบ') : 'ยังไม่ส่ง',
             submitted: submittedAt,
-            status: m.kyc_status, member_id: mid,
+            status: String(m.kyc_status||'').toLowerCase().trim(), // [v27 FIX] normalize case+whitespace
+            member_id: mid,
             id_doc_url:  docId?.doc_url   || '',
             id_back_url: docBack?.doc_url  || '',  // [v25]
             selfie_url:  docSelf?.doc_url  || '',
@@ -2388,7 +2495,8 @@ initKYC = async function(){
 // Override KYC approve/reject
 approveKYC = async function(kid){
   if(!ADMIN){showToast('ไม่มีสิทธิ์','err');return;}
-  const k=DA.kyc.find(x=>x.id===kid);if(!k)return;
+  const _kid=String(kid).trim(); // [v27 FIX] normalize
+  const k=DA.kyc.find(x=>String(x.id).trim()===_kid);if(!k)return;
   showLoad('กำลังอนุมัติ...');
   try{
     const res=await apiPost({action:'approveKYC',member_id:k.member_id||k.uid,status:'verified',approved_by:ADMIN.admin_id});
@@ -2399,7 +2507,8 @@ approveKYC = async function(kid){
 };
 rejectKYC = async function(kid){
   if(!ADMIN){showToast('ไม่มีสิทธิ์','err');return;}
-  const k=DA.kyc.find(x=>x.id===kid);if(!k)return;
+  const _kid=String(kid).trim(); // [v27 FIX] normalize
+  const k=DA.kyc.find(x=>String(x.id).trim()===_kid);if(!k)return;
   const reason=document.getElementById('kyc-reject-reason')?.value||'';
   showLoad('กำลังปฏิเสธ...');
   try{
@@ -2426,7 +2535,8 @@ initSA = async function(){
           name:a.owner_name || a.member_id,
           shop:a.shop_name||'-', cat:a.category||'-',
           kyc:a.kyc_verified==='true'||a.kyc_verified===true?'verified':'pending',
-          submitted:fmtDate(a.submitted_at,10), status:a.status||'pending',
+          submitted:fmtDate(a.submitted_at,10),
+          status:String(a.status||'pending').toLowerCase().trim(), // [v27 FIX] normalize
           member_id:a.member_id, app_id:a.app_id,
           logo_url: a.logo_url||''
         }));
@@ -2437,7 +2547,8 @@ initSA = async function(){
 
 approveSA = async function(sid){
   if(!ADMIN)return;
-  const s=DA.seller_apps.find(x=>x.id===sid);if(!s)return;
+  const _sid=String(sid).trim(); // [v27 FIX] normalize
+  const s=DA.seller_apps.find(x=>String(x.id).trim()===_sid);if(!s)return;
   showLoad('กำลังอนุมัติ Seller...');
   try{
     const res=await apiPost({action:'approveSeller',app_id:s.app_id||sid,member_id:s.member_id,status:'approved',approved_by:ADMIN.admin_id});
@@ -2448,7 +2559,8 @@ approveSA = async function(sid){
 };
 rejectSA = async function(sid){
   if(!ADMIN)return;
-  const s=DA.seller_apps.find(x=>x.id===sid);if(!s)return;
+  const _sid=String(sid).trim(); // [v27 FIX] normalize
+  const s=DA.seller_apps.find(x=>String(x.id).trim()===_sid);if(!s)return;
   const reason=document.getElementById('sa-reject-reason')?.value||'';
   showLoad('กำลังปฏิเสธ...');
   try{
@@ -2471,8 +2583,8 @@ initProds = async function(){
         // [FIX] payout_option ใน Sheet เป็น Number (15/30/45/60) ไม่ใช่ string '60'
         po: String(p.payout_option||'').trim()+'d',
         submitted:fmtDate(p.submitted_at,10),
-        // [FIX] ไม่ fallback เป็น 'pending' ถ้า approval_status เป็น null — ใช้ค่าจริงจาก Sheet
-        status:p.approval_status||'unknown',
+        // [v27 FIX] normalize case+whitespace เพื่อให้ === 'pending' ทำงานได้เสมอ
+        status:String(p.approval_status||'unknown').toLowerCase().trim(),
         ico:p.emoji_icon||'📦', product_id:p.product_id,
         rating_avg:Number(p.rating_avg||0), total_reviews:Number(p.total_reviews||0),
         images_json:p.images_json||'[]',
@@ -2494,7 +2606,8 @@ initProds = async function(){
 
 approveProd = async function(pid){
   if(!ADMIN)return;
-  const p=DA.products.find(x=>x.id===pid);if(!p)return;
+  const _pid=String(pid).trim(); // [v27 FIX] normalize
+  const p=DA.products.find(x=>String(x.id).trim()===_pid);if(!p)return;
   // [v22 FIX 2] อ่าน FF Override จาก modal fields (เหมือน function เก่า บรรทัด 1460)
   const ffRateOverride   = parseFloat(document.getElementById('adm-ff-rate')?.value);
   const ffAmountOverride = parseFloat(document.getElementById('adm-ff-amount')?.value);
@@ -2514,7 +2627,8 @@ approveProd = async function(pid){
 };
 rejectProd = async function(pid){
   if(!ADMIN)return;
-  const p=DA.products.find(x=>x.id===pid);if(!p)return;
+  const _pid=String(pid).trim(); // [v27 FIX] normalize
+  const p=DA.products.find(x=>String(x.id).trim()===_pid);if(!p)return;
   const reason   = document.getElementById('prod-reject-reason')?.value||'';
   // [v23 FIX C] อ่าน reject-note → ส่งเป็น admin_note ถึง Seller (บังคับมีข้อความ)
   const rejectNote = (document.getElementById('prod-reject-note')?.value||'').trim();
@@ -2613,7 +2727,8 @@ initWallets = async function(){
 // ── Approve Deposit ─────────────────────────────────────────────────────
 // ── TX Detail Modal ────────────────────────────────────────────────────────
 function openTxDetail(txId){
-  const t = DA.gtx.find(x => x.id === txId);
+  const _txId = String(txId).trim(); // [v27 FIX] normalize type
+  const t = DA.gtx.find(x => String(x.id).trim() === _txId);
   if(!t){ showToast('ไม่พบ TX ID: '+txId,'warn'); return; }
   const isPending = t.type === 'Deposit' && t.status === 'pending';
   const plus = String(t.amt).startsWith('+');
@@ -2771,7 +2886,8 @@ initFFAdmin = async function(){
       DA.ff_requests=reqs.map(r=>({
         id:r.request_id, uid:r.member_id, email:r.member_id,
         total_buy:Number(r.total_buy||0), old_rights:Number(r.old_rights||0),
-        submitted:fmtDate(r.submitted_at,10), status:r.status||'pending',
+        submitted:fmtDate(r.submitted_at,10),
+        status:String(r.status||'pending').toLowerCase().trim(), // [v27 FIX] normalize
         member_id:r.member_id, request_id:r.request_id
       }));
       filterFF('all',null);
@@ -2781,7 +2897,8 @@ initFFAdmin = async function(){
 
 approveFF = async function(fid){
   if(!ADMIN)return;
-  const f=DA.ff_requests.find(x=>x.id===fid);if(!f)return;
+  const _fid=String(fid).trim(); // [v27 FIX] normalize
+  const f=DA.ff_requests.find(x=>String(x.id).trim()===_fid);if(!f)return;
   showLoad('กำลังอนุมัติ...');
   try{
     const res=await apiPost({action:'approveFF',req_id:f.request_id||fid,member_id:f.member_id,approved:true,approved_by:ADMIN.admin_id});
@@ -2792,7 +2909,8 @@ approveFF = async function(fid){
 };
 rejectFF = async function(fid){
   if(!ADMIN)return;
-  const f=DA.ff_requests.find(x=>x.id===fid);if(!f)return;
+  const _fid=String(fid).trim(); // [v27 FIX] normalize
+  const f=DA.ff_requests.find(x=>String(x.id).trim()===_fid);if(!f)return;
   showLoad('กำลังปฏิเสธ...');
   try{
     const res=await apiPost({action:'approveFF',req_id:f.request_id||fid,member_id:f.member_id,approved:false,approved_by:ADMIN.admin_id});
@@ -2800,6 +2918,33 @@ rejectFF = async function(fid){
     if(res.success){f.status='rejected';closeM('m-ff');filterFF('all',null);showToast('❌ ปฏิเสธแล้ว');}
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
+};
+
+// ══════════════════════════════════════════════
+// MOBILE SIDEBAR TOGGLE — v27
+// ══════════════════════════════════════════════
+function toggleSidebar() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sb-overlay');
+  const isOpen = sb.classList.contains('open');
+  if (isOpen) {
+    sb.classList.remove('open');
+    ov.classList.remove('open');
+  } else {
+    sb.classList.add('open');
+    ov.classList.add('open');
+  }
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('open');
+}
+
+// Override showSec to auto-close sidebar on mobile
+const _origShowSec = showSec;
+showSec = function(id, el) {
+  _origShowSec(id, el);
+  if (window.innerWidth <= 768) closeSidebar();
 };
 
 // ─── INIT ───
