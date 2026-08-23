@@ -2513,12 +2513,13 @@ async function loadAdminApproval() {
 
   // All admins table
   allEl.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table style="width:100%;min-width:480px;border-collapse:collapse;font-size:13px;">
       <thead><tr style="color:var(--t3);border-bottom:1px solid var(--br);">
         <th style="text-align:left;padding:8px 4px;">ชื่อ / Email</th>
         <th style="text-align:left;padding:8px 4px;">Level</th>
         <th style="text-align:left;padding:8px 4px;">สร้างเมื่อ</th>
-        <th style="padding:8px 4px;"></th>
+        <th style="padding:8px 4px;white-space:nowrap;">เปลี่ยน Level</th>
       </tr></thead>
       <tbody>${active.map(a=>`
         <tr style="border-bottom:1px solid var(--br);">
@@ -2530,8 +2531,8 @@ async function loadAdminApproval() {
             <span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${a.admin_level==='superadmin'?'rgba(246,70,93,.15)':'rgba(240,185,11,.12)'};color:${a.admin_level==='superadmin'?'var(--err)':'var(--gold)'};">${a.admin_level}</span>
           </td>
           <td style="padding:8px 4px;" class="tsm tm">${fmtDate(a.created_at,10)||'-'}</td>
-          <td style="padding:8px 4px;">
-            <select onchange="changeAdminLevel('${a.admin_id}',this.value)" style="padding:4px 6px;border-radius:6px;border:1px solid var(--br);background:var(--card);color:var(--t1);font-size:11px;">
+          <td style="padding:8px 4px;white-space:nowrap;">
+            <select onchange="changeAdminLevel('${a.admin_id}',this.value)" style="padding:4px 6px;border-radius:6px;border:1px solid var(--br);background:var(--card);color:var(--t1);font-size:11px;max-width:120px;width:100%;">
               <option value="">เปลี่ยน Level</option>
               <option value="moderator">Moderator</option>
               <option value="admin">Admin</option>
@@ -2540,7 +2541,8 @@ async function loadAdminApproval() {
           </td>
         </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table>
+    </div>`;
 }
 
 async function approveAdmin(admin_id, email) {
