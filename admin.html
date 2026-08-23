@@ -2511,38 +2511,42 @@ async function loadAdminApproval() {
       </div>`).join('');
   }
 
-  // All admins table
-  allEl.innerHTML = `
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-    <table style="width:100%;min-width:480px;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="color:var(--t3);border-bottom:1px solid var(--br);">
-        <th style="text-align:left;padding:8px 4px;">ชื่อ / Email</th>
-        <th style="text-align:left;padding:8px 4px;">Level</th>
-        <th style="text-align:left;padding:8px 4px;">สร้างเมื่อ</th>
-        <th style="padding:8px 4px;white-space:nowrap;">เปลี่ยน Level</th>
-      </tr></thead>
-      <tbody>${active.map(a=>`
-        <tr style="border-bottom:1px solid var(--br);">
-          <td style="padding:8px 4px;">
-            <div style="font-weight:500;">${a.name||'-'}</div>
-            <div class="tsm tm">${a.email}</div>
-          </td>
-          <td style="padding:8px 4px;">
-            <span style="padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${a.admin_level==='superadmin'?'rgba(246,70,93,.15)':'rgba(240,185,11,.12)'};color:${a.admin_level==='superadmin'?'var(--err)':'var(--gold)'};">${a.admin_level}</span>
-          </td>
-          <td style="padding:8px 4px;" class="tsm tm">${fmtDate(a.created_at,10)||'-'}</td>
-          <td style="padding:8px 4px;white-space:nowrap;">
-            <select onchange="changeAdminLevel('${a.admin_id}',this.value)" style="padding:4px 6px;border-radius:6px;border:1px solid var(--br);background:var(--card);color:var(--t1);font-size:11px;max-width:120px;width:100%;">
-              <option value="">เปลี่ยน Level</option>
-              <option value="moderator">Moderator</option>
-              <option value="admin">Admin</option>
-              <option value="superadmin">Superadmin</option>
-            </select>
-          </td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
+  // All admins — card grid
+  if(!active.length){
+    allEl.innerHTML='<div class="tsm tm">ยังไม่มี Admin ในระบบ</div>';
+  } else {
+    allEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
+      ${active.map(a=>{
+        const lvlColor = a.admin_level==='superadmin'
+          ? {bg:'rgba(246,70,93,.13)',clr:'var(--err)',border:'rgba(246,70,93,.25)'}
+          : a.admin_level==='admin'
+          ? {bg:'rgba(240,185,11,.12)',clr:'var(--gold)',border:'rgba(240,185,11,.25)'}
+          : {bg:'rgba(24,144,255,.12)',clr:'var(--inf)',border:'rgba(24,144,255,.25)'};
+        const initials = (a.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        return `
+        <div onclick="openAdminDetail(${JSON.stringify(JSON.stringify(a))})"
+          style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:10px;"
+          onmouseover="this.style.borderColor='var(--bdg)';this.style.background='var(--hov)'"
+          onmouseout="this.style.borderColor='var(--bdr)';this.style.background='var(--card)'">
+          <!-- Header row -->
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:${lvlColor.bg};border:1.5px solid ${lvlColor.border};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:${lvlColor.clr};flex-shrink:0;">${initials}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name||'(ไม่ระบุชื่อ)'}</div>
+              <div class="tsm tm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.email}</div>
+            </div>
+          </div>
+          <!-- Level badge + date -->
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${lvlColor.bg};color:${lvlColor.clr};border:1px solid ${lvlColor.border};">${a.admin_level}</span>
+            <span class="tsm tm">${fmtDate(a.created_at,10)||'-'}</span>
+          </div>
+          <!-- Tap hint -->
+          <div class="tsm tm" style="text-align:right;font-size:10px;opacity:.55;">แตะเพื่อดูรายละเอียด →</div>
+        </div>`;
+      }).join('')}
     </div>`;
+  }
 }
 
 async function approveAdmin(admin_id, email) {
@@ -3615,6 +3619,93 @@ if (ADMIN) initOverview();
 _adjustToastPosition();
 if (ADMIN) setTimeout(updateMobNavDots, 800);
 
+</script>
+
+<!-- ─── ADMIN DETAIL MODAL ─── -->
+<div class="mover" id="m-admin-detail">
+  <div class="modal" style="max-width:480px;">
+    <span class="mclose" onclick="closeM('m-admin-detail')">✕</span>
+    <div class="mtitle" id="adm-modal-title">👤 Admin Detail</div>
+    <div id="adm-modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── openAdminDetail — shows card popup with full info + change-level action ──
+function openAdminDetail(jsonStr) {
+  const a = JSON.parse(jsonStr);
+  const lvlColor = a.admin_level==='superadmin'
+    ? {bg:'rgba(246,70,93,.13)',clr:'var(--err)',border:'rgba(246,70,93,.25)'}
+    : a.admin_level==='admin'
+    ? {bg:'rgba(240,185,11,.12)',clr:'var(--gold)',border:'rgba(240,185,11,.25)'}
+    : {bg:'rgba(24,144,255,.12)',clr:'var(--inf)',border:'rgba(24,144,255,.25)'};
+
+  const initials = (a.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('adm-modal-title').innerHTML =
+    `<span style="display:inline-flex;align-items:center;gap:10px;">
+      <span style="width:36px;height:36px;border-radius:50%;background:${lvlColor.bg};border:1.5px solid ${lvlColor.border};display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:${lvlColor.clr};">${initials}</span>
+      Admin Detail
+    </span>`;
+
+  // Permissions display
+  let permsHtml = '<span class="tsm tm">-</span>';
+  try {
+    const perms = JSON.parse(a.permissions||'[]');
+    if(Array.isArray(perms) && perms.length){
+      permsHtml = perms.map(p=>`<span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--card);border:1px solid var(--bdr);color:var(--t2);margin:2px;">${p}</span>`).join('');
+    }
+  } catch(e){}
+
+  document.getElementById('adm-modal-body').innerHTML = `
+    <!-- Info rows -->
+    <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:16px;">
+      ${[
+        ['👤 ชื่อ', a.name||'(ไม่ระบุชื่อ)'],
+        ['📧 Email', `<span style="word-break:break-all;">${a.email||'-'}</span>`],
+        ['🪪 Admin ID', `<span style="font-family:var(--fm);font-size:11px;color:var(--t2);">${a.admin_id||'-'}</span>`],
+        ['⭐ Level', `<span style="padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${lvlColor.bg};color:${lvlColor.clr};border:1px solid ${lvlColor.border};">${a.admin_level}</span>`],
+        ['🛡️ Permissions', `<div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;">${permsHtml}</div>`],
+        ['📅 สร้างเมื่อ', fmtDate(a.created_at,10)||'-'],
+        ['✅ อนุมัติโดย', a.approved_by||'-'],
+      ].map(([lbl,val],i)=>`
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 14px;background:${i%2===0?'transparent':'rgba(255,255,255,.02)'};border-bottom:1px solid var(--bdr);">
+          <span style="font-size:12px;color:var(--t3);white-space:nowrap;min-width:110px;">${lbl}</span>
+          <span style="font-size:13px;color:var(--t1);flex:1;">${val}</span>
+        </div>`).join('')}
+    </div>
+
+    <!-- Change Level -->
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:600;color:var(--t3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">⚙️ เปลี่ยน Level</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${['moderator','admin','superadmin'].map(lvl=>{
+          const isCurrent = a.admin_level===lvl;
+          const col = lvl==='superadmin'?'var(--err)':lvl==='admin'?'var(--gold)':'var(--inf)';
+          const bg  = lvl==='superadmin'?'rgba(246,70,93,.15)':lvl==='admin'?'rgba(240,185,11,.15)':'rgba(24,144,255,.15)';
+          const bdr = lvl==='superadmin'?'rgba(246,70,93,.3)':lvl==='admin'?'rgba(240,185,11,.3)':'rgba(24,144,255,.3)';
+          return `<button
+            ${isCurrent?'disabled':''}
+            onclick="admModalChangeLevel('${a.admin_id}','${lvl}')"
+            style="flex:1;min-width:90px;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:${isCurrent?'default':'pointer'};border:1px solid ${bdr};background:${isCurrent?bg:'transparent'};color:${isCurrent?col:'var(--t3)'};opacity:${isCurrent?.95:.6};transition:all .15s;"
+            onmouseover="${isCurrent?'':'this.style.opacity=1;this.style.color=\''+col+'\';this.style.background=\''+bg+'\''}"
+            onmouseout="${isCurrent?'':'this.style.opacity=.6;this.style.color=\'var(--t3)\';this.style.background=\'transparent\''}"
+          >${isCurrent?'✓ ':''} ${lvl.charAt(0).toUpperCase()+lvl.slice(1)}</button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- Close -->
+    <button class="btn btn-ghost w100" onclick="closeM('m-admin-detail')">ปิด</button>
+  `;
+
+  openM('m-admin-detail');
+}
+
+async function admModalChangeLevel(admin_id, new_level) {
+  closeM('m-admin-detail');
+  await changeAdminLevel(admin_id, new_level);
+}
 </script>
 </body>
 </html>
