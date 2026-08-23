@@ -8088,6 +8088,42 @@ document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if
   } catch(e) {}
 })();
 
+// [v47 FIX 1] GAS_MAIN_URL / apiPostMain / loadMainBalance ต้องอยู่ก่อน initApp
+// ── TCC_Main GAS endpoint ─────────────────────────────────────────
+// ⚠️ ใส่ URL จาก GAS_TCC_Main deploy (เวอร์ชัน 154, 5 ส.ค. 2569) ที่นี่
+// ไฟล์: index_MP_TH_v4.html บรรทัดนี้
+const GAS_MAIN_URL = 'https://script.google.com/macros/s/AKfycbwocCEr-mQu6esBJBRRElo68Y2GLPJryhAShi9FSm__G9mD0TV5oa9IAa8cFxBn_GlILw/exec';
+
+async function apiPostMain(body){
+  const res = await fetch(GAS_MAIN_URL,{
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+// ── Load TCC Main Balance ─────────────────────────────────────────
+// ดึงจาก GAS_TCC_Main (deploy แล้ว) — action: getUser
+// GAS_TCC_Main doPost รับ { action, data: { uid } }
+async function loadMainBalance(){
+  if(!SESSION?.uid) return;
+  try{
+    const res = await apiPostMain({action:'getUser', data:{ uid: SESSION.uid }});
+    // GAS_TCC_Main wrap ทุก response ใน {ok, data} → ต้องแกะ .data ก่อน
+    if(!res?.ok){ console.warn('[loadMainBalance] GAS error:', res?.error); return; }
+    const user = res.data;
+    const bal = parseFloat(user?.main_balance ?? 0);
+    SESSION.tcc_main_balance = bal;
+    const el = document.getElementById('bridge-main-bal');
+    if(el) el.textContent = bal.toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
+    // อัปเดต bridge topup modal ด้วย
+    const avail = document.getElementById('bridge-topup-avail');
+    if(avail) avail.textContent = bal.toLocaleString('th',{minimumFractionDigits:2});
+    console.log('[loadMainBalance] uid:', SESSION.uid, 'main_balance:', bal);
+  }catch(e){ console.warn('[loadMainBalance]', e.message); }
+}
+
 // [v14 FIX] loadSession เป็น async — ต้อง await ก่อน initHome()
 // เพื่อให้ SESSION._synced_this_session = true ก่อนที่ UI จะ render ครบ
 // และป้องกัน confirmBuy เรียก syncMember ซ้ำขณะ loadSession ยังไม่เสร็จ
@@ -8592,41 +8628,6 @@ function mpCommCloseDetail(){
      ─ SESSION.uid  → BNB_ID (ใช้ร่วมกัน 2 ระบบ)
 ═══════════════════════════════════════════════════════════════ -->
 <script>
-// ── TCC_Main GAS endpoint ─────────────────────────────────────────
-// ⚠️ ใส่ URL จาก GAS_TCC_Main deploy (เวอร์ชัน 154, 5 ส.ค. 2569) ที่นี่
-// ไฟล์: index_MP_TH_v4.html บรรทัดนี้
-const GAS_MAIN_URL = 'https://script.google.com/macros/s/AKfycbwocCEr-mQu6esBJBRRElo68Y2GLPJryhAShi9FSm__G9mD0TV5oa9IAa8cFxBn_GlILw/exec';
-
-async function apiPostMain(body){
-  const res = await fetch(GAS_MAIN_URL,{
-    method:'POST', redirect:'follow',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify(body)
-  });
-  return res.json();
-}
-
-// ── Load TCC Main Balance ─────────────────────────────────────────
-// ดึงจาก GAS_TCC_Main (deploy แล้ว) — action: getUser
-// GAS_TCC_Main doPost รับ { action, data: { uid } }
-async function loadMainBalance(){
-  if(!SESSION?.uid) return;
-  try{
-    const res = await apiPostMain({action:'getUser', data:{ uid: SESSION.uid }});
-    // GAS_TCC_Main wrap ทุก response ใน {ok, data} → ต้องแกะ .data ก่อน
-    if(!res?.ok){ console.warn('[loadMainBalance] GAS error:', res?.error); return; }
-    const user = res.data;
-    const bal = parseFloat(user?.main_balance ?? 0);
-    SESSION.tcc_main_balance = bal;
-    const el = document.getElementById('bridge-main-bal');
-    if(el) el.textContent = bal.toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
-    // อัปเดต bridge topup modal ด้วย
-    const avail = document.getElementById('bridge-topup-avail');
-    if(avail) avail.textContent = bal.toLocaleString('th',{minimumFractionDigits:2});
-    console.log('[loadMainBalance] uid:', SESSION.uid, 'main_balance:', bal);
-  }catch(e){ console.warn('[loadMainBalance]', e.message); }
-}
-
 // ── Modal helpers ─────────────────────────────────────────────────
 function openBridgeTopup(){
   if(!SESSION){ showToast('กรุณา Login ก่อน','warn'); return; }
