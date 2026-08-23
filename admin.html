@@ -639,7 +639,7 @@ textarea.fi{resize:vertical;min-height:70px;}
   </div>
   <span class="logo-badge">🔒 Admin Only</span>
   <div class="topbar-r">
-    <div class="admin-user">เข้าสู่ระบบในฐานะ <strong id="admin-user-lbl">Admin</strong></div>
+    <div class="admin-user">เข้าสู่ระบบในฐานะ <strong id="admin-user-lbl">Admin</strong> <span id="admin-level-badge" style="display:none;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:700;vertical-align:middle;"></span></div>
     <button class="btn btn-ghost btn-sm" onclick="window.location='index_MP.html'">← กลับ Marketplace</button>
     <button class="btn btn-err btn-sm" onclick="adminLogout()">Logout</button>
   </div>
@@ -1316,12 +1316,12 @@ let ADMIN = null;
 function saveAdminSession(data){
   ADMIN=data;
   try{ sessionStorage.setItem('tcc_admin',JSON.stringify(data)); }catch(e){}
-  document.getElementById('admin-user-lbl').textContent=data.email||'Admin';
+  _applyAdminIdentity(data);
 }
 function loadAdminSession(){
   try{
     const s=sessionStorage.getItem('tcc_admin');
-    if(s){ ADMIN=JSON.parse(s); document.getElementById('admin-user-lbl').textContent=ADMIN.email||'Admin'; }
+    if(s){ ADMIN=JSON.parse(s); _applyAdminIdentity(ADMIN); }
   }catch(e){}
   if(!ADMIN){
     showAdminLogin();
@@ -1330,6 +1330,113 @@ function loadAdminSession(){
     hideAdminLogin();
   }
 }
+
+// ── ตั้งชื่อ / badge level / สิทธิ์เมนู ──────────────────────────────────
+function _applyAdminIdentity(admin) {
+  // 1) ชื่อ — ใช้ name ก่อน, fallback email
+  const displayName = (admin.name && String(admin.name).trim()) ? admin.name : (admin.email||'Admin');
+  document.getElementById('admin-user-lbl').textContent = displayName;
+
+  // 2) Level badge
+  const badge = document.getElementById('admin-level-badge');
+  if(badge){
+    const lvl = admin.admin_level || '';
+    const lvlCfg = {
+      superadmin: {bg:'rgba(246,70,93,.2)',  clr:'#F6465D', bdr:'rgba(246,70,93,.4)'},
+      admin:      {bg:'rgba(240,185,11,.15)',clr:'#F0B90B', bdr:'rgba(240,185,11,.35)'},
+      moderator:  {bg:'rgba(24,144,255,.15)',clr:'#1890FF', bdr:'rgba(24,144,255,.35)'},
+    };
+    const cfg = lvlCfg[lvl] || {bg:'rgba(255,255,255,.08)',clr:'#848E9C',bdr:'rgba(255,255,255,.15)'};
+    badge.textContent = lvl || 'unknown';
+    badge.style.cssText = `display:inline-block;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:700;vertical-align:middle;background:${cfg.bg};color:${cfg.clr};border:1px solid ${cfg.bdr};`;
+  }
+
+  // 3) Apply menu permissions
+  _applyPermissions(admin);
+}
+
+// ── Permission map: permission key → section ids ──────────────────────────
+const PERM_MAP = {
+  users:    ['users'],
+  kyc:      ['kyc','seller-apps','reviews'],
+  products: ['products'],
+  wallets:  ['wallets','global-tx','funding-admin'],
+  referrals:['referral-mgmt'],
+  settings: ['settings','admin-approval'],
+};
+// Sections visible to ALL admins regardless of permissions
+const PERM_ALWAYS = ['overview'];
+
+function _applyPermissions(admin) {
+  const lvl  = admin.admin_level || '';
+  const isSuperOrAdmin = (lvl==='superadmin'||lvl==='admin');
+
+  // Parse permissions array
+  let perms = [];
+  try { perms = JSON.parse(admin.permissions||'[]'); } catch(e){}
+  if(!Array.isArray(perms)) perms = [];
+
+  // Collect allowed section ids
+  const allowed = new Set(PERM_ALWAYS);
+  if(isSuperOrAdmin){
+    // Full access
+    Object.values(PERM_MAP).forEach(ids => ids.forEach(id => allowed.add(id)));
+  } else {
+    perms.forEach(p => { if(PERM_MAP[p]) PERM_MAP[p].forEach(id => allowed.add(id)); });
+  }
+
+  // ── Desktop sidebar ──
+  document.querySelectorAll('.sb-item[onclick]').forEach(el => {
+    const m = el.getAttribute('onclick').match(/showSec\('([^']+)'/);
+    if(!m) return;
+    const secId = m[1];
+    if(allowed.has(secId)){
+      el.style.display = '';
+    } else {
+      el.style.display = 'none';
+      // ถ้า item นี้ active อยู่ → redirect ไป overview
+      if(el.classList.contains('active')){ showSec('overview',null); }
+    }
+  });
+
+  // ── Desktop sidebar section headers: ซ่อน header ถ้า items ใต้มันซ่อนหมด ──
+  document.querySelectorAll('.sb-section').forEach(header => {
+    let sib = header.nextElementSibling;
+    let allHidden = true;
+    while(sib && !sib.classList.contains('sb-section')){
+      if(sib.classList.contains('sb-item') && sib.style.display !== 'none') allHidden = false;
+      sib = sib.nextElementSibling;
+    }
+    header.style.display = allHidden ? 'none' : '';
+  });
+
+  // ── Mobile bottom nav: ซ่อน item ที่ไม่มีสิทธิ์ ──
+  // map mob nav item id → section id
+  const _permNavMap = {
+    'mobnav-overview':  'overview',
+    'mobnav-users':     'users',
+    'mobnav-products':  'products',
+    'mobnav-wallets':   'wallets',
+  };
+  Object.entries(_permNavMap).forEach(([navId, secId]) => {
+    const el = document.getElementById(navId);
+    if(el) el.style.display = allowed.has(secId) ? '' : 'none';
+  });
+
+  // ── Mobile "More" sheet ──
+  document.querySelectorAll('.mob-sheet-btn[onclick]').forEach(el => {
+    const m = el.getAttribute('onclick').match(/mobNavGo\('([^']+)'/);
+    if(!m) return;
+    el.style.display = allowed.has(m[1]) ? '' : 'none';
+  });
+
+  // ── Guard showSec: ป้องกัน navigate ไป section ที่ไม่มีสิทธิ์ ──
+  window._permAllowed = allowed;
+}
+
+// ── Override showSec to enforce permission guard ──────────────────────────
+const _showSecOrigPerm = typeof showSec !== 'undefined' ? showSec : null;
+// (จะ override หลัง showSec ถูก define แล้ว — ดูด้านล่าง)
 function adminLogout(){
   ADMIN=null;
   try{sessionStorage.removeItem('tcc_admin');}catch(e){}
@@ -1401,23 +1508,16 @@ async function doAdminLogin(){
   if(!email||!pass){showToast('กรุณากรอก Email และ Password','warn');return;}
   showLoad('กำลังตรวจสอบ...');
   try{
-    const admins=await apiGet({action:'read',sheet:'Admins'});
+    // [v31 SECURITY FIX] verify ที่ server ผ่าน action:'adminLogin' แทนการดึง
+    // readSheet('Admins') ทั้งชุด (password_hash/two_fa_secret ของ admin ทุกคน) มาเทียบใน browser
+    const res = await apiPost({action:'adminLogin', email, password:pass});
     hideLoad();
-    if(!Array.isArray(admins)){
-      showToast('❌ เชื่อมต่อ server ไม่ได้','err');
+    if(!res || !res.success){
+      if(res && res.pending){showToast('⏳ บัญชีของคุณยังรอ Superadmin อนุมัติ','warn');return;}
+      showToast('❌ '+((res&&res.error)||'เชื่อมต่อ server ไม่ได้'),'err');
       return;
     }
-    const myHash = hashSimple(pass);
-    const found  = admins.find(a=>a.email===email);
-    if(!found){showToast('❌ ไม่พบ Email นี้ในระบบ','err');return;}
-    const admin=admins.find(a=>a.email===email&&a.password_hash===myHash);
-    if(!admin){showToast('❌ Email หรือ Password ไม่ถูกต้อง','err');return;}
-    if(admin.admin_level==='pending'){
-      showToast('⏳ บัญชีของคุณยังรอ Superadmin อนุมัติ','warn');
-      return;
-    }
-    await apiPost({action:'auditLog',event:'ADMIN_LOGIN',actor:admin.admin_id,detail:'Admin login: '+email});
-    saveAdminSession(admin);
+    saveAdminSession(res);
     hideAdminLogin();
     initOverview();
     showToast('✅ เข้าสู่ระบบ Admin สำเร็จ!');
@@ -3573,9 +3673,15 @@ function updateMobNavDots() {
   dot('mdot-dep',  depCnt  > 0);
 }
 
-// Override showSec to auto-close sidebar on mobile + sync nav dots
+// Override showSec — (1) permission guard (2) close sidebar on mobile (3) sync nav dots
 const _origShowSec = showSec;
 showSec = function(id, el) {
+  // Permission guard: ถ้า section นี้ไม่มีสิทธิ์ → toast แล้วไป overview
+  if (window._permAllowed && !window._permAllowed.has(id)) {
+    showToast('⛔ คุณไม่มีสิทธิ์เข้าถึงส่วนนี้', 'err');
+    _origShowSec('overview', null);
+    return;
+  }
   _origShowSec(id, el);
   if (window.innerWidth <= 768) closeSidebar();
   setTimeout(updateMobNavDots, 200);
