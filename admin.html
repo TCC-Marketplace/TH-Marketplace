@@ -1,4 +1,17 @@
 <!DOCTYPE html>
+<!-- TCC Admin Panel v28
+     v28 NEW  — Full Mobile App-Style UI Redesign
+                  • Mobile Bottom Navigation Bar (5 tabs: Dashboard / Users / Products / Finance / More)
+                  • "More" bottom sheet: KYC, Seller Apps, Reviews, Global TX, FF Refresh, Referral, Settings, Logout
+                  • Mobile Section Headers (icon + title + action buttons) แทน ptitle ที่ซ่อนบน mobile
+                  • Bottom Nav Notification Dots (kyc, product pending, deposit pending)
+                  • Modal เปลี่ยนเป็น Bottom Sheet style (slide up, drag handle, rounded top)
+                  • Filter bar: horizontal scroll chips (ไม่ wrap)
+                  • Toast ปรับตำแหน่งเหนือ bottom nav บน mobile
+                  • Safe area inset support (notch/home bar iPhones)
+                  • Login screen: ซ่อน bottom nav อัตโนมัติ
+                  • Desktop: ไม่กระทบเลย — bottom nav ซ่อน, ptitle/sidebar ทำงานปกติ
+
 <!-- TCC Admin Panel v27
      v27 FIX  — Mobile Responsive + Modal Popup Fix
                   • เพิ่ม @media (max-width:768px): sidebar drawer, hamburger, section padding, grid, modal
@@ -220,85 +233,370 @@ textarea.fi{resize:vertical;min-height:70px;}
 @keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
 
 /* ══════════════════════════════════════════════════
-   MOBILE RESPONSIVE — v27
+   MOBILE RESPONSIVE — v28 (Full App-Style Redesign)
    ══════════════════════════════════════════════════ */
 
-/* Hamburger button (hidden on desktop) */
-.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;padding:6px;cursor:pointer;border-radius:var(--r);border:1px solid var(--bdr);background:transparent;flex-shrink:0;}
+/* ── Hamburger (hidden on desktop) ── */
+.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:40px;height:40px;padding:8px;cursor:pointer;border-radius:10px;border:1px solid var(--bdr);background:var(--card);flex-shrink:0;transition:background .15s;}
+.hamburger:active{background:var(--hov);}
 .hamburger span{display:block;height:2px;border-radius:2px;background:var(--t1);transition:all .25s;}
 
-/* Sidebar overlay backdrop */
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;backdrop-filter:blur(2px);}
+/* ── Sidebar overlay backdrop ── */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:150;backdrop-filter:blur(3px);}
 .sb-overlay.open{display:block;}
 
+/* ── Mobile Bottom Navigation Bar ── */
+.mob-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:64px;
+  background:rgba(17,20,24,.97);
+  border-top:1px solid var(--bdr);
+  z-index:120;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.mob-nav-inner{
+  display:flex;align-items:stretch;height:100%;
+  padding:0 4px;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.mob-nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;border-radius:10px;margin:6px 2px;
+  transition:background .15s;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.mob-nav-item:active{background:var(--hov);}
+.mob-nav-item.active{background:rgba(240,185,11,.1);}
+.mob-nav-ico{font-size:20px;line-height:1;position:relative;}
+.mob-nav-lbl{font-size:9px;font-weight:600;color:var(--t3);letter-spacing:.3px;white-space:nowrap;}
+.mob-nav-item.active .mob-nav-lbl{color:var(--gold);}
+.mob-nav-dot{
+  position:absolute;top:-2px;right:-4px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--err);border:2px solid rgba(17,20,24,.97);
+  display:none;
+}
+.mob-nav-dot.show{display:block;}
+
+/* ── Mobile Section Header ── */
+.mob-section-header{
+  display:none;
+  align-items:center;gap:10px;
+  padding:14px 16px 10px;
+  background:var(--bg);
+  border-bottom:1px solid var(--bdr);
+  margin:-16px -16px 16px;
+}
+.mob-section-icon{font-size:22px;line-height:1;}
+.mob-section-title{font-family:var(--fd);font-size:17px;font-weight:700;flex:1;}
+.mob-section-actions{display:flex;gap:6px;align-items:center;}
+
+/* ── Mobile Filter Chips (horizontal scroll) ── */
+.mob-filter-scroll{
+  display:none;
+  overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  gap:8px;padding:4px 0 10px;
+  margin:-4px -16px 12px;
+  padding-left:16px;padding-right:16px;
+}
+.mob-filter-scroll::-webkit-scrollbar{display:none;}
+.mob-filter-scroll .fbtn{
+  flex-shrink:0;white-space:nowrap;
+  padding:7px 16px;font-size:12px;
+}
+
+/* ── Mobile Stat Cards (2-col) ── */
+.mob-stat-grid{
+  display:none;
+  grid-template-columns:1fr 1fr;gap:10px;
+  margin-bottom:14px;
+}
+.mob-stat-card{
+  background:var(--sur);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 14px 12px;
+}
+.mob-stat-lbl{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.mob-stat-val{font-family:var(--fm);font-size:1.25rem;font-weight:700;line-height:1.2;}
+.mob-stat-sub{font-size:10px;color:var(--t2);margin-top:3px;}
+
+/* ── Mobile Card Rows (table replacement) ── */
+.mob-card-list{display:none;flex-direction:column;gap:1px;background:var(--bdr);border-radius:var(--rl);overflow:hidden;border:1px solid var(--bdr);}
+.mob-card-row{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;
+  background:var(--sur);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .12s;
+  position:relative;
+}
+.mob-card-row:active{background:var(--card);}
+.mob-card-row:last-child{border-bottom:none;}
+.mob-card-avatar{
+  width:40px;height:40px;border-radius:12px;
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.mob-card-body{flex:1;min-width:0;}
+.mob-card-title{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-card-sub{font-size:11px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-card-meta{font-size:11px;color:var(--t3);margin-top:2px;}
+.mob-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.mob-card-amount{font-family:var(--fm);font-size:13px;font-weight:600;}
+.mob-card-time{font-size:10px;color:var(--t3);}
+.mob-card-chevron{color:var(--t3);font-size:14px;margin-left:2px;}
+
+/* ── Mobile Search Bar ── */
+.mob-search-wrap{
+  display:none;
+  padding:0 0 12px;
+  position:relative;
+}
+.mob-search-wrap .fi{
+  width:100%;padding-left:38px;
+  background:var(--card);border-color:var(--bdr);
+  border-radius:12px;font-size:14px;height:42px;
+}
+.mob-search-ico{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:16px;pointer-events:none;color:var(--t3);
+}
+
+/* ── Mobile Action Sheet (bottom modal) ── */
+.mob-sheet-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.6);z-index:300;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.mob-sheet-overlay.open{display:flex;align-items:flex-end;}
+.mob-sheet{
+  width:100%;background:var(--sur);
+  border-radius:20px 20px 0 0;
+  border:1px solid var(--bdr);border-bottom:none;
+  padding:12px 20px 32px;
+  padding-bottom:calc(32px + env(safe-area-inset-bottom,0px));
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.32,.72,0,1);
+}
+.mob-sheet-overlay.open .mob-sheet{transform:translateY(0);}
+.mob-sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:0 auto 16px;}
+.mob-sheet-title{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:16px;}
+.mob-sheet-btn{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 0;border-bottom:1px solid var(--bdr);
+  cursor:pointer;font-size:14px;font-weight:500;color:var(--t1);
+  -webkit-tap-highlight-color:transparent;
+  transition:color .12s;
+}
+.mob-sheet-btn:last-child{border-bottom:none;}
+.mob-sheet-btn .ico{font-size:20px;width:28px;text-align:center;}
+
 @media (max-width: 768px) {
-  /* ── Sidebar: drawer from left ── */
+
+  /* ── ROOT: body needs bottom padding for nav bar ── */
+  body{padding-bottom:64px;}
+  body.mob-no-padding{padding-bottom:0;}
+
+  /* ── Sidebar: slide-in drawer ── */
   .sidebar{
-    position:fixed;
-    top:0;left:0;
-    height:100vh;
+    position:fixed;top:0;left:0;
+    height:100vh;width:280px;
     z-index:160;
     transform:translateX(-100%);
-    transition:transform .25s ease;
-    width:260px;
-    top:0;
+    transition:transform .28s cubic-bezier(.32,.72,0,1);
+    padding-top:env(safe-area-inset-top,0px);
+    box-shadow:4px 0 32px rgba(0,0,0,.5);
   }
   .sidebar.open{transform:translateX(0);}
 
-  /* ── Main content: full width ── */
+  /* ── Layout: stack vertically ── */
   .layout{display:block;}
   .main{width:100%;}
 
-  /* ── Section padding: reduce on mobile ── */
-  .section{padding:1rem;}
-
-  /* ── TopBar ── */
+  /* ── TopBar: app-style ── */
   .hamburger{display:flex;}
-  .topbar{padding:0 1rem;gap:8px;}
+  .topbar{
+    padding:0 12px;gap:8px;
+    height:52px;
+  }
+  .topbar .logo{font-size:16px;}
   .admin-user{display:none;}
   .topbar-r{gap:6px;}
-  .topbar-r .btn{font-size:11px;padding:5px 8px;}
-
-  /* ── ptitle: stack filter controls ── */
-  .ptitle{flex-direction:column;align-items:flex-start;}
-  .ptitle .fc{flex-wrap:wrap;width:100%;gap:6px;}
-  .ptitle .fi{width:100% !important;box-sizing:border-box;}
-
-  /* ── Filter bar: wrap ── */
-  .fbar{gap:6px;}
-  .fbar .fi{width:100% !important;}
-
-  /* ── Tables: horizontal scroll (already .ox) ── */
-  .tbl{overflow-x:auto;}
-  td,th{white-space:nowrap;}
-
-  /* ── Grids: force single column on very small screens ── */
-  .g2,.g3,.g4,.g5{grid-template-columns:1fr;}
-
-  /* ── Modals: full screen on mobile ── */
-  .modal,.modal-lg{
-    width:96%;
-    max-width:none;
-    padding:1.25rem;
-    max-height:88vh;
-    border-radius:var(--rl);
+  .topbar-r .btn{
+    font-size:11px;padding:6px 10px;
+    border-radius:8px;
   }
 
-  /* ── Dashboard stats: 2 columns on mobile ── */
+  /* ── Bottom nav: show ── */
+  .mob-nav{display:block;}
+
+  /* ── Section: padding for app feel ── */
+  .section{
+    padding:16px 16px;
+    min-height:calc(100vh - 52px - 64px);
+  }
+
+  /* ── Show mobile section headers ── */
+  .mob-section-header{display:flex;}
+
+  /* ── ptitle: hide on mobile (replaced by mob-section-header) ── */
+  .ptitle{
+    display:none;
+  }
+
+  /* ── Filter bar: horizontal scroll chips mode ── */
+  .fbar{
+    overflow-x:auto;overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    flex-wrap:nowrap;
+    gap:8px;
+    padding:2px 0 10px;
+    margin-left:-16px;margin-right:-16px;
+    padding-left:16px;padding-right:16px;
+  }
+  .fbar::-webkit-scrollbar{display:none;}
+  .fbar .fbtn{flex-shrink:0;white-space:nowrap;padding:7px 15px;}
+  .fbar .fi{
+    min-width:140px;max-width:170px;flex-shrink:0;
+    font-size:13px;height:36px;padding:0 10px;
+    border-radius:18px;
+  }
+  .fbar .btn{flex-shrink:0;}
+
+  /* ── Grids: 2-col for stats, 1-col for content ── */
+  .g2,.g3,.g4{grid-template-columns:1fr;}
+  .g5{grid-template-columns:repeat(2,1fr);}
   #ov-stats.g5{grid-template-columns:repeat(2,1fr);}
 
-  /* ── Section content padding ── */
-  .card{padding:1rem;}
+  /* ── Tables: horizontal scroll with sticky first col ── */
+  .tbl{overflow-x:auto;border-radius:14px;}
+  .tbl table{min-width:600px;}
+  td,th{white-space:nowrap;font-size:12px;padding:10px 12px;}
+  th{font-size:10px;}
 
-  /* ── Global TX filter bar: wrap inputs ── */
-  #sec-global-tx .fbar{flex-direction:column;align-items:stretch;}
+  /* ── Cards: slightly reduced padding ── */
+  .card{padding:14px;border-radius:14px;}
+
+  /* ── Modals: bottom sheet style on mobile ── */
+  .mover{
+    align-items:flex-end;
+    padding:0;
+  }
+  .modal,.modal-lg{
+    width:100%;
+    max-width:none;
+    padding:20px 18px;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
+    max-height:92vh;
+    border-radius:20px 20px 0 0;
+    border-left:none;border-right:none;border-bottom:none;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* modal drag handle */
+  .modal::before,.modal-lg::before{
+    content:'';display:block;
+    width:36px;height:4px;border-radius:2px;
+    background:var(--bdr);margin:0 auto 16px;
+  }
+  .mtitle{font-size:1rem;margin-bottom:1rem;}
+
+  /* ── Buttons: larger touch targets ── */
+  .btn{padding:9px 16px;font-size:13px;}
+  .btn-sm{padding:7px 12px;font-size:12px;}
+
+  /* ── Page overview stats ── */
+  #ov-stats{gap:10px;}
+
+  /* ── Wallet cards: 2-col ── */
+  #wallet-cards{grid-template-columns:repeat(2,1fr);}
+  .wallet-card{padding:14px;}
+  .wc-bal{font-size:1.1rem;}
+
+  /* ── Filter inputs: full width stacked ── */
+  #sec-global-tx .fbar{flex-direction:column;align-items:stretch;flex-wrap:wrap;overflow-x:visible;margin-left:0;margin-right:0;padding-left:0;padding-right:0;}
   #sec-global-tx .fbar .fi,
-  #sec-global-tx .fbar .btn{width:100%;}
+  #sec-global-tx .fbar .btn{width:100%;max-width:none;min-width:auto;border-radius:var(--r);}
+
+  /* ── ptitle inside sections that need it for action buttons ── */
+  .ptitle-mob-actions{
+    display:flex;align-items:center;justify-content:flex-end;
+    gap:8px;margin-bottom:12px;flex-wrap:wrap;
+  }
+
+  /* ── Tabs: scrollable ── */
+  .tabs{
+    overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:none;
+    flex-wrap:nowrap;
+    margin-left:-16px;margin-right:-16px;
+    padding-left:16px;padding-right:16px;
+    gap:0;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{white-space:nowrap;flex-shrink:0;padding:10px 16px;font-size:13px;}
+
+  /* ── Page title fallback (sections that don't override) ── */
+  .ptitle-fallback{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .ptitle-fallback h2{font-family:var(--fd);font-size:1.1rem;font-weight:700;}
+  .ptitle-fallback h2 span{color:var(--gold);}
+
+  /* ── Alert: compact ── */
+  .alrt{padding:10px 12px;font-size:12px;border-radius:10px;}
+
+  /* ── Form inputs: larger tap targets ── */
+  .fi{height:44px;font-size:14px;border-radius:10px;padding:0 14px;}
+  textarea.fi{height:auto;padding:12px 14px;}
+  .fg{margin-bottom:14px;}
+  .fl{font-size:12px;margin-bottom:6px;}
+
+  /* ── Badge on sidebar items: keep visible ── */
+  .sb-badge{font-size:9px;padding:2px 6px;}
+
+  /* ── Overview chart: taller on mobile ── */
+  .chart-wrap{height:120px;}
+
+  /* ── Confirm modal: center on mobile ── */
+  #_aconfirm{align-items:flex-end;}
+  #_aconfirm-box{
+    width:100%;max-width:none;
+    border-radius:20px 20px 0 0;
+    padding:24px 20px;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  }
+
+  /* ── Referral filter bar ── */
+  #sec-referral-mgmt .ptitle .fc{flex-direction:column;gap:8px;width:100%;}
+  #sec-referral-mgmt .ptitle .fc .fi{width:100%;max-width:none;min-width:auto;}
 }
 
 @media (max-width: 400px) {
-  #ov-stats.g5{grid-template-columns:1fr;}
-  .section{padding:.75rem;}
+  .section{padding:12px 12px;}
+  .g5{grid-template-columns:repeat(2,1fr);}
+  #ov-stats.g5{grid-template-columns:repeat(2,1fr);}
+  .mob-stat-val{font-size:1.1rem;}
+  #wallet-cards{grid-template-columns:1fr;}
+  .topbar{height:50px;}
+  .modal,.modal-lg{max-height:95vh;}
+  .tab{padding:10px 12px;font-size:12px;}
+}
+
+/* ── Safe area support for notched phones ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 768px) {
+    .mob-nav{
+      padding-bottom:env(safe-area-inset-bottom);
+      height:calc(64px + env(safe-area-inset-bottom));
+    }
+    body{padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+  }
 }
 </style>
 </head>
@@ -306,6 +604,49 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- SIDEBAR OVERLAY (mobile) -->
 <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- MOBILE BOTTOM NAV BAR — v28 -->
+<nav class="mob-nav" id="mob-nav" aria-label="Navigation">
+  <div class="mob-nav-inner">
+    <div class="mob-nav-item active" id="mobnav-overview" onclick="mobNavGo('overview',this)" role="button" aria-label="Dashboard">
+      <div class="mob-nav-ico">📊</div>
+      <div class="mob-nav-lbl">Dashboard</div>
+    </div>
+    <div class="mob-nav-item" id="mobnav-users" onclick="mobNavGo('users',this)" role="button" aria-label="Users">
+      <div class="mob-nav-ico">👥<span class="mob-nav-dot" id="mdot-kyc"></span></div>
+      <div class="mob-nav-lbl">Users</div>
+    </div>
+    <div class="mob-nav-item" id="mobnav-products" onclick="mobNavGo('products',this)" role="button" aria-label="Products">
+      <div class="mob-nav-ico">📦<span class="mob-nav-dot" id="mdot-prod"></span></div>
+      <div class="mob-nav-lbl">Products</div>
+    </div>
+    <div class="mob-nav-item" id="mobnav-wallets" onclick="mobNavGo('wallets',this)" role="button" aria-label="Finance">
+      <div class="mob-nav-ico">💳<span class="mob-nav-dot" id="mdot-dep"></span></div>
+      <div class="mob-nav-lbl">Finance</div>
+    </div>
+    <div class="mob-nav-item" id="mobnav-more" onclick="openMobMore()" role="button" aria-label="More">
+      <div class="mob-nav-ico">⋯</div>
+      <div class="mob-nav-lbl">More</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE "MORE" ACTION SHEET — v28 -->
+<div class="mob-sheet-overlay" id="mob-more-sheet" onclick="closeMobMore()">
+  <div class="mob-sheet" onclick="event.stopPropagation()">
+    <div class="mob-sheet-handle"></div>
+    <div class="mob-sheet-title">เมนูเพิ่มเติม</div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('kyc',null);closeMobMore()"><span class="ico">🪪</span>KYC Review<span class="sb-badge warn" id="msheet-kyc-cnt" style="margin-left:auto;"></span></div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('seller-apps',null);closeMobMore()"><span class="ico">🏪</span>Seller Applications<span class="sb-badge" id="msheet-sa-cnt" style="margin-left:auto;"></span></div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('reviews',null);closeMobMore()"><span class="ico">⭐</span>Review Management</div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('global-tx',null);closeMobMore()"><span class="ico">📋</span>Global TX View</div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('funding-admin',null);closeMobMore()"><span class="ico">🎁</span>Funding Free Refresh<span class="sb-badge" id="msheet-ff-cnt" style="margin-left:auto;"></span></div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('referral-mgmt',null);closeMobMore()"><span class="ico">🤝</span>Referral Management</div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('admin-approval',null);closeMobMore()"><span class="ico">👤</span>อนุมัติ Admin<span class="sb-badge warn" id="msheet-adm-cnt" style="margin-left:auto;"></span></div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('settings',null);closeMobMore()"><span class="ico">⚙️</span>System Settings</div>
+    <div class="mob-sheet-btn" style="color:var(--err);" onclick="adminLogout();closeMobMore()"><span class="ico">🚪</span>Logout</div>
+  </div>
+</div>
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -409,6 +750,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── OVERVIEW ─── -->
 <div id="sec-overview" class="section active">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">📊</span>
+    <span class="mob-section-title">Dashboard</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initOverview()">🔄</button></div>
+  </div>
   <div class="ptitle"><h2>📊 Admin <span>Dashboard</span></h2><button class="btn btn-ghost btn-sm" onclick="initOverview()">🔄 รีเฟรช</button></div>
   <div class="g5 mb4" id="ov-stats"></div>
   <div class="g2 mb4">
@@ -431,6 +777,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── USER MANAGEMENT ─── -->
 <div id="sec-users" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">👥</span>
+    <span class="mob-section-title">User Management</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initUsers()">🔄</button></div>
+  </div>
   <div class="ptitle">
     <h2>👥 User <span>Management</span></h2>
     <div class="fc gap8">
@@ -477,6 +828,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── KYC REVIEW ─── -->
 <div id="sec-kyc" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">🪪</span>
+    <span class="mob-section-title">KYC Review</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initKYC()">🔄</button></div>
+  </div>
   <div class="ptitle">
     <h2>🪪 KYC <span>Review</span></h2>
     <div class="fc gap8">
@@ -523,6 +879,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── SELLER APPLICATIONS ─── -->
 <div id="sec-seller-apps" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">🏪</span>
+    <span class="mob-section-title">Seller Applications</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initSA()">🔄</button></div>
+  </div>
   <div class="ptitle"><h2>🏪 Seller <span>Applications</span></h2><button class="btn btn-ghost btn-sm" onclick="initSA()">🔄 รีเฟรช</button></div>
   <div class="fbar" id="sa-fbar">
     <button class="fbtn active" onclick="filterSA('all',this)">ทั้งหมด</button>
@@ -554,6 +915,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── REVIEW MANAGEMENT [NEW v7] ─── -->
 <div id="sec-reviews" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">⭐</span>
+    <span class="mob-section-title">Review Management</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initReviews()">🔄</button></div>
+  </div>
   <div class="ptitle">
     <h2>⭐ Review <span>Management</span></h2>
     <div class="fc gap8">
@@ -594,6 +960,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── PRODUCT APPROVAL ─── -->
 <div id="sec-products" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">📦</span>
+    <span class="mob-section-title">Product Approval</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initProds()">🔄</button></div>
+  </div>
   <div class="ptitle"><h2>📦 Product <span>Approval</span></h2><button class="btn btn-ghost btn-sm" onclick="initProds()">🔄 รีเฟรช</button></div>
   <div class="fbar" id="prod-fbar">
     <button class="fbtn active" onclick="filterProds('all',this)">ทั้งหมด</button>
@@ -647,6 +1018,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── WALLET MANAGEMENT ─── -->
 <div id="sec-wallets" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">💳</span>
+    <span class="mob-section-title">Wallet Management</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initWallets()">🔄</button></div>
+  </div>
   <div class="ptitle"><h2>💳 Wallet <span>Management</span></h2><button class="btn btn-ghost btn-sm" onclick="initWallets()">🔄 รีเฟรช</button></div>
   <div class="g4 mb4" id="wallet-cards"></div>
   <div class="tabs">
@@ -702,6 +1078,14 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── GLOBAL TX VIEW ─── -->
 <div id="sec-global-tx" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">📋</span>
+    <span class="mob-section-title">Global TX View</span>
+    <div class="mob-section-actions">
+      <button class="btn btn-ghost btn-sm" onclick="initGTX()">🔄</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥</button>
+    </div>
+  </div>
   <div class="ptitle">
     <h2>📋 Global <span>TX View</span></h2>
     <div class="fc gap8">
@@ -747,6 +1131,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── FUNDING FREE REFRESH ─── -->
 <div id="sec-funding-admin" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">🎁</span>
+    <span class="mob-section-title">Funding Free Refresh</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initFFAdmin()">🔄</button></div>
+  </div>
   <div class="ptitle"><h2>🎁 Funding Free <span>Refresh Panel</span></h2><button class="btn btn-ghost btn-sm" onclick="initFFAdmin()">🔄 รีเฟรช</button></div>
   <div class="fbar" id="ff-fbar">
     <button class="fbtn active" onclick="filterFF('all',this)">ทั้งหมด</button>
@@ -778,6 +1167,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── REFERRAL MANAGEMENT ─── -->
 <div id="sec-referral-mgmt" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">🤝</span>
+    <span class="mob-section-title">Referral Management</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initRef()">🔄</button></div>
+  </div>
   <div class="ptitle">
     <h2>🤝 Referral <span>Management</span></h2>
     <div class="fc gap8">
@@ -808,6 +1202,11 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── ADMIN APPROVAL ─── -->
 <div id="sec-admin-approval" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">👤</span>
+    <span class="mob-section-title">อนุมัติ Admin</span>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminApproval()">🔄</button></div>
+  </div>
   <div class="ptitle"><h2>👤 อนุมัติ <span>Admin</span></h2><button class="btn btn-ghost btn-sm" onclick="loadAdminApproval()">🔄 รีเฟรช</button></div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
@@ -825,6 +1224,10 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 <!-- ─── SYSTEM SETTINGS ─── -->
 <div id="sec-settings" class="section">
+  <div class="mob-section-header">
+    <span class="mob-section-icon">⚙️</span>
+    <span class="mob-section-title">System Settings</span>
+  </div>
   <div class="ptitle"><h2>⚙️ System <span>Settings</span></h2></div>
   <div class="g2">
     <div class="card">
@@ -2921,8 +3324,9 @@ rejectFF = async function(fid){
 };
 
 // ══════════════════════════════════════════════
-// MOBILE SIDEBAR TOGGLE — v27
+// MOBILE NAVIGATION — v28
 // ══════════════════════════════════════════════
+
 function toggleSidebar() {
   const sb = document.querySelector('.sidebar');
   const ov = document.getElementById('sb-overlay');
@@ -2940,17 +3344,120 @@ function closeSidebar() {
   document.getElementById('sb-overlay').classList.remove('open');
 }
 
-// Override showSec to auto-close sidebar on mobile
+// ── Mobile bottom nav: map nav item id → section id ──
+const MOB_NAV_MAP = {
+  'mobnav-overview': 'overview',
+  'mobnav-users':    'users',
+  'mobnav-products': 'products',
+  'mobnav-wallets':  'wallets',
+};
+
+function mobNavGo(sectionId, navEl) {
+  // Trigger existing showSec (which already handles sidebar/main logic)
+  showSec(sectionId, null);
+
+  // Update bottom nav active state
+  document.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
+  if (navEl) {
+    navEl.classList.add('active');
+  } else {
+    // Try to find which nav item maps to this section
+    const found = Object.entries(MOB_NAV_MAP).find(([k, v]) => v === sectionId);
+    if (found) {
+      const navItem = document.getElementById(found[0]);
+      if (navItem) navItem.classList.add('active');
+    }
+  }
+
+  // Scroll to top
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+// ── More Sheet ──
+function openMobMore() {
+  // Sync badge counts into sheet
+  ['kyc','sa','ff','adm'].forEach(k => {
+    const sbEl  = document.getElementById(`sb-${k}-cnt`);
+    const shEl  = document.getElementById(`msheet-${k}-cnt`);
+    if (sbEl && shEl) shEl.textContent = sbEl.textContent;
+  });
+  const sheet = document.getElementById('mob-more-sheet');
+  sheet.style.display = 'flex';
+  requestAnimationFrame(() => sheet.classList.add('open'));
+}
+function closeMobMore() {
+  const sheet = document.getElementById('mob-more-sheet');
+  sheet.classList.remove('open');
+  setTimeout(() => { sheet.style.display = 'none'; }, 300);
+}
+
+// ── Dot badges on bottom nav ──
+function updateMobNavDots() {
+  const kycCnt  = parseInt(document.getElementById('sb-kyc-cnt')?.textContent  || '0');
+  const prodCnt = parseInt(document.getElementById('sb-prod-cnt')?.textContent || '0');
+  const depCnt  = document.getElementById('dep-badge')?.style.display !== 'none' ? 1 : 0;
+  const dot = (id, show) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('show', show);
+  };
+  dot('mdot-kyc',  kycCnt  > 0);
+  dot('mdot-prod', prodCnt > 0);
+  dot('mdot-dep',  depCnt  > 0);
+}
+
+// Override showSec to auto-close sidebar on mobile + sync nav dots
 const _origShowSec = showSec;
 showSec = function(id, el) {
   _origShowSec(id, el);
   if (window.innerWidth <= 768) closeSidebar();
+  setTimeout(updateMobNavDots, 200);
 };
 
+// ── Update dots after each data load ──
+const _origHideLoad = hideLoad;
+hideLoad = function() {
+  _origHideLoad();
+  setTimeout(updateMobNavDots, 300);
+};
+
+// ── Toast: adjust position for mobile ──
+function _adjustToastPosition() {
+  const t = document.getElementById('_toast');
+  if (!t) return;
+  if (window.innerWidth <= 768) {
+    Object.assign(t.style, {
+      bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+      right: '12px', left: '12px', textAlign: 'center'
+    });
+  } else {
+    Object.assign(t.style, { bottom: '24px', right: '24px', left: 'auto', textAlign: 'left' });
+  }
+}
+window.addEventListener('resize', _adjustToastPosition);
+
+// ── Login screen: hide bottom nav ──
+function showAdminLoginMob() {
+  document.getElementById('mob-nav').style.display = 'none';
+  document.body.classList.add('mob-no-padding');
+}
+function hideAdminLoginMob() {
+  document.getElementById('mob-nav').style.display = '';
+  document.body.classList.remove('mob-no-padding');
+}
+
+// Patch showAdminLogin / hideAdminLogin to sync mob-nav visibility
+const _origShow = showAdminLogin;
+const _origHide = hideAdminLogin;
+showAdminLogin = function() { _origShow(); showAdminLoginMob(); };
+hideAdminLogin = function() { _origHide(); hideAdminLoginMob(); };
+
 // ─── INIT ───
-// INIT
 loadAdminSession();
-if(ADMIN) initOverview();
+if (ADMIN) initOverview();
+_adjustToastPosition();
+if (ADMIN) setTimeout(updateMobNavDots, 800);
 
 </script>
 </body>
