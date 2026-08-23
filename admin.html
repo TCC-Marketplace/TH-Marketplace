@@ -2512,6 +2512,11 @@ async function loadAdminApproval() {
   }
 
   // All admins — card grid
+  // Store admin objects in a global Map keyed by admin_id — avoids JSON-in-attribute escaping
+  window._adminMap = window._adminMap || new Map();
+  window._adminMap.clear();
+  active.forEach(a => window._adminMap.set(String(a.admin_id), a));
+
   if(!active.length){
     allEl.innerHTML='<div class="tsm tm">ยังไม่มี Admin ในระบบ</div>';
   } else {
@@ -2523,8 +2528,9 @@ async function loadAdminApproval() {
           ? {bg:'rgba(240,185,11,.12)',clr:'var(--gold)',border:'rgba(240,185,11,.25)'}
           : {bg:'rgba(24,144,255,.12)',clr:'var(--inf)',border:'rgba(24,144,255,.25)'};
         const initials = (a.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const safeId = String(a.admin_id).replace(/'/g,"\\'");
         return `
-        <div onclick="openAdminDetail(${JSON.stringify(JSON.stringify(a))})"
+        <div onclick="openAdminDetail('${safeId}')"
           style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:10px;"
           onmouseover="this.style.borderColor='var(--bdg)';this.style.background='var(--hov)'"
           onmouseout="this.style.borderColor='var(--bdr)';this.style.background='var(--card)'">
@@ -3632,8 +3638,9 @@ if (ADMIN) setTimeout(updateMobNavDots, 800);
 
 <script>
 // ── openAdminDetail — shows card popup with full info + change-level action ──
-function openAdminDetail(jsonStr) {
-  const a = JSON.parse(jsonStr);
+function openAdminDetail(admin_id) {
+  const a = (window._adminMap||new Map()).get(String(admin_id));
+  if(!a){ console.warn('openAdminDetail: admin not found', admin_id); return; }
   const lvlColor = a.admin_level==='superadmin'
     ? {bg:'rgba(246,70,93,.13)',clr:'var(--err)',border:'rgba(246,70,93,.25)'}
     : a.admin_level==='admin'
