@@ -6673,6 +6673,8 @@ async function loadSession(){
   const _lastSync = SESSION._lastSyncAt || 0;
   if(SESSION._synced_this_session && (Date.now() - _lastSync) < _SYNC_TTL){
     console.log('[loadSession v40] cache hit — skip GAS call, synced', Math.round((Date.now()-_lastSync)/1000), 's ago');
+    // [v47 FIX 1] cache hit ยังต้องโหลด TCC Main Balance เสมอ
+    if(typeof loadMainBalance==='function') loadMainBalance();
     return;
   }
 
@@ -8679,7 +8681,9 @@ async function confirmBridgeTopup(){
       if(shopBal) shopBal.textContent = newMp.toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
       // invalidate MP_Wallets cache — บังคับโหลดยอดใหม่ครั้งต่อไป
       delete _apiCache['mpwal_'  + (SESSION.uid||SESSION.member_id)];
+      delete _apiCache['mptxs_' + (SESSION.uid||SESSION.member_id)];
       delete _apiCache['member_' + SESSION.member_id];
+      if(typeof initWallet==='function') initWallet(); // [v47 FIX 2a] refresh TX list
       showToast('✅ โอน '+amount.toLocaleString()+' USDT เข้า MP สำเร็จ!');
     } else {
       showToast('❌ '+(d?.error||res?.error||'โอนไม่สำเร็จ'),'err');
@@ -8719,7 +8723,9 @@ async function confirmBridgeWithdraw(){
       const shopBal = document.getElementById('shop-wallet-bal');
       if(shopBal) shopBal.textContent = newMp.toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
       delete _apiCache['mpwal_'  + (SESSION.uid||SESSION.member_id)];
+      delete _apiCache['mptxs_' + (SESSION.uid||SESSION.member_id)];
       delete _apiCache['member_' + SESSION.member_id];
+      if(typeof initWallet==='function') initWallet(); // [v47 FIX 2a] refresh TX list
       showToast('✅ ถอน '+amount.toLocaleString()+' USDT กลับ TCC สำเร็จ!');
     } else {
       showToast('❌ '+(d2?.error||res?.error||'ถอนไม่สำเร็จ'),'err');
@@ -9018,6 +9024,7 @@ async function shopCheckout(){
     delete _apiCache['mptxs_' + _cacheUid];
     delete _apiCache['member_' + SESSION.member_id];
     delete _apiCache['orders_' + SESSION.uid];  // [v18 FIX] key เปลี่ยนเป็น uid แล้ว
+    if(typeof initWallet==='function') initWallet(); // [v47 FIX 2b] refresh TX list หลังซื้อ
 
     // อัปเดต UI
     const wb = document.getElementById('wb');
