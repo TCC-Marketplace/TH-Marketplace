@@ -236,14 +236,9 @@ textarea.fi{resize:vertical;min-height:70px;}
    MOBILE RESPONSIVE — v28 (Full App-Style Redesign)
    ══════════════════════════════════════════════════ */
 
-/* ── Hamburger (hidden on desktop) ── */
-.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:40px;height:40px;padding:8px;cursor:pointer;border-radius:10px;border:1px solid var(--bdr);background:var(--card);flex-shrink:0;transition:background .15s;}
-.hamburger:active{background:var(--hov);}
-.hamburger span{display:block;height:2px;border-radius:2px;background:var(--t1);transition:all .25s;}
-
-/* ── Sidebar overlay backdrop ── */
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:150;backdrop-filter:blur(3px);}
-.sb-overlay.open{display:block;}
+/* ── Sidebar overlay backdrop (removed — hamburger removed v29) ── */
+.sb-overlay{display:none;}
+/* hamburger removed v29 */
 
 /* ── Mobile Bottom Navigation Bar ── */
 .mob-nav{
@@ -403,35 +398,22 @@ textarea.fi{resize:vertical;min-height:70px;}
   body{padding-bottom:64px;}
   body.mob-no-padding{padding-bottom:0;}
 
-  /* ── Sidebar: slide-in drawer ── */
-  .sidebar{
-    position:fixed;top:0;left:0;
-    height:100vh;width:280px;
-    z-index:160;
-    transform:translateX(-100%);
-    transition:transform .28s cubic-bezier(.32,.72,0,1);
-    padding-top:env(safe-area-inset-top,0px);
-    box-shadow:4px 0 32px rgba(0,0,0,.5);
-  }
-  .sidebar.open{transform:translateX(0);}
+  /* ── Sidebar: hidden on mobile (no drawer — v29) ── */
+  .sidebar{display:none;}
 
-  /* ── Layout: stack vertically ── */
+  /* ── Layout: full width (v29 — no sidebar on mobile) ── */
   .layout{display:block;}
-  .main{width:100%;}
+  .main{width:100%;max-width:100%;overflow-x:hidden;}
 
-  /* ── TopBar: app-style ── */
-  .hamburger{display:flex;}
+  /* ── TopBar: app-style (v29: hamburger removed, topbar-r hidden) ── */
   .topbar{
-    padding:0 12px;gap:8px;
+    padding:0 14px;gap:8px;
     height:52px;
   }
   .topbar .logo{font-size:16px;}
   .admin-user{display:none;}
-  .topbar-r{gap:6px;}
-  .topbar-r .btn{
-    font-size:11px;padding:6px 10px;
-    border-radius:8px;
-  }
+  .logo-badge{display:none;}
+  .topbar-r{display:none;}
 
   /* ── Bottom nav: show ── */
   .mob-nav{display:block;}
@@ -475,11 +457,12 @@ textarea.fi{resize:vertical;min-height:70px;}
   .g5{grid-template-columns:repeat(2,1fr);}
   #ov-stats.g5{grid-template-columns:repeat(2,1fr);}
 
-  /* ── Tables: horizontal scroll with sticky first col ── */
-  .tbl{overflow-x:auto;border-radius:14px;}
-  .tbl table{min-width:600px;}
-  td,th{white-space:nowrap;font-size:12px;padding:10px 12px;}
-  th{font-size:10px;}
+  /* ── Tables: hidden on mobile → replaced by mob-card-list (v29) ── */
+  .tbl{display:none;}
+  .pag{display:none;}
+  /* ── mob-card-list: show on mobile ── */
+  .mob-card-list{display:flex;}
+  .mob-card-row{min-height:64px;}
 
   /* ── Cards: slightly reduced padding ── */
   .card{padding:14px;border-radius:14px;}
@@ -583,7 +566,7 @@ textarea.fi{resize:vertical;min-height:70px;}
   #ov-stats.g5{grid-template-columns:repeat(2,1fr);}
   .mob-stat-val{font-size:1.1rem;}
   #wallet-cards{grid-template-columns:1fr;}
-  .topbar{height:50px;}
+  .topbar{height:50px;padding:0 12px;}
   .modal,.modal-lg{max-height:95vh;}
   .tab{padding:10px 12px;font-size:12px;}
 }
@@ -602,8 +585,7 @@ textarea.fi{resize:vertical;min-height:70px;}
 </head>
 <body>
 
-<!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+<!-- v29: sb-overlay removed (hamburger removed) -->
 
 <!-- MOBILE BOTTOM NAV BAR — v28 -->
 <nav class="mob-nav" id="mob-nav" aria-label="Navigation">
@@ -648,11 +630,9 @@ textarea.fi{resize:vertical;min-height:70px;}
   </div>
 </div>
 
-<!-- TOP BAR -->
+<!-- TOP BAR — v29: mobile = logo+name only; desktop = full bar -->
 <div class="topbar">
-  <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="เมนู">
-    <span></span><span></span><span></span>
-  </button>
+  <!-- v29: hamburger removed — desktop sidebar always visible, mobile uses bottom nav -->
   <div class="logo" style="display:flex;align-items:center;gap:8px;">
     <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="TCC Admin" style="width:28px;height:28px;object-fit:contain;border-radius:6px;flex-shrink:0;filter:drop-shadow(0 0 5px rgba(246,70,93,.4));">
     TCC<span>Admin</span>
@@ -799,6 +779,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <table><thead><tr><th>UID</th><th>Email</th><th>Role</th><th>KYC</th><th>2FA</th><th>สถานะ</th><th>สมัครเมื่อ</th><th>จัดการ</th></tr></thead>
     <tbody id="u-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="u-cards"></div>
   <div class="pag" id="u-pag"></div>
 </div>
 
@@ -847,6 +829,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <table><thead><tr><th>UID</th><th>ชื่อ</th><th>เอกสาร</th><th>ส่งเมื่อ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
     <tbody id="kyc-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="kyc-cards"></div>
 </div>
 
 <!-- KYC REVIEW MODAL -->
@@ -895,6 +879,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <table><thead><tr><th>UID</th><th>ชื่อผู้สมัคร</th><th>ชื่อร้าน</th><th>หมวดหมู่</th><th>KYC</th><th>ส่งเมื่อ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
     <tbody id="sa-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="sa-cards"></div>
 </div>
 
 <!-- SELLER APP REVIEW MODAL -->
@@ -940,6 +926,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     </tr></thead>
     <tbody id="rv-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="rv-cards"></div>
 </div>
 
 <!-- REVIEW DETAIL MODAL -->
@@ -976,6 +964,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <table><thead><tr><th>สินค้า</th><th>ร้านค้า</th><th>หมวดหมู่</th><th>ราคา</th><th>Payout</th><th>Rating</th><th>Reviews</th><th>ส่งเมื่อ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
     <tbody id="prod-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="prod-cards"></div>
 </div>
 
 <!-- PRODUCT REVIEW MODAL -->
@@ -1115,6 +1105,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <table><thead><tr><th>TX ID</th><th>เวลา</th><th>Wallet</th><th>UID</th><th>ประเภท</th><th>รายละเอียด</th><th>จำนวน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
     <tbody id="gtx-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="gtx-cards"></div>
   <div class="pag" id="gtx-pag"></div>
 </div>
 
@@ -1147,6 +1139,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <table><thead><tr><th>Request ID</th><th>UID</th><th>Email</th><th>ยอดซื้อรวม</th><th>Rights ก่อนหน้า</th><th>ส่งเมื่อ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
     <tbody id="ff-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="ff-cards"></div>
 </div>
 
 <!-- FF APPROVE/REJECT MODAL -->
@@ -1198,6 +1192,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     </tr></thead>
     <tbody id="ref-table"></tbody></table>
   </div>
+  <!-- v29 mobile card list -->
+  <div class="mob-card-list" id="ref-cards"></div>
 </div>
 
 <!-- ─── ADMIN APPROVAL ─── -->
@@ -1635,6 +1631,22 @@ function filterUsers() {
     <td class="tsm tm">${u.joined}</td>
     <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openUserDetail('${u.uid}')">👁 ดูรายละเอียด</button></td>
   </tr>`).join('') || nodata(8);
+  // v29: mob-card render
+  const uCards = document.getElementById('u-cards');
+  if(uCards) uCards.innerHTML = paged.map(u => `
+    <div class="mob-card-row" onclick="openUserDetail('${u.uid}')">
+      <div class="mob-card-avatar">${u.role==='Seller'?'🏪':u.role==='Admin'?'🛡️':'👤'}</div>
+      <div class="mob-card-body">
+        <div class="mob-card-title">${u.email}</div>
+        <div class="mob-card-sub">${u.uid} · ${u.joined}</div>
+        <div class="mob-card-meta">${kycBdg(u.kyc)} <span class="bdg ${u.role==='Admin'?'bdg-err':u.role==='Seller'?'bdg-warn':'bdg-inf'}" style="font-size:10px;">${u.role}</span></div>
+      </div>
+      <div class="mob-card-right">
+        <span class="bdg ${u.status==='active'?'bdg-ok':'bdg-err'}" style="font-size:10px;">${u.status==='active'?'Active':'Suspended'}</span>
+        <span class="mob-card-time">${u.fa?'🔐 2FA':'—'}</span>
+      </div>
+      <span class="mob-card-chevron">›</span>
+    </div>`).join('') || '<div class="empty"><div class="empty-ico">👥</div>ไม่พบข้อมูล</div>';
   renderPag('u-pag', Math.ceil(users.length/U_PP), uPage, p => { uPage = p; filterUsers(); });
 }
 function openUserDetail(uid) {
@@ -1759,6 +1771,21 @@ function filterKYC() {
     <td>${kycBdg(k.status)}</td>
     <td>${k.status==='pending'?`<button class="btn btn-inf btn-sm" onclick="openKYCModal('${k.id}')">🔍 ตรวจสอบ</button>`:'<span class="tsm tm">ดำเนินการแล้ว</span>'}</td>
   </tr>`).join('') || nodata(6);
+  // v29: mob-card render
+  const kycCards = document.getElementById('kyc-cards');
+  if(kycCards) kycCards.innerHTML = items.map(k => `
+    <div class="mob-card-row" onclick="openKYCModal('${k.id}')">
+      <div class="mob-card-avatar">🪪</div>
+      <div class="mob-card-body">
+        <div class="mob-card-title">${k.full_name || k.phone || k.name || k.uid}</div>
+        <div class="mob-card-sub">${k.uid} · ${k.doc}</div>
+        <div class="mob-card-meta">${k.submitted}</div>
+      </div>
+      <div class="mob-card-right">
+        ${kycBdg(k.status)}
+      </div>
+      <span class="mob-card-chevron">›</span>
+    </div>`).join('') || '<div class="empty"><div class="empty-ico">🪪</div>ไม่พบข้อมูล</div>';
   document.getElementById('sb-kyc-cnt').textContent = DA.kyc.filter(k => k.status==='pending').length;
 }
 // ✅ [FIXED] openKYCModal — แสดงรูปเอกสารจริงจาก KYC_Documents sheet
@@ -1875,6 +1902,22 @@ function filterSA(st, btn) {
     <td>${saBdg(s.status)}</td>
     <td>${s.status==='pending'?`<button class="btn btn-inf btn-sm" onclick="openSAModal('${s.id}')">🔍 พิจารณา</button>`:'<span class="tsm tm">ดำเนินการแล้ว</span>'}</td>
   </tr>`).join('') || nodata(8);
+  // v29: mob-card render
+  const saCards = document.getElementById('sa-cards');
+  if(saCards) saCards.innerHTML = items.map(s => `
+    <div class="mob-card-row" onclick="${s.status==='pending'?`openSAModal('${s.id}')`:'void(0)'}">
+      <div class="mob-card-avatar">🏪</div>
+      <div class="mob-card-body">
+        <div class="mob-card-title">${s.shop}</div>
+        <div class="mob-card-sub">${s.name} · ${s.uid}</div>
+        <div class="mob-card-meta"><span class="bdg bdg-muted" style="font-size:10px;">${s.cat}</span> ${kycBdg(s.kyc)}</div>
+      </div>
+      <div class="mob-card-right">
+        ${saBdg(s.status)}
+        <span class="mob-card-time">${s.submitted}</span>
+      </div>
+      <span class="mob-card-chevron">›</span>
+    </div>`).join('') || '<div class="empty"><div class="empty-ico">🏪</div>ไม่พบข้อมูล</div>';
   document.getElementById('sb-sa-cnt').textContent = DA.seller_apps.filter(s => s.status==='pending').length;
 }
 function openSAModal(sid) {
@@ -1951,6 +1994,22 @@ function filterProds(st, btn) {
     <td>${prodSt(p.status)}</td>
     <td>${p.status==='pending'?`<button class="btn btn-inf btn-sm" onclick="openProdModal('${p.id}')">🔍 ตรวจสอบ</button>`:'<span class="tsm tm">ดำเนินการแล้ว</span>'}</td>
   </tr>`).join('') || nodata(10);
+  // v29: mob-card render
+  const prodCards = document.getElementById('prod-cards');
+  if(prodCards) prodCards.innerHTML = items.map(p => `
+    <div class="mob-card-row" onclick="${p.status==='pending'?`openProdModal('${p.id}')`:'void(0)'}">
+      <div class="mob-card-avatar" style="font-size:22px;">${p.ico}</div>
+      <div class="mob-card-body">
+        <div class="mob-card-title">${p.name}</div>
+        <div class="mob-card-sub">${p.seller} · <span class="bdg bdg-muted" style="font-size:10px;">${p.cat}</span></div>
+        <div class="mob-card-meta">${p.submitted}</div>
+      </div>
+      <div class="mob-card-right">
+        <span class="mob-card-amount tg">${p.price.toLocaleString()} USDT</span>
+        ${prodSt(p.status)}
+      </div>
+      <span class="mob-card-chevron">›</span>
+    </div>`).join('') || '<div class="empty"><div class="empty-ico">📦</div>ไม่พบข้อมูล</div>';
   document.getElementById('sb-prod-cnt').textContent = DA.products.filter(p => p.status==='pending').length;
 }
 function openProdModal(pid) {
@@ -2101,7 +2160,6 @@ function filterGTX() {
   document.getElementById('gtx-table').innerHTML = paged.map(t => {
     const plus = String(t.amt).startsWith('+'), minus = String(t.amt).startsWith('-');
     const hashLink = t.hash ? fmtTxHash(t.hash, t.network) : '';
-    // ✅ FIX: แสดงปุ่ม Approve/Reject สำหรับ Deposit ที่ยัง pending
     const isDepositPending = t.type === 'Deposit' && t.status === 'pending';
     const actionCell = isDepositPending
       ? `<td><div class="fc gap4">
@@ -2121,6 +2179,29 @@ function filterGTX() {
       ${actionCell}
     </tr>`;
   }).join('') || nodata(9);
+  // v29: mob-card render
+  const gtxCards = document.getElementById('gtx-cards');
+  if(gtxCards) gtxCards.innerHTML = paged.map(t => {
+    const plus = String(t.amt).startsWith('+'), minus = String(t.amt).startsWith('-');
+    const isDepPend = t.type==='Deposit' && t.status==='pending';
+    return `<div class="mob-card-row" onclick="openTxDetail('${t.id}')">
+      <div class="mob-card-avatar"><span class="bdg ${typeColor(t.type)}" style="font-size:11px;padding:4px 6px;">${t.type.slice(0,4)}</span></div>
+      <div class="mob-card-body">
+        <div class="mob-card-title">${t.desc}</div>
+        <div class="mob-card-sub">${t.uid} · <span class="bdg bdg-muted" style="font-size:10px;">${t.wallet}</span></div>
+        <div class="mob-card-meta">${t.date}</div>
+        ${isDepPend?`<div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="btn btn-ok btn-sm" style="font-size:11px;padding:4px 10px;" onclick="event.stopPropagation();doApproveDeposit('${t.id}','${t.uid}',${t.rawAmt||0})">✅ Approve</button>
+          <button class="btn btn-err btn-sm" style="font-size:11px;padding:4px 10px;" onclick="event.stopPropagation();doRejectDeposit('${t.id}')">❌ Reject</button>
+        </div>`:''}
+      </div>
+      <div class="mob-card-right">
+        <span class="mob-card-amount ${plus?'tok':minus?'terr':'tg'}">${t.amt}</span>
+        ${t.status==='success'?'<span class="bdg bdg-ok" style="font-size:10px;">✓</span>':t.status==='pending'?'<span class="bdg bdg-warn" style="font-size:10px;">⏳</span>':'<span class="bdg bdg-err" style="font-size:10px;">✗</span>'}
+      </div>
+      <span class="mob-card-chevron">›</span>
+    </div>`;
+  }).join('') || '<div class="empty"><div class="empty-ico">📋</div>ไม่พบข้อมูล</div>';
   renderPag('gtx-pag', Math.ceil(txs.length/GTX_PP), gtxPage, p => { gtxPage = p; filterGTX(); });
 }
 function fmtTxHash(hash, network) {
@@ -2161,6 +2242,22 @@ function filterFF(st, btn) {
     <td>${ffStBdg(f.status)}</td>
     <td>${f.status==='pending'?`<button class="btn btn-inf btn-sm" onclick="openFFModal('${f.id}')">🔍 พิจารณา</button>`:'<span class="tsm tm">ดำเนินการแล้ว</span>'}</td>
   </tr>`).join('') || nodata(8);
+  // v29: mob-card render
+  const ffCards = document.getElementById('ff-cards');
+  if(ffCards) ffCards.innerHTML = items.map(f => `
+    <div class="mob-card-row" onclick="${f.status==='pending'?`openFFModal('${f.id}')`:'void(0)'}">
+      <div class="mob-card-avatar">🎁</div>
+      <div class="mob-card-body">
+        <div class="mob-card-title">${f.email}</div>
+        <div class="mob-card-sub">${f.uid} · ${f.id}</div>
+        <div class="mob-card-meta">Rights: <span class="terr" style="font-weight:700;">${f.old_rights}/5</span> · ${f.submitted}</div>
+      </div>
+      <div class="mob-card-right">
+        <span class="mob-card-amount tg">${f.total_buy.toLocaleString()} USDT</span>
+        ${ffStBdg(f.status)}
+      </div>
+      <span class="mob-card-chevron">›</span>
+    </div>`).join('') || '<div class="empty"><div class="empty-ico">🎁</div>ไม่พบข้อมูล</div>';
   document.getElementById('sb-ff-cnt').textContent = DA.ff_requests.filter(f => f.status==='pending').length;
 }
 function openFFModal(fid) {
@@ -2311,10 +2408,9 @@ function filterRef() {
     return matchQ && matchType && matchStatus;
   });
 
-  document.getElementById('ref-table').innerHTML = items.length
-    ? [...items]
-        .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
-        .map(r => {
+  const sortedRefs = [...items].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+  document.getElementById('ref-table').innerHTML = sortedRefs.length
+    ? sortedRefs.map(r => {
           const isPaid = r.commission_status === 'paid';
           const isBuyer = r.referred_type === 'buyer';
           return `<tr>
@@ -2342,6 +2438,26 @@ function filterRef() {
           </tr>`;
         }).join('')
     : `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--t3);">ไม่พบข้อมูล</td></tr>`;
+  // v29: mob-card render
+  const refCards = document.getElementById('ref-cards');
+  if(refCards) refCards.innerHTML = sortedRefs.length
+    ? sortedRefs.map(r => {
+        const isPaid = r.commission_status === 'paid';
+        const isBuyer = r.referred_type === 'buyer';
+        return `<div class="mob-card-row">
+          <div class="mob-card-avatar">${isBuyer?'👤':'🏪'}</div>
+          <div class="mob-card-body">
+            <div class="mob-card-title">${r._referrer_email} → ${r._referred_email}</div>
+            <div class="mob-card-sub"><span class="bdg ${isBuyer?'bdg-inf':'bdg-warn'}" style="font-size:10px;">${r.referred_type||'—'}</span> · ${r.ref_id||'—'}</div>
+            <div class="mob-card-meta">${String(r.created_at||'').slice(0,10)||'—'} · Rate: ${r.commission_rate_pct||0}%</div>
+          </div>
+          <div class="mob-card-right">
+            <span class="mob-card-amount ${isPaid?'tok':'tg'}">+${Number(r.commission_amount||0).toFixed(2)} USDT</span>
+            ${isPaid?'<span class="bdg bdg-ok" style="font-size:10px;">จ่ายแล้ว</span>':'<span class="bdg bdg-warn" style="font-size:10px;">รอจ่าย</span>'}
+          </div>
+        </div>`;
+      }).join('')
+    : '<div class="empty"><div class="empty-ico">🤝</div>ไม่พบข้อมูล</div>';
 }
 
 // ═══════════════════════════════════════
@@ -2687,6 +2803,8 @@ let _allReviews = [];
 
 async function initReviews() {
   document.getElementById('rv-table').innerHTML = `<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--t3);">กำลังโหลด...</td></tr>`;
+  const rvCardsEl = document.getElementById('rv-cards');
+  if(rvCardsEl) rvCardsEl.innerHTML = '<div class="empty"><div class="empty-ico">⏳</div>กำลังโหลด...</div>';
   document.getElementById('rv-stats').innerHTML = '';
   try {
     const rvs = await apiGet({ action: 'read', sheet: 'Reviews' });
@@ -2741,6 +2859,27 @@ function filterReviews() {
         </tr>`;
       }).join('')
     : nodata(9);
+  // v29: mob-card render
+  const rvCards = document.getElementById('rv-cards');
+  if(rvCards) rvCards.innerHTML = items.length
+    ? items.map(r => {
+        const isRep = r.is_reported == true || r.is_reported === 'true';
+        const stars = '★'.repeat(Math.min(5, Number(r.rating)||0));
+        return `<div class="mob-card-row" onclick="openReviewModal('${r.review_id}')">
+          <div class="mob-card-avatar" style="background:${isRep?'rgba(246,70,93,.15)':'var(--card)'};">${isRep?'🚨':'⭐'}</div>
+          <div class="mob-card-body">
+            <div class="mob-card-title">${r.username||'-'} <span style="color:var(--gold);font-size:11px;">${stars}</span></div>
+            <div class="mob-card-sub">${r.product_id||'-'}</div>
+            <div class="mob-card-meta" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${r.review_text||'—'}</div>
+          </div>
+          <div class="mob-card-right">
+            ${isRep ? '<span class="bdg bdg-err" style="font-size:10px;">Reported</span>' : '<span class="bdg bdg-muted" style="font-size:10px;">ปกติ</span>'}
+            <span class="mob-card-time">${fmtDate(r.created_at,10)||'-'}</span>
+          </div>
+          <span class="mob-card-chevron">›</span>
+        </div>`;
+      }).join('')
+    : '<div class="empty"><div class="empty-ico">⭐</div>ไม่พบข้อมูล</div>';
 }
 
 function openReviewModal(rvId) {
@@ -3082,34 +3221,63 @@ initWallets = async function(){
         if(pending.length === 0){
           depList.innerHTML = '<div class="empty"><div class="empty-ico">✅</div><p>ไม่มี Deposit ที่รอการยืนยัน</p></div>';
         } else {
-          depList.innerHTML = `
-            <table><thead><tr>
-              <th>TX ID</th><th>Member ID</th><th>จำนวน</th><th>Network</th>
-              <th>TX Hash (Blockchain)</th><th>วันที่ส่ง</th><th>จัดการ</th>
-            </tr></thead><tbody>
-            ${pending.map(t=>`<tr>
-              <td class="mono txs">${t.tx_id}</td>
-              <td class="mono tsm">${t.member_id}</td>
-              <td class="mono tg" style="font-weight:700;">+${isNaN(Number(t.amount_usdt))?'—':Number(t.amount_usdt).toLocaleString()} USDT</td>
-              <td><span class="bdg bdg-inf">${t.network||'TRC20'}</span></td>
-              <td>
-                <div class="waddr" style="font-size:10px;max-width:220px;">
-                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.blockchain_hash||'-'}</span>
-                  ${t.blockchain_hash?`<span class="cpbtn" onclick="cp('${t.blockchain_hash}')">Copy</span>`:''}
+          const isMob = window.innerWidth <= 768;
+          if(isMob){
+            // v29: mobile card style สำหรับ pending deposits
+            depList.innerHTML = `<div class="mob-card-list" style="display:flex;">` +
+              pending.map(t=>`<div class="mob-card-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;width:100%;">
+                  <div class="mob-card-avatar">📥</div>
+                  <div class="mob-card-body">
+                    <div class="mob-card-title">${t.member_id}</div>
+                    <div class="mob-card-sub">${t.tx_id} · <span class="bdg bdg-inf" style="font-size:10px;">${t.network||'TRC20'}</span></div>
+                  </div>
+                  <div class="mob-card-right">
+                    <span class="mob-card-amount tok">+${isNaN(Number(t.amount_usdt))?'—':Number(t.amount_usdt).toLocaleString()} USDT</span>
+                    <span class="mob-card-time">${fmtDate(t.created_at,10)}</span>
+                  </div>
                 </div>
-                ${t.network==='TRC20'
-                  ? `<a href="https://tronscan.org/#/transaction/${t.blockchain_hash}" target="_blank" class="tsm tg">🔍 TronScan</a>`
-                  : `<a href="https://bscscan.com/tx/${t.blockchain_hash}" target="_blank" class="tsm tg">🔍 BscScan</a>`}
-              </td>
-              <td class="tsm tm">${fmtDate(t.created_at,16)}</td>
-              <td>
-                <div class="fc g8">
-                  <button class="btn btn-ok btn-sm" onclick="doApproveDeposit('${t.tx_id}','${t.member_id}',${Number(t.amount_usdt)})">✅ Approve</button>
-                  <button class="btn btn-err btn-sm" onclick="doRejectDeposit('${t.tx_id}')">❌ Reject</button>
+                <div style="font-size:11px;color:var(--t3);word-break:break-all;padding:0 4px;">
+                  ${t.blockchain_hash
+                    ? `<span>${t.blockchain_hash.slice(0,20)}...${t.blockchain_hash.slice(-8)}</span>
+                       <a href="${t.network==='TRC20'?'https://tronscan.org/#/transaction/':'https://bscscan.com/tx/'}${t.blockchain_hash}" target="_blank" style="color:var(--inf);margin-left:6px;">🔗 ดู Explorer</a>`
+                    : '<span class="tm">ไม่มี TX Hash</span>'}
                 </div>
-              </td>
-            </tr>`).join('')}
-            </tbody></table>`;
+                <div style="display:flex;gap:8px;width:100%;">
+                  <button class="btn btn-ok btn-sm" style="flex:1;" onclick="doApproveDeposit('${t.tx_id}','${t.member_id}',${Number(t.amount_usdt)})">✅ Approve</button>
+                  <button class="btn btn-err btn-sm" style="flex:1;" onclick="doRejectDeposit('${t.tx_id}')">❌ Reject</button>
+                </div>
+              </div>`).join('') + `</div>`;
+          } else {
+            depList.innerHTML = `
+              <table><thead><tr>
+                <th>TX ID</th><th>Member ID</th><th>จำนวน</th><th>Network</th>
+                <th>TX Hash (Blockchain)</th><th>วันที่ส่ง</th><th>จัดการ</th>
+              </tr></thead><tbody>
+              ${pending.map(t=>`<tr>
+                <td class="mono txs">${t.tx_id}</td>
+                <td class="mono tsm">${t.member_id}</td>
+                <td class="mono tg" style="font-weight:700;">+${isNaN(Number(t.amount_usdt))?'—':Number(t.amount_usdt).toLocaleString()} USDT</td>
+                <td><span class="bdg bdg-inf">${t.network||'TRC20'}</span></td>
+                <td>
+                  <div class="waddr" style="font-size:10px;max-width:220px;">
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.blockchain_hash||'-'}</span>
+                    ${t.blockchain_hash?`<span class="cpbtn" onclick="cp('${t.blockchain_hash}')">Copy</span>`:''}
+                  </div>
+                  ${t.network==='TRC20'
+                    ? `<a href="https://tronscan.org/#/transaction/${t.blockchain_hash}" target="_blank" class="tsm tg">🔍 TronScan</a>`
+                    : `<a href="https://bscscan.com/tx/${t.blockchain_hash}" target="_blank" class="tsm tg">🔍 BscScan</a>`}
+                </td>
+                <td class="tsm tm">${fmtDate(t.created_at,16)}</td>
+                <td>
+                  <div class="fc g8">
+                    <button class="btn btn-ok btn-sm" onclick="doApproveDeposit('${t.tx_id}','${t.member_id}',${Number(t.amount_usdt)})">✅ Approve</button>
+                    <button class="btn btn-err btn-sm" onclick="doRejectDeposit('${t.tx_id}')">❌ Reject</button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+              </tbody></table>`;
+          }
         }
       }
 
@@ -3327,22 +3495,8 @@ rejectFF = async function(fid){
 // MOBILE NAVIGATION — v28
 // ══════════════════════════════════════════════
 
-function toggleSidebar() {
-  const sb = document.querySelector('.sidebar');
-  const ov = document.getElementById('sb-overlay');
-  const isOpen = sb.classList.contains('open');
-  if (isOpen) {
-    sb.classList.remove('open');
-    ov.classList.remove('open');
-  } else {
-    sb.classList.add('open');
-    ov.classList.add('open');
-  }
-}
-function closeSidebar() {
-  document.querySelector('.sidebar').classList.remove('open');
-  document.getElementById('sb-overlay').classList.remove('open');
-}
+// v29: toggleSidebar / closeSidebar removed — hamburger removed, mobile uses bottom nav only
+function closeSidebar() { /* no-op v29 */ }
 
 // ── Mobile bottom nav: map nav item id → section id ──
 const MOB_NAV_MAP = {
