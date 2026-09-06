@@ -1255,8 +1255,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <!-- Room list -->
     <div class="card" style="overflow:hidden;">
       <div style="font-weight:600;margin-bottom:10px;font-size:13px;">📋 ห้องแชททั้งหมด</div>
-      <div style="margin-bottom:10px;display:flex;gap:8px;">
-        <input id="chat-search-inp" class="fi" placeholder="ค้นหา Member ID / Order ID..." style="flex:1;"
+      <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input id="chat-search-inp" class="fi" placeholder="ค้นหา Member ID / Order ID..." style="flex:1;min-width:120px;"
           oninput="adminFilterChatRooms(this.value)">
         <select id="chat-type-filter" class="fi" onchange="adminFilterChatRooms(document.getElementById('chat-search-inp').value)"
           style="width:130px;">
@@ -1265,6 +1265,37 @@ textarea.fi{resize:vertical;min-height:70px;}
           <option value="private_admin">Admin Chat</option>
           <option value="group">Group</option>
         </select>
+        <button class="btn btn-gold btn-sm" onclick="adminShowCreateChatModal()" style="flex-shrink:0;">+ สร้างห้อง</button>
+      </div>
+      <!-- Modal สร้างห้องแชท -->
+      <div id="admin-create-chat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:20px;width:320px;max-width:90vw;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:14px;">💬 สร้างห้องแชทใหม่</div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 1 ID (Buyer)</label>
+            <input id="cc-m1id" class="fi" placeholder="member_id ผู้ซื้อ" style="width:100%;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 2 ID (Seller)</label>
+            <input id="cc-m2id" class="fi" placeholder="member_id ผู้ขาย" style="width:100%;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Order ID (ถ้ามี)</label>
+            <input id="cc-orderid" class="fi" placeholder="ไม่บังคับ" style="width:100%;">
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ประเภทห้อง</label>
+            <select id="cc-roomtype" class="fi" style="width:100%;">
+              <option value="private_admin">Admin Chat</option>
+              <option value="private_order">Order Chat</option>
+            </select>
+          </div>
+          <div id="cc-err" style="font-size:11px;color:var(--err);margin-bottom:8px;display:none;"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button class="btn btn-sm" onclick="adminHideCreateChatModal()">ยกเลิก</button>
+            <button class="btn btn-gold btn-sm" onclick="adminDoCreateChatRoom()">สร้างห้อง ➤</button>
+          </div>
+        </div>
       </div>
       <div id="admin-chat-room-list" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
         <div class="tsm tm" style="padding:12px;text-align:center;">กำลังโหลด...</div>
@@ -1283,7 +1314,7 @@ textarea.fi{resize:vertical;min-height:70px;}
         </div>
       </div>
       <!-- Admin reply input -->
-      <div id="admin-chat-input-wrap" style="display:none;padding:10px 12px;border-top:1px solid var(--bd);display:none;gap:8px;align-items:flex-end;">
+      <div id="admin-chat-input-wrap" style="display:none;padding:10px 12px;border-top:1px solid var(--bd);gap:8px;align-items:flex-end;">
         <textarea id="admin-chat-input" class="fi" placeholder="ส่งข้อความในฐานะ Admin..." rows="2"
           style="flex:1;resize:none;border-radius:12px;font-size:12px;"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminChatSend();}"></textarea>
@@ -4065,6 +4096,53 @@ async function adminChatSend() {
   } catch(e) {
     showToast('⚠️ ส่งข้อความไม่ได้: ' + e.message, 'warn');
     if (inputEl) inputEl.value = msg;
+  }
+}
+
+// ─── Admin สร้างห้องแชทใหม่ ────────────────────────────────────────
+function adminShowCreateChatModal() {
+  const m = document.getElementById('admin-create-chat-modal');
+  if (m) { m.style.display = 'flex'; document.getElementById('cc-err').style.display = 'none'; }
+}
+function adminHideCreateChatModal() {
+  const m = document.getElementById('admin-create-chat-modal');
+  if (m) m.style.display = 'none';
+}
+async function adminDoCreateChatRoom() {
+  const m1id     = (document.getElementById('cc-m1id')?.value || '').trim();
+  const m2id     = (document.getElementById('cc-m2id')?.value || '').trim();
+  const orderId  = (document.getElementById('cc-orderid')?.value || '').trim();
+  const roomType = document.getElementById('cc-roomtype')?.value || 'private_admin';
+  const errEl    = document.getElementById('cc-err');
+  if (!m1id || !m2id) {
+    errEl.textContent = 'กรุณาระบุ Member 1 ID และ Member 2 ID';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  try {
+    const res = await apiPost({
+      action:       'createChatRoom',
+      room_type:    roomType,
+      order_id:     orderId,
+      member1_id:   m1id,
+      member1_name: m1id,
+      member2_id:   m2id,
+      member2_name: m2id,
+      room_name:    m1id + ' & ' + m2id
+    });
+    if (res && res.success) {
+      showToast(res.existed ? '✅ ห้องมีอยู่แล้ว' : '✅ สร้างห้องแชทสำเร็จ', 'ok');
+      adminHideCreateChatModal();
+      await adminLoadChatRooms();
+      if (res.room?.room_id) adminLoadChatRoom(res.room.room_id);
+    } else {
+      errEl.textContent = res?.error || 'สร้างห้องไม่ได้';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
   }
 }
 
