@@ -1470,9 +1470,10 @@ const PERM_MAP = {
   wallets:  ['wallets','global-tx','funding-admin'],
   referrals:['referral-mgmt'],
   settings: ['settings','admin-approval'],
+  chat:     ['chat-mgmt'],
 };
 // Sections visible to ALL admins regardless of permissions
-const PERM_ALWAYS = ['overview'];
+const PERM_ALWAYS = ['overview','chat-mgmt'];
 
 function _applyPermissions(admin) {
   const lvl  = admin.admin_level || '';
