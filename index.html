@@ -9531,16 +9531,69 @@ async function loadMainBalance(){
      [vChat] CHAT PAGE — ระบบแชท Buyer ↔ Seller
      ══════════════════════════════════════════════════════════════ -->
 <style>
-#p-chat{padding:0!important;display:none;flex-direction:column;height:calc(100vh - 60px);overflow:hidden;}
-#p-chat.active{display:flex!important;}
-.chat-pw{display:flex;height:100%;overflow:hidden;}
-.chat-sidebar{width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;}
-@media(max-width:768px){
-  .chat-sidebar{position:fixed;left:0;top:0;height:100%;z-index:300;transform:translateX(-100%);transition:transform .25s ease;width:280px;}
-  #p-chat{height:calc(100vh - 64px);}
+/* ── Chat Page Layout (ยึด pattern TOS1) ── */
+#p-chat{
+  padding:0!important;
+  display:none;
+  flex-direction:column;
+  /* desktop: หัก nav-top 60px */
+  height:calc(100vh - 60px);
+  max-height:calc(100vh - 60px);
+  overflow:hidden;
+  position:relative;
 }
-.chat-sidebar.open{transform:translateX(0)!important;}
-.chat-sob{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;}
+#p-chat.active{display:flex!important;}
+
+/* chat-pw: row container สำหรับ sidebar+main (desktop เท่านั้น) */
+.chat-pw{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* Sidebar desktop: inline */
+/* Desktop: sidebar inline ใน #p-chat */
+.chat-sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--bd);
+  display:flex;flex-direction:column;overflow:hidden;
+  /* desktop: position normal (ไม่ fixed) */
+  position:relative;
+  transform:none;
+  transition:none;
+}
+
+/* mobile override */
+@media(max-width:768px){
+  /* หน้า chat: หัก nav-top (60px) + bnav-bottom (64px) + safe-area */
+  #p-chat,#p-chat.active{
+    height:calc(100dvh - 60px - 64px - env(safe-area-inset-bottom,0px))!important;
+    max-height:calc(100dvh - 60px - 64px - env(safe-area-inset-bottom,0px))!important;
+    overflow:hidden!important;
+  }
+  /* sidebar: fixed overlay on mobile, top ต้อง offset nav bar 60px */
+  .chat-sidebar{
+    position:fixed!important;
+    left:0;
+    top:60px;
+    height:calc(100dvh - 60px)!important;
+    width:280px!important;
+    z-index:300;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+  }
+  .chat-sidebar.open{transform:translateX(0)!important;}
+}
+/* desktop: ไม่ต้อง transform */
+@media(min-width:769px){
+  .chat-sidebar{transform:none!important;position:relative!important;}
+  .chat-sob{display:none!important;}  /* ซ่อน overlay บน desktop */
+}
+
+/* Sidebar overlay */
+.chat-sob{
+  display:none;
+  position:fixed;inset:0;
+  top:60px;   /* ไม่บัง nav top */
+  background:rgba(0,0,0,.5);
+  z-index:299;
+}
 .chat-sob.open{display:block;}
 .chat-sbhdr{display:flex;align-items:center;gap:8px;padding:12px 10px;border-bottom:1px solid var(--bd);flex-shrink:0;}
 .chat-sbhdr-ttl{font-size:14px;font-weight:700;flex:1;}
@@ -9553,15 +9606,32 @@ async function loadMainBalance(){
 .chat-sbname{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-sblast{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-sbbdg{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--err);color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center;}
-.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.chat-hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--bd);flex-shrink:0;}
+.chat-main{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;min-width:0;min-height:0; /* min-height:0 สำคัญมากใน flexbox */
+}
+.chat-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  background:var(--bg2);border-bottom:1px solid var(--bd);
+  flex-shrink:0;  /* ห้ามหดตัว */
+}
 .chat-hdrav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b8860b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000;flex-shrink:0;}
 .chat-hdrinfo{flex:1;min-width:0;}
 .chat-hdrname{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-hdrsub{font-size:10px;color:var(--t3);}
 .chat-sbtoggle{background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:6px;display:none;}
 @media(max-width:768px){.chat-sbtoggle{display:flex;align-items:center;}}
-.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth;}
+/* chat-msgs: flex:1 + overflow scroll — ต้อง min-height:0 หรือ overflow จะไม่ทำงาน */
+.chat-msgs{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;  /* iOS smooth scroll */
+  padding:10px 12px 6px;
+  display:flex;flex-direction:column;gap:4px;
+  scroll-behavior:smooth;
+  min-height:0;  /* critical for flexbox overflow */
+}
 .chat-datesep{text-align:center;font-size:10px;color:var(--t3);margin:6px 0;display:flex;align-items:center;gap:6px;}
 .chat-datesep::before,.chat-datesep::after{content:'';flex:1;height:1px;background:var(--bd);}
 .cmsg-row{display:flex;gap:7px;align-items:flex-end;}
@@ -9579,7 +9649,14 @@ async function loadMainBalance(){
 .cmsg-img{max-width:180px;max-height:160px;object-fit:cover;border-radius:10px;cursor:pointer;display:block;border:1px solid var(--bd);}
 .chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--t3);text-align:center;padding:2rem;}
 .chat-empty-ico{font-size:44px;}
-.chat-iw{display:flex;align-items:flex-end;gap:7px;padding:9px 10px;background:var(--bg2);border-top:1px solid var(--bd);flex-shrink:0;padding-bottom:max(9px,env(safe-area-inset-bottom));}
+.chat-iw{
+  display:flex;align-items:flex-end;gap:7px;
+  padding:9px 10px;
+  /* บน mobile ไม่ต้องเพิ่ม safe-area เพราะ #p-chat height fix แล้ว */
+  padding-bottom:9px;
+  background:var(--bg2);border-top:1px solid var(--bd);
+  flex-shrink:0;
+}
 .chat-input{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:18px;padding:8px 13px;color:var(--text);font-size:13px;outline:none;resize:none;max-height:88px;overflow-y:auto;line-height:1.4;font-family:inherit;transition:border-color .2s;}
 .chat-input:focus{border-color:var(--gold);}
 .chat-sendbtn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b8860b);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;font-size:15px;flex-shrink:0;transition:opacity .15s;}
@@ -9588,85 +9665,90 @@ async function loadMainBalance(){
 </style>
 
 <div id="p-chat" class="page">
-  <div class="chat-pw">
-    <!-- Sidebar overlay (mobile) -->
-    <div class="chat-sob" id="chatSob" onclick="chatCloseSidebar()"></div>
-    <!-- Sidebar: Room List -->
-    <div class="chat-sidebar" id="chatSidebar">
-      <div class="chat-sbhdr">
-        <span class="chat-sbhdr-ttl">💬 แชท</span>
-        <button class="chat-sbclose" onclick="chatCloseSidebar()">✕</button>
+  <!-- Sidebar overlay (fixed, mobile only) -->
+  <div class="chat-sob" id="chatSob" onclick="chatCloseSidebar()"></div>
+
+  <!-- Sidebar: Room List (fixed overlay on mobile, inline on desktop) -->
+  <div class="chat-sidebar" id="chatSidebar">
+    <div class="chat-sbhdr">
+      <span class="chat-sbhdr-ttl">💬 แชท</span>
+      <button class="chat-sbclose" onclick="chatCloseSidebar()">✕</button>
+    </div>
+    <div class="chat-sblist" id="chatRoomList">
+      <div style="padding:14px;color:var(--t3);font-size:12px;text-align:center;">กำลังโหลด...</div>
+    </div>
+  </div>
+
+  <!-- Main Chat Area — flex:1 ขยายเต็ม -->
+  <div class="chat-main">
+    <!-- Header -->
+    <div class="chat-hdr">
+      <button class="chat-sbtoggle" onclick="chatOpenSidebar()">☰</button>
+      <div class="chat-hdrav" id="chatHdrAv">?</div>
+      <div class="chat-hdrinfo">
+        <div class="chat-hdrname" id="chatHdrName">เลือกห้องแชท</div>
+        <div class="chat-hdrsub" id="chatHdrSub">—</div>
       </div>
-      <div class="chat-sblist" id="chatRoomList">
-        <div style="padding:14px;color:var(--t3);font-size:12px;text-align:center;">กำลังโหลด...</div>
+      <button class="chat-toolbtn" onclick="chatLoadMessages(true)" title="รีเฟรช">🔄</button>
+    </div>
+
+    <!-- Messages (scroll area) -->
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="chat-empty">
+        <div class="chat-empty-ico">💬</div>
+        <div style="font-size:13px;font-weight:600;">เลือกห้องแชทจากด้านซ้าย</div>
+        <div style="font-size:11px;">หรือกด 💬 แชทกับร้านค้า จากหน้า Orders</div>
       </div>
     </div>
-    <!-- Main Chat Area -->
-    <div class="chat-main">
-      <div class="chat-hdr">
-        <button class="chat-sbtoggle" onclick="chatOpenSidebar()">☰</button>
-        <div class="chat-hdrav" id="chatHdrAv">?</div>
-        <div class="chat-hdrinfo">
-          <div class="chat-hdrname" id="chatHdrName">เลือกห้องแชท</div>
-          <div class="chat-hdrsub" id="chatHdrSub">—</div>
-        </div>
-        <button class="chat-toolbtn" onclick="chatLoadMessages(true)" title="รีเฟรช">🔄</button>
-      </div>
-      <div class="chat-msgs" id="chatMsgs">
-        <div class="chat-empty">
-          <div class="chat-empty-ico">💬</div>
-          <div style="font-size:13px;font-weight:600;">เลือกห้องแชทจากด้านซ้าย</div>
-          <div style="font-size:11px;">หรือกด 💬 แชทกับร้านค้า จากหน้า Orders</div>
-        </div>
-      </div>
-      <div class="chat-iw" id="chatInputWrap" style="display:none;">
-        <input type="file" id="chatImgFile" accept="image/*" style="display:none" onchange="chatSendImage(event)">
-        <button class="chat-toolbtn" onclick="document.getElementById('chatImgFile').click()" title="ส่งรูป">📎</button>
-        <textarea id="chatInput" class="chat-input" placeholder="พิมพ์ข้อความ..." rows="1"
-          oninput="chatAutoResize(this)"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMsg();}"></textarea>
-        <button class="chat-sendbtn" id="chatSendBtn" onclick="chatSendMsg()">➤</button>
-      </div>
+
+    <!-- Input Area -->
+    <div class="chat-iw" id="chatInputWrap" style="display:none;">
+      <input type="file" id="chatImgFile" accept="image/*" style="display:none" onchange="chatSendImage(event)">
+      <button class="chat-toolbtn" onclick="document.getElementById('chatImgFile').click()" title="ส่งรูป">📎</button>
+      <textarea id="chatInput" class="chat-input" placeholder="พิมพ์ข้อความ..." rows="1"
+        oninput="chatAutoResize(this)"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMsg();}"></textarea>
+      <button class="chat-sendbtn" id="chatSendBtn" onclick="chatSendMsg()">➤</button>
     </div>
   </div>
 </div>
 
 <nav class="bnav" id="bnav">
+  <!-- 5 slots: หน้าแรก | สินค้า | TRADE(center) | แชท | โปรไฟล์ -->
   <div class="bnav-item active" id="bn-home" onclick="bnGo('home')">
     <img src="https://i.ibb.co/7dNgfK3t/TCC-Marketplace-Logo.png" alt="Home"
-         style="width:22px;height:22px;object-fit:contain;border-radius:4px;
-                opacity:0.7;transition:opacity .15s;">
+         style="width:22px;height:22px;object-fit:contain;border-radius:4px;opacity:0.7;transition:opacity .15s;">
     <span>หน้าแรก</span>
   </div>
   <div class="bnav-item" id="bn-marketplace" onclick="bnGo('marketplace')">
     <span class="bi">🛒</span><span>สินค้า</span>
   </div>
-  <!-- CHAT — [vChat] -->
-  <div class="bnav-item" id="bn-chat" onclick="bnGo('chat')" style="position:relative;">
-    <span class="bi">💬</span><span>แชท</span>
-    <span class="bnav-bdg" id="bn-chat-bdg" style="display:none;"></span>
-  </div>
-  <!-- TRADE — center floating button -->
+  <!-- TRADE — center floating button (slot 3) -->
   <div class="bnav-trade" id="bn-trade" onclick="bnGoTrade()">
     <div class="bnav-trade-icon">📈</div>
     <span>TRADE</span>
   </div>
-  <div class="bnav-item" id="bn-dashboard" onclick="bnGo('wallet')">
-    <span class="bi">💳</span><span>บัญชี</span>
-    <span class="bnav-bdg" id="bn-notif-bdg" style="display:none"></span>
+  <!-- แชท (slot 4) — [vChat] -->
+  <div class="bnav-item" id="bn-chat" onclick="bnGo('chat')" style="position:relative;">
+    <span class="bi">💬</span><span>แชท</span>
+    <span class="bnav-bdg" id="bn-chat-bdg" style="display:none;"></span>
   </div>
+  <!-- โปรไฟล์ (slot 5) -->
   <div class="bnav-item" id="bn-profile" onclick="bnGo('profile')">
     <span class="bi">👤</span><span>โปรไฟล์</span>
   </div>
 </nav>
+<!-- hidden badge anchor สำหรับ bnUpdateNotif() — ไม่แสดงผล -->
+<span id="bn-notif-bdg" style="display:none;"></span>
 <script>
 function bnGo(pg){
   go(pg);
-  const dashPgs=['wallet','orders','funding','referrals','notifications'];
-  if(dashPgs.includes(pg)) bnSetActive('dashboard');
-  else if(pg==='profile') bnSetActive('profile');
+  // bnav 5 slots: home | marketplace | TRADE | chat | profile
+  if(pg==='profile') bnSetActive('profile');
   else if(pg==='shop'||pg==='marketplace') bnSetActive('marketplace');
-  else bnSetActive(pg);
+  else if(pg==='chat') bnSetActive('chat');
+  else if(pg==='home') bnSetActive('home');
+  else bnSetActive(pg); // null = bnSetActive จะ return early ไม่ highlight ใด
 }
 function bnGoShop(){
   // navigate ไปหน้า dashboard แล้ว switch tab shop
@@ -9692,13 +9774,16 @@ function bnSetActive(key){
     home:'bn-home',
     marketplace:'bn-marketplace',
     trade:'bn-trade',
-    shop:'bn-marketplace',   // shop ไม่มีใน bnav → highlight marketplace แทน
-    chat:'bn-chat',          // [vChat]
-    dashboard:'bn-dashboard',
-    seller:'bn-seller',
+    shop:'bn-marketplace',
+    chat:'bn-chat',
+    wallet:null,
+    dashboard:null,
+    seller:null,
     profile:'bn-profile'
   };
-  const el=document.getElementById(map[key]);
+  const targetId = map[key];
+  if(!targetId) return;
+  const el=document.getElementById(targetId);
   if(el) el.classList.add('active');
 }
 function bnUpdateNotif(count){
