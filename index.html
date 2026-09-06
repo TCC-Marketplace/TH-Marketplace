@@ -4175,8 +4175,11 @@ function go(pg){
   }
   // ─── Guard: หน้าเดิมแล้ว → ข้าม re-init ───
   if(curPage===pg) return;
-  // [vChat] หยุด poll เมื่อออกจากหน้า chat
-  if(curPage==='chat' && pg!=='chat' && typeof chatStopPoll==='function') chatStopPoll();
+  // [vChat] หยุด poll เมื่อออกจากหน้า chat + คืน body scroll
+  if(curPage==='chat' && pg!=='chat') {
+    if(typeof chatStopPoll==='function') chatStopPoll();
+    document.body.style.overflow = '';  // คืน scroll
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const el=document.getElementById('p-'+pg);
   if(el){el.classList.add('active');curPage=pg;}
@@ -4222,7 +4225,7 @@ function initPg(p){
   const m={
     'home':initHome,'marketplace':initMP,
     'dashboard':()=>{ dTab(curDTab); },   // ← ไม่ force initWallet ซ้ำ — go() จัดการแล้ว
-    'chat':initChat,  // [vChat] Chat Page
+    'chat':()=>{ document.body.style.overflow='hidden'; initChat(); },  // [vChat]
     'kyc-wizard':initKYC,'seller-dashboard':initSD,'seller-shop':initSShop,
     'seller-products':initSProds,'seller-orders':()=>filterSOrd('all',null),
     'seller-wallet':initSW,'seller-analytics':initSA,
@@ -9531,68 +9534,73 @@ async function loadMainBalance(){
      [vChat] CHAT PAGE — ระบบแชท Buyer ↔ Seller
      ══════════════════════════════════════════════════════════════ -->
 <style>
-/* ── Chat Page Layout (ยึด pattern TOS1) ── */
+/* ══ Chat Page Layout — position:fixed เพื่อหนี .page inheritance ══ */
+/* position:fixed: ไม่รับ padding/max-width/margin:auto จาก .page เลย  */
 #p-chat{
-  padding:0!important;
   display:none;
+  position:fixed !important;
+  top:60px;                          /* ต่อจาก nav bar (height:60px) */
+  left:0; right:0;
+  bottom:0;                          /* ถึงขอบจอล่าง (bnav จัดการ spacing เอง) */
+  z-index:90;                        /* ต่ำกว่า nav (100) และ bnav (150) */
   flex-direction:column;
-  /* desktop: หัก nav-top 60px */
-  height:calc(100vh - 60px);
-  max-height:calc(100vh - 60px);
+  padding:0 !important;
+  margin:0 !important;
+  max-width:100% !important;
+  width:100% !important;
   overflow:hidden;
-  position:relative;
+  background:var(--bg);
 }
-#p-chat.active{display:flex!important;}
+#p-chat.active{display:flex !important;}
 
-/* chat-pw: row container สำหรับ sidebar+main (desktop เท่านั้น) */
-.chat-pw{display:flex;flex:1;overflow:hidden;min-height:0;}
+/* บน mobile: เว้นล่างสำหรับ bnav (fixed, height ~64px) */
+@media(max-width:768px){
+  #p-chat{
+    bottom:calc(64px + env(safe-area-inset-bottom,0px));
+  }
+}
 
-/* Sidebar desktop: inline */
-/* Desktop: sidebar inline ใน #p-chat */
+/* Sidebar: inline บน desktop, fixed overlay บน mobile */
 .chat-sidebar{
-  width:260px;flex-shrink:0;
-  background:var(--bg2);border-right:1px solid var(--bd);
-  display:flex;flex-direction:column;overflow:hidden;
-  /* desktop: position normal (ไม่ fixed) */
+  width:260px;
+  flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--bd);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  /* desktop: ไม่ fixed */
   position:relative;
   transform:none;
   transition:none;
 }
-
-/* mobile override */
 @media(max-width:768px){
-  /* หน้า chat: หัก nav-top (60px) + bnav-bottom (64px) + safe-area */
-  #p-chat,#p-chat.active{
-    height:calc(100dvh - 60px - 64px - env(safe-area-inset-bottom,0px))!important;
-    max-height:calc(100dvh - 60px - 64px - env(safe-area-inset-bottom,0px))!important;
-    overflow:hidden!important;
-  }
-  /* sidebar: fixed overlay on mobile, top ต้อง offset nav bar 60px */
   .chat-sidebar{
-    position:fixed!important;
+    position:fixed !important;
     left:0;
     top:60px;
-    height:calc(100dvh - 60px)!important;
-    width:280px!important;
-    z-index:300;
+    bottom:calc(64px + env(safe-area-inset-bottom,0px));
+    height:auto !important;
+    width:280px;
+    z-index:310;
     transform:translateX(-100%);
     transition:transform .25s ease;
   }
-  .chat-sidebar.open{transform:translateX(0)!important;}
+  .chat-sidebar.open{transform:translateX(0) !important;}
 }
-/* desktop: ไม่ต้อง transform */
 @media(min-width:769px){
-  .chat-sidebar{transform:none!important;position:relative!important;}
-  .chat-sob{display:none!important;}  /* ซ่อน overlay บน desktop */
+  .chat-sidebar{transform:none !important;}
+  .chat-sob{display:none !important;}
 }
 
 /* Sidebar overlay */
 .chat-sob{
   display:none;
-  position:fixed;inset:0;
-  top:60px;   /* ไม่บัง nav top */
+  position:fixed;
+  top:60px; left:0; right:0;
+  bottom:calc(64px + env(safe-area-inset-bottom,0px));
   background:rgba(0,0,0,.5);
-  z-index:299;
+  z-index:305;
 }
 .chat-sob.open{display:block;}
 .chat-sbhdr{display:flex;align-items:center;gap:8px;padding:12px 10px;border-bottom:1px solid var(--bd);flex-shrink:0;}
@@ -9607,8 +9615,12 @@ async function loadMainBalance(){
 .chat-sblast{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chat-sbbdg{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--err);color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center;}
 .chat-main{
-  flex:1;display:flex;flex-direction:column;
-  overflow:hidden;min-width:0;min-height:0; /* min-height:0 สำคัญมากใน flexbox */
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  min-width:0;
+  min-height:0;  /* critical: ทำให้ flex child สามารถ shrink และ scroll ได้ */
 }
 .chat-hdr{
   display:flex;align-items:center;gap:10px;
@@ -9650,14 +9662,31 @@ async function loadMainBalance(){
 .chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--t3);text-align:center;padding:2rem;}
 .chat-empty-ico{font-size:44px;}
 .chat-iw{
-  display:flex;align-items:flex-end;gap:7px;
-  padding:9px 10px;
-  /* บน mobile ไม่ต้องเพิ่ม safe-area เพราะ #p-chat height fix แล้ว */
-  padding-bottom:9px;
-  background:var(--bg2);border-top:1px solid var(--bd);
-  flex-shrink:0;
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+  padding:8px 10px;
+  background:var(--bg2);
+  border-top:1px solid var(--bd);
+  flex-shrink:0;  /* ห้าม shrink — ต้องอยู่ด้านล่างเสมอ */
 }
-.chat-input{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:18px;padding:8px 13px;color:var(--text);font-size:13px;outline:none;resize:none;max-height:88px;overflow-y:auto;line-height:1.4;font-family:inherit;transition:border-color .2s;}
+.chat-input{
+  flex:1;
+  background:var(--bg3);
+  border:1px solid var(--bd);
+  border-radius:18px;
+  padding:8px 13px;
+  color:var(--text);
+  font-size:13px;
+  outline:none;
+  resize:none;
+  min-height:36px;
+  max-height:88px;
+  overflow-y:auto;
+  line-height:1.4;
+  font-family:inherit;
+  transition:border-color .2s;
+}
 .chat-input:focus{border-color:var(--gold);}
 .chat-sendbtn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b8860b);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;font-size:15px;flex-shrink:0;transition:opacity .15s;}
 .chat-sendbtn:disabled{opacity:.4;cursor:not-allowed;}
@@ -11042,8 +11071,16 @@ const _CHAT_POLL_MS   = 12000;  // poll ทุก 12 วินาที
 
 // ─── เปิดหน้า Chat page ──────────────────────────────────────────────
 async function initChat() {
-  if (!SESSION) { showToast('⚠️ กรุณาเข้าสู่ระบบก่อน', 'warn'); return; }
-  await chatLoadRooms();
+  // Guard: ต้อง login ก่อน
+  if (!SESSION) {
+    showToast('⚠️ กรุณาเข้าสู่ระบบก่อน', 'warn');
+    go('home');
+    return;
+  }
+  // reset state เมื่อเข้าหน้าใหม่
+  _chatLastMsgId = null;
+  // โหลด rooms — ถ้ามี active room เดิม ให้เปิดต่อ
+  await chatLoadRooms(_chatActiveRoomId || null);
 }
 
 // ─── โหลด Room List (sidebar) ────────────────────────────────────────
