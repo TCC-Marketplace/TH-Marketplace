@@ -1270,48 +1270,32 @@ textarea.fi{resize:vertical;min-height:70px;}
       </div>
       <!-- Modal สร้างห้องแชท -->
       <div id="admin-create-chat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:20px;width:360px;max-width:92vw;max-height:90vh;overflow-y:auto;">
-          <div style="font-weight:700;font-size:14px;margin-bottom:14px;">💬 สร้างห้องแชทใหม่</div>
-          <!-- Member 1 -->
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 1 ID (Buyer) *</label>
-            <input id="cc-m1id" class="fi" placeholder="MEM-XXXXX" style="width:100%;" oninput="ccAutoName('cc-m1id','cc-m1name')">
-          </div>
+        <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:20px;width:380px;max-width:92vw;max-height:90vh;overflow-y:auto;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:14px;">🏠 สร้างห้องแชทใหม่</div>
+          <!-- ชื่อห้อง -->
           <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อ Member 1</label>
-            <input id="cc-m1name" class="fi" placeholder="กรอกเองหรือรอ Auto-fill" style="width:100%;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อห้อง *</label>
+            <input id="cc-roomname" class="fi" placeholder="เช่น ห้องทั่วไป, ทีม Marketing" style="width:100%;">
           </div>
-          <!-- Member 2 -->
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 2 ID (Seller) *</label>
-            <input id="cc-m2id" class="fi" placeholder="MEM-XXXXX" style="width:100%;" oninput="ccAutoName('cc-m2id','cc-m2name')">
+          <!-- คำอธิบาย -->
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">คำอธิบาย (ไม่บังคับ)</label>
+            <input id="cc-desc" class="fi" placeholder="ไม่บังคับ" style="width:100%;">
           </div>
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อ Member 2</label>
-            <input id="cc-m2name" class="fi" placeholder="กรอกเองหรือรอ Auto-fill" style="width:100%;">
-          </div>
-          <!-- Room name -->
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อห้องแชท (ไม่บังคับ)</label>
-            <input id="cc-roomname" class="fi" placeholder="ปล่อยว่าง = ใช้ชื่อ Member อัตโนมัติ" style="width:100%;">
-          </div>
-          <!-- Order ID -->
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Order ID (ถ้ามี)</label>
-            <input id="cc-orderid" class="fi" placeholder="ไม่บังคับ" style="width:100%;">
-          </div>
-          <!-- Type -->
-          <div style="margin-bottom:14px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ประเภทห้อง</label>
-            <select id="cc-roomtype" class="fi" style="width:100%;">
-              <option value="private_admin">Admin Chat</option>
-              <option value="private_order">Order Chat</option>
-            </select>
+          <!-- เพิ่มสมาชิก -->
+          <div style="margin-bottom:12px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">เชิญสมาชิก</label>
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <input id="cc-mem-search" class="fi" placeholder="🔍 ค้นหาชื่อหรือ Member ID..." style="flex:1;" oninput="ccSearchMembers(this.value)">
+              <button class="btn btn-sm" onclick="ccLoadAllMembers()" style="flex-shrink:0;font-size:11px;">📋 ทั้งหมด</button>
+            </div>
+            <div id="cc-mem-results" style="display:none;max-height:150px;overflow-y:auto;border:1px solid var(--bdr);border-radius:8px;padding:4px;margin-bottom:6px;background:var(--card);"></div>
+            <div id="cc-selected-wrap" style="display:flex;flex-wrap:wrap;gap:5px;min-height:24px;"></div>
           </div>
           <div id="cc-err" style="font-size:11px;color:var(--err);margin-bottom:8px;display:none;"></div>
           <div style="display:flex;gap:8px;justify-content:flex-end;">
             <button class="btn btn-sm" onclick="adminHideCreateChatModal()">ยกเลิก</button>
-            <button id="cc-submit-btn" class="btn btn-gold btn-sm" onclick="adminDoCreateChatRoom()">สร้างห้อง ➤</button>
+            <button id="cc-submit-btn" class="btn btn-gold btn-sm" onclick="adminDoCreateChatRoom()">✅ สร้างห้อง</button>
           </div>
         </div>
       </div>
@@ -4118,53 +4102,113 @@ async function adminChatSend() {
   }
 }
 
-// ─── Admin สร้างห้องแชทใหม่ ────────────────────────────────────────
+// ─── Admin สร้างห้องแชท (Group — ทุกคนเข้าร่วมได้) ─────────────────
+let _ccSelectedMembers = [];
+
 function adminShowCreateChatModal() {
-  const m = document.getElementById('admin-create-chat-modal');
-  if (!m) return;
-  // reset fields
-  ['cc-m1id','cc-m1name','cc-m2id','cc-m2name','cc-roomname','cc-orderid'].forEach(id => {
+  _ccSelectedMembers = [];
+  ['cc-roomname','cc-desc','cc-mem-search'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  const res = document.getElementById('cc-mem-results');
+  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+  const sel = document.getElementById('cc-selected-wrap');
+  if (sel) sel.innerHTML = '';
   document.getElementById('cc-err').style.display = 'none';
-  m.style.display = 'flex';
+  document.getElementById('admin-create-chat-modal').style.display = 'flex';
 }
 function adminHideCreateChatModal() {
-  const m = document.getElementById('admin-create-chat-modal');
-  if (m) m.style.display = 'none';
+  document.getElementById('admin-create-chat-modal').style.display = 'none';
 }
 
-// Auto-fill ชื่อ member จาก member_id ที่พิมพ์
-let _ccLookupTimer = {};
-function ccAutoName(idField, nameField) {
-  const mid = (document.getElementById(idField)?.value || '').trim();
-  if (_ccLookupTimer[idField]) clearTimeout(_ccLookupTimer[idField]);
-  if (!mid || mid.length < 4) return;
-  _ccLookupTimer[idField] = setTimeout(async () => {
+// ค้นหาสมาชิก (debounce 400ms)
+let _ccSearchTimer = null;
+async function ccSearchMembers(q) {
+  if (_ccSearchTimer) clearTimeout(_ccSearchTimer);
+  const res = document.getElementById('cc-mem-results');
+  if (!q || q.length < 1) { res.style.display = 'none'; return; }
+  _ccSearchTimer = setTimeout(async () => {
+    res.style.display = 'block';
+    res.innerHTML = '<div style="padding:6px;font-size:12px;color:var(--t2);">กำลังค้นหา...</div>';
     try {
-      const res = await apiGet({ action: 'getMemberData', member_id: mid });
-      if (res && res.success && res.member) {
-        const nameEl = document.getElementById(nameField);
-        if (nameEl && !nameEl.value) {
-          nameEl.value = res.member.username || res.member.member_id || mid;
-        }
-      }
-    } catch(_) {}
-  }, 600);
+      const d = await apiGet({ action: 'read', sheet: 'Members' });
+      const members = (d.data || []).filter(m =>
+        m.status !== 'suspended' &&
+        !_ccSelectedMembers.find(s => s.member_id === m.member_id) &&
+        ((m.username || '').toLowerCase().includes(q.toLowerCase()) ||
+         (m.member_id || '').toLowerCase().includes(q.toLowerCase()))
+      ).slice(0, 15);
+      if (!members.length) { res.innerHTML = '<div style="padding:6px;font-size:12px;">ไม่พบสมาชิก</div>'; return; }
+      res.innerHTML = members.map(m => {
+        const uid = m.member_id || ''; const name = m.username || uid;
+        return `<div onclick="ccSelectMember('${uid}','${name.replace(/'/g,"\\'")}','cc-mem-search')"
+          style="padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;display:flex;gap:8px;align-items:center;"
+          onmouseover="this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.background=''">
+          <span style="font-weight:600;">${name}</span>
+          <span style="color:var(--t3);font-size:11px;">${uid}</span>
+        </div>`;
+      }).join('');
+    } catch(e) { res.innerHTML = `<div style="padding:6px;font-size:12px;color:var(--err);">${e.message}</div>`; }
+  }, 400);
+}
+
+// โหลดสมาชิกทั้งหมดผ่าน checkbox picker
+async function ccLoadAllMembers() {
+  const res = document.getElementById('cc-mem-results');
+  res.style.display = 'block';
+  res.innerHTML = '<div style="padding:6px;font-size:12px;color:var(--t2);">กำลังโหลด...</div>';
+  try {
+    const d = await apiGet({ action: 'read', sheet: 'Members' });
+    const members = (d.data || []).filter(m => m.status !== 'suspended');
+    if (!members.length) { res.innerHTML = '<div style="padding:6px;font-size:12px;">ไม่พบสมาชิก</div>'; return; }
+    res.innerHTML = members.map(m => {
+      const uid = m.member_id || ''; const name = m.username || uid;
+      const checked = _ccSelectedMembers.find(s => s.member_id === uid) ? 'checked' : '';
+      return `<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:6px;font-size:12px;">
+        <input type="checkbox" class="cc-mem-cb" value="${uid}" data-name="${name.replace(/"/g,'&quot;')}" ${checked}
+          style="accent-color:var(--gold);width:14px;height:14px;">
+        <span style="font-weight:600;">${name}</span>
+        <span style="color:var(--t3);font-size:11px;">${uid}</span>
+      </label>`;
+    }).join('');
+    res.querySelectorAll('.cc-mem-cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) ccSelectMember(cb.value, cb.dataset.name, null);
+        else ccDeselectMember(cb.value);
+      });
+    });
+  } catch(e) { res.innerHTML = `<div style="padding:6px;font-size:12px;color:var(--err);">${e.message}</div>`; }
+}
+
+function ccSelectMember(uid, name, searchInputId) {
+  if (_ccSelectedMembers.find(m => m.member_id === uid)) return;
+  _ccSelectedMembers.push({ member_id: uid, username: name });
+  const sel = document.getElementById('cc-selected-wrap');
+  if (sel) {
+    const chip = document.createElement('span');
+    chip.dataset.uid = uid;
+    chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(240,185,11,.15);border:1px solid var(--gold);border-radius:20px;font-size:11px;color:var(--gold);';
+    chip.innerHTML = `${name} <span onclick="ccDeselectMember('${uid}')" style="cursor:pointer;font-size:14px;line-height:1;">×</span>`;
+    sel.appendChild(chip);
+  }
+  if (searchInputId) {
+    const inp = document.getElementById(searchInputId); if (inp) inp.value = '';
+    const res = document.getElementById('cc-mem-results'); if (res) res.style.display = 'none';
+  }
+}
+
+function ccDeselectMember(uid) {
+  _ccSelectedMembers = _ccSelectedMembers.filter(m => m.member_id !== uid);
+  const sel = document.getElementById('cc-selected-wrap');
+  if (sel) { const chip = sel.querySelector(`[data-uid="${uid}"]`); if (chip) chip.remove(); }
+  const cb = document.querySelector(`.cc-mem-cb[value="${uid}"]`); if (cb) cb.checked = false;
 }
 
 async function adminDoCreateChatRoom() {
-  const m1id     = (document.getElementById('cc-m1id')?.value    || '').trim();
-  const m1name   = (document.getElementById('cc-m1name')?.value  || '').trim() || m1id;
-  const m2id     = (document.getElementById('cc-m2id')?.value    || '').trim();
-  const m2name   = (document.getElementById('cc-m2name')?.value  || '').trim() || m2id;
-  const roomName = (document.getElementById('cc-roomname')?.value || '').trim() || (m1name + ' & ' + m2name);
-  const orderId  = (document.getElementById('cc-orderid')?.value  || '').trim();
-  const roomType = document.getElementById('cc-roomtype')?.value  || 'private_admin';
+  const roomName = (document.getElementById('cc-roomname')?.value || '').trim();
   const errEl    = document.getElementById('cc-err');
-
-  if (!m1id || !m2id) {
-    errEl.textContent = 'กรุณาระบุ Member 1 ID และ Member 2 ID';
+  if (!roomName) {
+    errEl.textContent = 'กรุณาระบุชื่อห้อง';
     errEl.style.display = 'block';
     return;
   }
@@ -4173,17 +4217,15 @@ async function adminDoCreateChatRoom() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังสร้าง...'; }
   try {
     const res = await apiPost({
-      action:       'createChatRoom',
-      room_type:    roomType,
-      order_id:     orderId,
-      member1_id:   m1id,
-      member1_name: m1name,
-      member2_id:   m2id,
-      member2_name: m2name,
-      room_name:    roomName
+      action:           'createGroupRoom',
+      room_name:        roomName,
+      created_by_id:    ADMIN?.admin_id || 'ADMIN',
+      created_by_name:  ADMIN?.name || 'Admin',
+      member_ids:       _ccSelectedMembers.map(m => m.member_id)
     });
     if (res && res.success) {
-      showToast(res.existed ? '✅ ห้องนี้มีอยู่แล้ว' : `✅ สร้างห้อง "${roomName}" สำเร็จ`, 'ok');
+      const cnt = _ccSelectedMembers.length;
+      showToast(`✅ สร้างห้อง "${roomName}" สำเร็จ` + (cnt ? ` (${cnt} สมาชิก)` : ''), 'ok');
       adminHideCreateChatModal();
       await initChatMgmt();
       if (res.room?.room_id) adminLoadChatRoom(res.room.room_id);
@@ -4195,7 +4237,7 @@ async function adminDoCreateChatRoom() {
     errEl.textContent = 'Error: ' + e.message;
     errEl.style.display = 'block';
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'สร้างห้อง ➤'; }
+    if (btn) { btn.disabled = false; btn.textContent = '✅ สร้างห้อง'; }
   }
 }
 
