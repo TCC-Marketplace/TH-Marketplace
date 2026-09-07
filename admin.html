@@ -1270,20 +1270,37 @@ textarea.fi{resize:vertical;min-height:70px;}
       </div>
       <!-- Modal สร้างห้องแชท -->
       <div id="admin-create-chat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:20px;width:320px;max-width:90vw;">
+        <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:20px;width:360px;max-width:92vw;max-height:90vh;overflow-y:auto;">
           <div style="font-weight:700;font-size:14px;margin-bottom:14px;">💬 สร้างห้องแชทใหม่</div>
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 1 ID (Buyer)</label>
-            <input id="cc-m1id" class="fi" placeholder="member_id ผู้ซื้อ" style="width:100%;">
+          <!-- Member 1 -->
+          <div style="margin-bottom:8px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 1 ID (Buyer) *</label>
+            <input id="cc-m1id" class="fi" placeholder="MEM-XXXXX" style="width:100%;" oninput="ccAutoName('cc-m1id','cc-m1name')">
           </div>
           <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 2 ID (Seller)</label>
-            <input id="cc-m2id" class="fi" placeholder="member_id ผู้ขาย" style="width:100%;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อ Member 1</label>
+            <input id="cc-m1name" class="fi" placeholder="กรอกเองหรือรอ Auto-fill" style="width:100%;">
           </div>
+          <!-- Member 2 -->
+          <div style="margin-bottom:8px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 2 ID (Seller) *</label>
+            <input id="cc-m2id" class="fi" placeholder="MEM-XXXXX" style="width:100%;" oninput="ccAutoName('cc-m2id','cc-m2name')">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อ Member 2</label>
+            <input id="cc-m2name" class="fi" placeholder="กรอกเองหรือรอ Auto-fill" style="width:100%;">
+          </div>
+          <!-- Room name -->
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อห้องแชท (ไม่บังคับ)</label>
+            <input id="cc-roomname" class="fi" placeholder="ปล่อยว่าง = ใช้ชื่อ Member อัตโนมัติ" style="width:100%;">
+          </div>
+          <!-- Order ID -->
           <div style="margin-bottom:10px;">
             <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Order ID (ถ้ามี)</label>
             <input id="cc-orderid" class="fi" placeholder="ไม่บังคับ" style="width:100%;">
           </div>
+          <!-- Type -->
           <div style="margin-bottom:14px;">
             <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ประเภทห้อง</label>
             <select id="cc-roomtype" class="fi" style="width:100%;">
@@ -1294,7 +1311,7 @@ textarea.fi{resize:vertical;min-height:70px;}
           <div id="cc-err" style="font-size:11px;color:var(--err);margin-bottom:8px;display:none;"></div>
           <div style="display:flex;gap:8px;justify-content:flex-end;">
             <button class="btn btn-sm" onclick="adminHideCreateChatModal()">ยกเลิก</button>
-            <button class="btn btn-gold btn-sm" onclick="adminDoCreateChatRoom()">สร้างห้อง ➤</button>
+            <button id="cc-submit-btn" class="btn btn-gold btn-sm" onclick="adminDoCreateChatRoom()">สร้างห้อง ➤</button>
           </div>
         </div>
       </div>
@@ -4104,39 +4121,71 @@ async function adminChatSend() {
 // ─── Admin สร้างห้องแชทใหม่ ────────────────────────────────────────
 function adminShowCreateChatModal() {
   const m = document.getElementById('admin-create-chat-modal');
-  if (m) { m.style.display = 'flex'; document.getElementById('cc-err').style.display = 'none'; }
+  if (!m) return;
+  // reset fields
+  ['cc-m1id','cc-m1name','cc-m2id','cc-m2name','cc-roomname','cc-orderid'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('cc-err').style.display = 'none';
+  m.style.display = 'flex';
 }
 function adminHideCreateChatModal() {
   const m = document.getElementById('admin-create-chat-modal');
   if (m) m.style.display = 'none';
 }
+
+// Auto-fill ชื่อ member จาก member_id ที่พิมพ์
+let _ccLookupTimer = {};
+function ccAutoName(idField, nameField) {
+  const mid = (document.getElementById(idField)?.value || '').trim();
+  if (_ccLookupTimer[idField]) clearTimeout(_ccLookupTimer[idField]);
+  if (!mid || mid.length < 4) return;
+  _ccLookupTimer[idField] = setTimeout(async () => {
+    try {
+      const res = await apiGet({ action: 'getMemberData', member_id: mid });
+      if (res && res.success && res.member) {
+        const nameEl = document.getElementById(nameField);
+        if (nameEl && !nameEl.value) {
+          nameEl.value = res.member.username || res.member.member_id || mid;
+        }
+      }
+    } catch(_) {}
+  }, 600);
+}
+
 async function adminDoCreateChatRoom() {
-  const m1id     = (document.getElementById('cc-m1id')?.value || '').trim();
-  const m2id     = (document.getElementById('cc-m2id')?.value || '').trim();
-  const orderId  = (document.getElementById('cc-orderid')?.value || '').trim();
-  const roomType = document.getElementById('cc-roomtype')?.value || 'private_admin';
+  const m1id     = (document.getElementById('cc-m1id')?.value    || '').trim();
+  const m1name   = (document.getElementById('cc-m1name')?.value  || '').trim() || m1id;
+  const m2id     = (document.getElementById('cc-m2id')?.value    || '').trim();
+  const m2name   = (document.getElementById('cc-m2name')?.value  || '').trim() || m2id;
+  const roomName = (document.getElementById('cc-roomname')?.value || '').trim() || (m1name + ' & ' + m2name);
+  const orderId  = (document.getElementById('cc-orderid')?.value  || '').trim();
+  const roomType = document.getElementById('cc-roomtype')?.value  || 'private_admin';
   const errEl    = document.getElementById('cc-err');
+
   if (!m1id || !m2id) {
     errEl.textContent = 'กรุณาระบุ Member 1 ID และ Member 2 ID';
     errEl.style.display = 'block';
     return;
   }
   errEl.style.display = 'none';
+  const btn = document.getElementById('cc-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังสร้าง...'; }
   try {
     const res = await apiPost({
       action:       'createChatRoom',
       room_type:    roomType,
       order_id:     orderId,
       member1_id:   m1id,
-      member1_name: m1id,
+      member1_name: m1name,
       member2_id:   m2id,
-      member2_name: m2id,
-      room_name:    m1id + ' & ' + m2id
+      member2_name: m2name,
+      room_name:    roomName
     });
     if (res && res.success) {
-      showToast(res.existed ? '✅ ห้องมีอยู่แล้ว' : '✅ สร้างห้องแชทสำเร็จ', 'ok');
+      showToast(res.existed ? '✅ ห้องนี้มีอยู่แล้ว' : `✅ สร้างห้อง "${roomName}" สำเร็จ`, 'ok');
       adminHideCreateChatModal();
-      await adminLoadChatRooms();
+      await initChatMgmt();
       if (res.room?.room_id) adminLoadChatRoom(res.room.room_id);
     } else {
       errEl.textContent = res?.error || 'สร้างห้องไม่ได้';
@@ -4145,6 +4194,8 @@ async function adminDoCreateChatRoom() {
   } catch(e) {
     errEl.textContent = 'Error: ' + e.message;
     errEl.style.display = 'block';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'สร้างห้อง ➤'; }
   }
 }
 
