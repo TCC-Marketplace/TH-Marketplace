@@ -11160,6 +11160,18 @@ const _CHAT_STICKER_PACKS = [
   {id:'food',   icon:'🍔', name:'อาหาร',    stickers:['🍔','🍕','🌮','🍜','🍣','🍩','🎂','🧁','🍦','🍫','☕','🧋','🍺','🥂','🍾','🍿']}
 ];
 
+// ─── Helper: _chatMyId / _chatMyName ────────────────────────────────
+// SESSION.member_id อาจว่างถ้า localStorage session เก่า — fallback หลายชั้น
+function _chatMyId() {
+  if (!SESSION) return '';
+  return String(SESSION.member_id || SESSION.uid || SESSION.bnb_id || '').trim();
+}
+function _chatMyName() {
+  if (!SESSION) return 'สมาชิก';
+  return String(SESSION.username || SESSION.full_name || SESSION.name ||
+                SESSION.member_id || SESSION.uid || 'สมาชิก').trim();
+}
+
 // ─── Helper: escHtml ─────────────────────────────────────────────────
 function escHtml(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -11228,7 +11240,7 @@ function chatStrHue(s) { let h = 0; for (const c of String(s || '')) h = (h * 31
 
 // ─── Render one message row (TOS1 style, MP fields) ─────────────────
 function chatRenderMsgRow(msg, prevMsg) {
-  const myId       = SESSION?.member_id || '';
+  const myId       = _chatMyId();
   const senderId   = String(msg.sender_id || '').trim();
   const isMine     = senderId === myId;
   const isAdmin    = String(msg.sender_role || '').toLowerCase() === 'admin';
@@ -11376,7 +11388,7 @@ async function chatToggleReaction(msgId, emoji) {
   let rx = {};
   try { rx = JSON.parse(msg.reactions_json || '{}'); } catch {}
   if (!rx._users) rx._users = {};
-  const myId = SESSION.member_id;
+  const myId = _chatMyId();
   const prev = rx._users[myId];
   if (prev === emoji) {
     delete rx._users[myId]; rx[emoji] = Math.max(0, (rx[emoji] || 1) - 1);
@@ -11416,7 +11428,7 @@ async function chatDeleteMsg(msgId) {
   if (!SESSION) return;
   if (!confirm('ลบข้อความนี้ใช่ไหม?')) return;
   try {
-    await apiPost({ action: 'deleteChatMessage', msg_id: msgId, sender_id: SESSION.member_id });
+    await apiPost({ action: 'deleteChatMessage', msg_id: msgId, sender_id: _chatMyId() });
     await chatLoadMessages(true);
     showToast('ลบข้อความแล้ว', 'ok');
   } catch(e) { showToast('⚠️ ลบไม่สำเร็จ: ' + e.message, 'warn'); }
@@ -11460,7 +11472,9 @@ function chatInsertEmoji(e) {
 async function chatSendSticker(emoji) {
   if (!_chatActiveRoomId || !SESSION) return;
   chatCloseEmoji();
-  const myName = SESSION.username || SESSION.full_name || SESSION.member_id || 'สมาชิก';
+  const myName = _chatMyName();
+  const myId   = _chatMyId();
+  if (!myId) { showToast('⚠️ กรุณาเข้าสู่ระบบใหม่', 'warn'); return; }
   // Optimistic bubble
   const tempRow = document.createElement('div');
   tempRow.className = 'cmsg-row mine';
@@ -11475,7 +11489,7 @@ async function chatSendSticker(emoji) {
     const res = await apiPost({
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
-      sender_id:   SESSION.member_id,
+      sender_id:   myId,
       sender_name: myName,
       sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
       message:     `⟦sticker⟧${emoji}`,
@@ -11518,7 +11532,7 @@ async function chatLoadRooms(selectRoomId) {
   const listEl = document.getElementById('chatRoomList');
   if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--t3);font-size:12px;text-align:center;">⏳ กำลังโหลด...</div>';
   try {
-    const res = await apiGet({ action: 'listChatRooms', member_id: SESSION.member_id });
+    const res = await apiGet({ action: 'listChatRooms', member_id: _chatMyId() });
     if (res && res.success === false) {
       console.error('[chatLoadRooms] GAS error:', res.error);
       if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--err);font-size:12px;text-align:center;">⚠️ ' + (res.error||'โหลดไม่ได้') + '</div>';
@@ -11648,8 +11662,15 @@ async function chatSendMsg() {
   _chatSending = true;
   const btnEl  = document.getElementById('chatSendBtn');
   if (btnEl) btnEl.disabled = true;
-  const myName = SESSION.username || SESSION.full_name || SESSION.member_id || 'สมาชิก';
-  const myId   = SESSION.member_id;
+  const myName = _chatMyName();
+  const myId   = _chatMyId();
+  if (!myId) {
+    showToast('⚠️ ไม่พบข้อมูลผู้ใช้ — กรุณาเข้าสู่ระบบใหม่', 'warn');
+    _chatSending = false;
+    if (document.getElementById('chatSendBtn')) document.getElementById('chatSendBtn').disabled = false;
+    inputEl.value = text;
+    return;
+  }
 
   // Optimistic bubble
   const tempId  = 'temp-' + Date.now();
@@ -11712,11 +11733,13 @@ async function chatSendImage(event) {
       imgUrl = await _chatCompressImg(file, 480, 0.55);
       if (imgUrl.length > 180000) throw new Error('รูปใหญ่เกิน — กรุณาตั้งค่า ImgBB key');
     }
-    const myName = SESSION.username || SESSION.full_name || SESSION.member_id || 'สมาชิก';
+    const myName = _chatMyName();
+    const myId   = _chatMyId();
+    if (!myId) throw new Error('ไม่พบข้อมูลผู้ใช้ — กรุณาเข้าสู่ระบบใหม่');
     const imgRes = await apiPost({
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
-      sender_id:   SESSION.member_id,
+      sender_id:   myId,
       sender_name: myName,
       sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
       message:     `⟦img⟧${imgUrl}`,
@@ -11753,7 +11776,7 @@ function _chatCompressImg(file, maxPx, quality) {
 // ─── Mark Read ───────────────────────────────────────────────────────
 async function chatMarkRead(roomId) {
   if (!roomId || !SESSION) return;
-  try { await apiPost({ action: 'markChatRead', room_id: roomId, member_id: SESSION.member_id }); } catch {}
+  try { await apiPost({ action: 'markChatRead', room_id: roomId, member_id: _chatMyId() }); } catch {}
 }
 
 // ─── Polling ─────────────────────────────────────────────────────────
@@ -11804,7 +11827,7 @@ async function startChatFromOrder(buyerId, buyerName, sellerId, sellerName, orde
 async function chatCheckUnread() {
   if (!SESSION) return 0;
   try {
-    const res   = await apiGet({ action: 'getChatUnread', member_id: SESSION.member_id });
+    const res   = await apiGet({ action: 'getChatUnread', member_id: _chatMyId() });
     const count = (res && res.unread) ? res.unread : 0;
     const bdg   = document.getElementById('bn-chat-bdg');
     if (bdg) {
