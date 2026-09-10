@@ -11472,7 +11472,7 @@ async function chatSendSticker(emoji) {
   document.getElementById('chatMsgs')?.appendChild(tempRow);
   chatScrollBottom();
   try {
-    await apiPost({
+    const res = await apiPost({
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
       sender_id:   SESSION.member_id,
@@ -11481,9 +11481,14 @@ async function chatSendSticker(emoji) {
       message:     `⟦sticker⟧${emoji}`,
       msg_type:    'text'
     });
+    if (!res || res.success === false) {
+      const errMsg = (res && res.error) ? res.error : 'GAS ไม่ตอบกลับ';
+      console.error('[chatSendSticker] GAS error:', errMsg);
+      throw new Error(errMsg);
+    }
     await new Promise(r => setTimeout(r, 600));
     await chatLoadMessages(true);
-  } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ', 'warn'); }
+  } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
 }
 
 // ─── Typing indicator (local UX only) ────────────────────────────────
@@ -11514,6 +11519,11 @@ async function chatLoadRooms(selectRoomId) {
   if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--t3);font-size:12px;text-align:center;">⏳ กำลังโหลด...</div>';
   try {
     const res = await apiGet({ action: 'listChatRooms', member_id: SESSION.member_id });
+    if (res && res.success === false) {
+      console.error('[chatLoadRooms] GAS error:', res.error);
+      if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--err);font-size:12px;text-align:center;">⚠️ ' + (res.error||'โหลดไม่ได้') + '</div>';
+      return;
+    }
     _chatRooms = (res && res.rooms) ? res.rooms : [];
     chatRenderRoomList();
     if (selectRoomId)        chatSelectRoom(selectRoomId);
@@ -11593,7 +11603,12 @@ async function chatLoadMessages(forceScroll) {
   try {
     const res = await apiGet({ action: 'listChatMessages', room_id: _chatActiveRoomId, limit: 100 });
     if (_snapRoomId !== _chatActiveRoomId) return; // room changed during fetch
-    if (!res || !res.messages) return;
+    if (!res) return;
+    if (res.success === false) {
+      console.error('[chatLoadMessages] GAS error:', res.error, '| room:', _chatActiveRoomId);
+      return;
+    }
+    if (!res.messages) return;
     const msgs    = res.messages;
     const lastId  = msgs.length ? (msgs[msgs.length - 1].msg_id || '') : '';
     const isNewMsg = msgs.length > _chatLastMsgCnt && _chatLastMsgCnt > 0;
@@ -11646,7 +11661,8 @@ async function chatSendMsg() {
   }
 
   try {
-    await apiPost({
+    console.log('[chatSendMsg] POST → room:', _chatActiveRoomId, '| sender:', myId, '| len:', text.length);
+    const res = await apiPost({
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
       sender_id:   myId,
@@ -11655,6 +11671,13 @@ async function chatSendMsg() {
       message:     text,
       msg_type:    'text'
     });
+    // ตรวจ GAS error — ถ้า success:false ต้อง throw เพื่อ rollback optimistic bubble
+    if (!res || res.success === false) {
+      const errMsg = (res && res.error) ? res.error : 'GAS ไม่ตอบกลับ';
+      console.error('[chatSendMsg] GAS error:', errMsg, '| room:', _chatActiveRoomId, '| sender:', myId);
+      throw new Error(errMsg);
+    }
+    console.log('[chatSendMsg] GAS OK → msg_id:', res.msg_id);
     await new Promise(r => setTimeout(r, 600)); // wait GAS commit
     await chatLoadMessages(true);
     // retry after 2.5s in case GAS was slow
@@ -11690,7 +11713,7 @@ async function chatSendImage(event) {
       if (imgUrl.length > 180000) throw new Error('รูปใหญ่เกิน — กรุณาตั้งค่า ImgBB key');
     }
     const myName = SESSION.username || SESSION.full_name || SESSION.member_id || 'สมาชิก';
-    await apiPost({
+    const imgRes = await apiPost({
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
       sender_id:   SESSION.member_id,
@@ -11700,6 +11723,11 @@ async function chatSendImage(event) {
       msg_type:    'image',
       image_url:   imgUrl
     });
+    if (!imgRes || imgRes.success === false) {
+      const errMsg = (imgRes && imgRes.error) ? imgRes.error : 'GAS ไม่ตอบกลับ';
+      console.error('[chatSendImage] GAS error:', errMsg);
+      throw new Error(errMsg);
+    }
     await new Promise(r => setTimeout(r, 600));
     await chatLoadMessages(true);
     showToast('✅ ส่งรูปแล้ว', 'ok');
