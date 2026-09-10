@@ -11203,7 +11203,7 @@ let _chatEmojiOpen    = false;
 let _chatCurEmojiTab  = 'emoji';
 let _chatReplyCtx     = null;   // { name, text } for reply quotes
 let _chatLastMsgCnt   = 0;
-let _chatLoadBusy     = false;   // [v7-FIX] guard: ป้องกัน concurrent chatLoadMessages
+let _chatPollInFlight = false;  // [v7-FIX2] guard เฉพาะ poll background — ไม่บล็อก forceScroll
 const _CHAT_POLL_MS   = 12000;
 
 // ─── Emoji / Sticker data ───────────────────────────────────────────
@@ -11718,8 +11718,10 @@ function chatSelectRoom(roomId) {
 // ─── โหลด Messages ───────────────────────────────────────────────────
 async function chatLoadMessages(forceScroll) {
   if (!_chatActiveRoomId) return;
-  if (_chatLoadBusy) return; // [v7-FIX] ป้องกัน concurrent fetch (poll ชน send)
-  _chatLoadBusy = true;
+  // [v7-FIX2] เฉพาะ poll background (forceScroll=false) ถ้ากำลัง in-flight อยู่แล้วให้ skip
+  // forceScroll=true (จาก chatSendMsg/chatSendSticker/chatOpenRoom) ห้าม block เด็ดขาด
+  if (!forceScroll && _chatPollInFlight) return;
+  if (!forceScroll) _chatPollInFlight = true;
   const _snapRoomId = _chatActiveRoomId; // guard against room switch mid-flight
   try {
     const res = await apiGet({ action: 'listChatMessages', room_id: _chatActiveRoomId, limit: 100 });
@@ -11730,16 +11732,18 @@ async function chatLoadMessages(forceScroll) {
       return;
     }
     if (!res.messages) return;
-    const msgs    = res.messages;
-    const lastId  = msgs.length ? (msgs[msgs.length - 1].msg_id || '') : '';
+    const msgs     = res.messages;
+    const lastId   = msgs.length ? (msgs[msgs.length - 1].msg_id || '') : '';
     const isNewMsg = msgs.length > _chatLastMsgCnt && _chatLastMsgCnt > 0;
-    if (!forceScroll && lastId === _chatLastMsgId) return; // nothing new — finally will release lock
+    if (!forceScroll && lastId === _chatLastMsgId) return; // nothing new
     _chatLastMsgId  = lastId;
     _chatLastMsgCnt = msgs.length;
     _chatMessages   = msgs;
     chatRenderMessages(forceScroll, isNewMsg);
   } catch(e) { /* silent */ }
-  finally { _chatLoadBusy = false; } // [v7-FIX] ปลด lock เสมอ ไม่ว่าจะ ok หรือ error
+  finally {
+    if (!forceScroll) _chatPollInFlight = false; // ปลด poll lock เสมอ
+  }
 }
 
 // ─── Render Messages ──────────────────────────────────────────────────
