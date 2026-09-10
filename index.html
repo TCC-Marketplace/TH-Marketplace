@@ -9420,24 +9420,49 @@ document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if
 
 // [v47 FIX 1] GAS_MAIN_URL / apiPostMain / loadMainBalance ต้องอยู่ก่อน initApp
 // ── TCC_Main GAS endpoint ─────────────────────────────────────────
-// ⚠️ ใส่ URL จาก GAS_TCC_Main deploy (เวอร์ชัน 154, 5 ส.ค. 2569) ที่นี่
-// ไฟล์: index_MP_TH_v4.html บรรทัดนี้
+// [v5-BRIDGE FIX] URL อัปเดตเป็น GAS_TCC_Main deploy ล่าสุด
+// ⚠️ ถ้า URL นี้ยัง 404 → ให้ re-deploy GAS_TCC_Main แล้วแก้ URL ด้านล่างเท่านั้น
+//    (ไม่ต้องแก้ไขโค้ดส่วนอื่น)
 const GAS_MAIN_URL = 'https://script.google.com/macros/s/AKfycbwocCEr-mQu6esBJBRRElo68Y2GLPJryhAShi9FSm__G9mD0TV5oa9IAa8cFxBn_GlILw/exec';
+// ↑ แก้เฉพาะบรรทัดนี้เมื่อ re-deploy GAS_TCC_Main ─────────────
 
+// [v5-BRIDGE FIX] apiPostMain: แยก timeout 8s ออกจาก fetchWithTimeout ของ chat (15s)
+// ป้องกัน Bridge fetch ที่ช้า/ล้มเหลวไปชน queue ของ sendChatMessage
 async function apiPostMain(body){
-  const res = await fetch(GAS_MAIN_URL,{
-    method:'POST', redirect:'follow',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify(body)
-  });
-  return res.json();
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), 8000); // 8s timeout — แยกจาก chat
+  try{
+    const res = await fetch(GAS_MAIN_URL,{
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(body),
+      signal: ctrl.signal
+    });
+    clearTimeout(tid);
+    return res.json();
+  }catch(e){
+    clearTimeout(tid);
+    if(e.name === 'AbortError') throw new Error('GAS_MAIN timeout (8s)');
+    throw e;
+  }
 }
 
 // ── Load TCC Main Balance ─────────────────────────────────────────
 // ดึงจาก GAS_TCC_Main (deploy แล้ว) — action: getUser
 // GAS_TCC_Main doPost รับ { action, data: { uid } }
+//
+// [v5-BRIDGE FIX] debounce guard — ป้องกัน double-call ที่เกิดจาก:
+//   loadSession (cache-hit) → loadMainBalance()   ... call #1
+//   loadSession → updateAuthUI() → loadMainBalance() ... call #2
+// ทั้งสองเรียกในช่วง <200ms เดียวกัน → guard ทิ้ง call ที่สองทันที
+let _loadMainBusy = false;
 async function loadMainBalance(){
   if(!SESSION?.uid) return;
+  if(_loadMainBusy){
+    console.log('[loadMainBalance] skipped — already in-flight');
+    return;
+  }
+  _loadMainBusy = true;
   try{
     const res = await apiPostMain({action:'getUser', data:{ uid: SESSION.uid }});
     // GAS_TCC_Main wrap ทุก response ใน {ok, data} → ต้องแกะ .data ก่อน
@@ -9452,6 +9477,7 @@ async function loadMainBalance(){
     if(avail) avail.textContent = bal.toLocaleString('th',{minimumFractionDigits:2});
     console.log('[loadMainBalance] uid:', SESSION.uid, 'main_balance:', bal);
   }catch(e){ console.warn('[loadMainBalance]', e.message); }
+  finally{ _loadMainBusy = false; }
 }
 
 // [v14 FIX] loadSession เป็น async — ต้อง await ก่อน initHome()
@@ -11193,16 +11219,8 @@ function chatLinkify(text) {
 
 // ─── Helper: parse message markers ──────────────────────────────────
 // Markers: ⟦del⟧ | ⟦sticker⟧emoji | ⟦img⟧url | ⟦reply:name|text⟧body
-// [v7.1] รองรับ [] fallback — Google Sheets บางครั้ง display ⟦⟧ เป็น []
-// แต่ store จริงยังเป็น unicode — normalize ก่อน parse เพื่อความแน่ใจ
 function chatParseMsg(raw) {
   raw = String(raw ?? '');
-  // Normalize: แปลง [] markers กลับเป็น ⟦⟧ (ถ้า Sheets convert มา)
-  raw = raw.replace(/^\[sticker\]/, '⟦sticker⟧')
-           .replace(/^\[img\]/, '⟦img⟧')
-           .replace(/^\[del\]/, '⟦del⟧')
-           .replace(/^\[reply:/, '⟦reply:')
-           .replace(/\]([^⟧]*)$/, (m, p1) => raw.startsWith('[reply:') ? '⟧' + p1 : m);
   let quote = null, isDeleted = false, isImg = false, imgUrl = '', isSticker = false, stickerEmoji = '', text = raw;
   if (raw.startsWith('⟦del⟧'))        { isDeleted = true; text = ''; }
   else if (raw.startsWith('⟦sticker⟧')){ isSticker = true; stickerEmoji = raw.slice(9); text = ''; }
@@ -11479,12 +11497,10 @@ function chatInsertEmoji(e) {
 // ─── Send sticker ────────────────────────────────────────────────────
 async function chatSendSticker(emoji) {
   if (!_chatActiveRoomId || !SESSION) return;
-  // [v7.1] Confirm before sending sticker
+  chatCloseEmoji();
   const myName = _chatMyName();
   const myId   = _chatMyId();
   if (!myId) { showToast('⚠️ กรุณาเข้าสู่ระบบใหม่', 'warn'); return; }
-  if (!confirm(`ส่งสติ๊กเกอร์ ${emoji} ?`)) return;
-  chatCloseEmoji();
   // Optimistic bubble
   const tempRow = document.createElement('div');
   tempRow.className = 'cmsg-row mine';
@@ -11510,8 +11526,7 @@ async function chatSendSticker(emoji) {
       console.error('[chatSendSticker] GAS error:', errMsg);
       throw new Error(errMsg);
     }
-    await new Promise(r => setTimeout(r, 300)); // [v7.1] ลดจาก 600→300ms
-    _chatLastMsgId = null;
+    await new Promise(r => setTimeout(r, 600));
     await chatLoadMessages(true);
   } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
 }
@@ -11710,9 +11725,10 @@ async function chatSendMsg() {
       throw new Error(errMsg);
     }
     console.log('[chatSendMsg] GAS OK → msg_id:', res.msg_id);
-    await new Promise(r => setTimeout(r, 300)); // [v7.1] ลดจาก 600→300ms
-    _chatLastMsgId = null; // force re-fetch
+    await new Promise(r => setTimeout(r, 600)); // wait GAS commit
     await chatLoadMessages(true);
+    // retry after 2.5s in case GAS was slow
+    setTimeout(() => { _chatLastMsgId = null; chatLoadMessages(false); }, 2500);
   } catch(e) {
     document.getElementById('chatMsg-' + tempId)?.remove();
     showToast('⚠️ ส่งไม่สำเร็จ: ' + e.message, 'warn');
@@ -11731,9 +11747,6 @@ async function chatSendImage(event) {
   if (!file) return;
   if (!file.type.startsWith('image/')) { showToast('⚠️ รองรับเฉพาะรูปภาพ', 'warn'); return; }
   if (file.size > 10 * 1024 * 1024)   { showToast('⚠️ ไฟล์ใหญ่เกิน 10MB', 'warn'); return; }
-  // [v7.1] Confirm before uploading image
-  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
-  if (!confirm(`ส่งรูปภาพ "${file.name}" (${sizeMB} MB) ?`)) return;
   const btn = document.querySelector('.chat-toolbtn[title="ส่งรูป"]');
   if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
   showToast('⏳ กำลังอัปโหลดรูป...', 'info');
@@ -11764,8 +11777,7 @@ async function chatSendImage(event) {
       console.error('[chatSendImage] GAS error:', errMsg);
       throw new Error(errMsg);
     }
-    await new Promise(r => setTimeout(r, 300)); // [v7.1] ลดจาก 600→300ms
-    _chatLastMsgId = null;
+    await new Promise(r => setTimeout(r, 600));
     await chatLoadMessages(true);
     showToast('✅ ส่งรูปแล้ว', 'ok');
   } catch(e) { showToast('⚠️ อัปโหลดไม่สำเร็จ: ' + e.message, 'warn'); }
