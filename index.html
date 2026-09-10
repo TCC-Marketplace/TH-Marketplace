@@ -783,9 +783,9 @@ textarea.fi{resize:vertical;min-height:80px;}
 #member-mobile-nav #dash-nav{display:block;}
 /* Custom confirm modal */
 #_confirm{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(11,14,17,.7);backdrop-filter:blur(4px);}
-#_confirm-box{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;}
+#_confirm-box{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;overflow:hidden;}
 #_confirm-ico{font-size:2.5rem;margin-bottom:12px;}
-#_confirm-msg{font-size:14px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
+#_confirm-msg{font-size:14px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;word-break:break-word;overflow-wrap:anywhere;}
 /* Upload preview grid */
 .img-preview-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
 .img-preview-item{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);}
@@ -11865,15 +11865,19 @@ async function chatSendImage(event) {
   }
 
   // [v5-CHAT] อัปโหลดเสร็จแล้ว → แสดง in-app confirm พร้อม thumbnail
-  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
-  // thumbnail: ถ้าเป็น data URL ใช้ได้ตรง, ถ้าเป็น https URL ก็ใช้ได้
-  const thumbSrc = imgUrl.startsWith('data:') ? imgUrl : imgUrl;
-  const previewHtml = `<img src="${thumbSrc}"
-      alt="${escHtml(file.name)}"
-      style="max-width:220px;max-height:180px;border-radius:10px;
+  // [v7-FIX] ตัดชื่อไฟล์ยาวเกินไม่ให้หลุด modal
+  const rawName  = file.name;
+  const dispName = rawName.length > 32 ? rawName.slice(0, 16) + '…' + rawName.slice(-12) : rawName;
+  const sizeStr  = file.size >= 1024 * 1024
+    ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
+    : (file.size / 1024).toFixed(0) + ' KB';
+  const previewHtml = `<img src="${escHtml(imgUrl)}"
+      alt="${escHtml(dispName)}"
+      style="max-width:min(220px,70vw);max-height:180px;border-radius:10px;
              box-shadow:0 4px 16px rgba(0,0,0,.5);display:block;margin:0 auto;">`;
-  const captionHtml = `ส่งรูป <strong>${escHtml(file.name)}</strong><br>
-      <small style="color:var(--t3);">${sizeMB} MB</small>`;
+  const captionHtml = `ส่งรูป<br>
+      <strong style="font-size:12px;word-break:break-all;display:block;margin:4px 0 2px;">${escHtml(dispName)}</strong>
+      <small style="color:var(--t3);">${sizeStr}</small>`;
 
   if (btn) { btn.textContent = '📎'; btn.disabled = false; } // คืนปุ่มก่อน modal
 
