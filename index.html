@@ -11193,8 +11193,16 @@ function chatLinkify(text) {
 
 // ─── Helper: parse message markers ──────────────────────────────────
 // Markers: ⟦del⟧ | ⟦sticker⟧emoji | ⟦img⟧url | ⟦reply:name|text⟧body
+// [v7.1] รองรับ [] fallback — Google Sheets บางครั้ง display ⟦⟧ เป็น []
+// แต่ store จริงยังเป็น unicode — normalize ก่อน parse เพื่อความแน่ใจ
 function chatParseMsg(raw) {
   raw = String(raw ?? '');
+  // Normalize: แปลง [] markers กลับเป็น ⟦⟧ (ถ้า Sheets convert มา)
+  raw = raw.replace(/^\[sticker\]/, '⟦sticker⟧')
+           .replace(/^\[img\]/, '⟦img⟧')
+           .replace(/^\[del\]/, '⟦del⟧')
+           .replace(/^\[reply:/, '⟦reply:')
+           .replace(/\]([^⟧]*)$/, (m, p1) => raw.startsWith('[reply:') ? '⟧' + p1 : m);
   let quote = null, isDeleted = false, isImg = false, imgUrl = '', isSticker = false, stickerEmoji = '', text = raw;
   if (raw.startsWith('⟦del⟧'))        { isDeleted = true; text = ''; }
   else if (raw.startsWith('⟦sticker⟧')){ isSticker = true; stickerEmoji = raw.slice(9); text = ''; }
@@ -11471,10 +11479,12 @@ function chatInsertEmoji(e) {
 // ─── Send sticker ────────────────────────────────────────────────────
 async function chatSendSticker(emoji) {
   if (!_chatActiveRoomId || !SESSION) return;
-  chatCloseEmoji();
+  // [v7.1] Confirm before sending sticker
   const myName = _chatMyName();
   const myId   = _chatMyId();
   if (!myId) { showToast('⚠️ กรุณาเข้าสู่ระบบใหม่', 'warn'); return; }
+  if (!confirm(`ส่งสติ๊กเกอร์ ${emoji} ?`)) return;
+  chatCloseEmoji();
   // Optimistic bubble
   const tempRow = document.createElement('div');
   tempRow.className = 'cmsg-row mine';
@@ -11500,7 +11510,8 @@ async function chatSendSticker(emoji) {
       console.error('[chatSendSticker] GAS error:', errMsg);
       throw new Error(errMsg);
     }
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 300)); // [v7.1] ลดจาก 600→300ms
+    _chatLastMsgId = null;
     await chatLoadMessages(true);
   } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
 }
@@ -11699,10 +11710,9 @@ async function chatSendMsg() {
       throw new Error(errMsg);
     }
     console.log('[chatSendMsg] GAS OK → msg_id:', res.msg_id);
-    await new Promise(r => setTimeout(r, 600)); // wait GAS commit
+    await new Promise(r => setTimeout(r, 300)); // [v7.1] ลดจาก 600→300ms
+    _chatLastMsgId = null; // force re-fetch
     await chatLoadMessages(true);
-    // retry after 2.5s in case GAS was slow
-    setTimeout(() => { _chatLastMsgId = null; chatLoadMessages(false); }, 2500);
   } catch(e) {
     document.getElementById('chatMsg-' + tempId)?.remove();
     showToast('⚠️ ส่งไม่สำเร็จ: ' + e.message, 'warn');
@@ -11721,6 +11731,9 @@ async function chatSendImage(event) {
   if (!file) return;
   if (!file.type.startsWith('image/')) { showToast('⚠️ รองรับเฉพาะรูปภาพ', 'warn'); return; }
   if (file.size > 10 * 1024 * 1024)   { showToast('⚠️ ไฟล์ใหญ่เกิน 10MB', 'warn'); return; }
+  // [v7.1] Confirm before uploading image
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  if (!confirm(`ส่งรูปภาพ "${file.name}" (${sizeMB} MB) ?`)) return;
   const btn = document.querySelector('.chat-toolbtn[title="ส่งรูป"]');
   if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
   showToast('⏳ กำลังอัปโหลดรูป...', 'info');
@@ -11751,7 +11764,8 @@ async function chatSendImage(event) {
       console.error('[chatSendImage] GAS error:', errMsg);
       throw new Error(errMsg);
     }
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 300)); // [v7.1] ลดจาก 600→300ms
+    _chatLastMsgId = null;
     await chatLoadMessages(true);
     showToast('✅ ส่งรูปแล้ว', 'ok');
   } catch(e) { showToast('⚠️ อัปโหลดไม่สำเร็จ: ' + e.message, 'warn'); }
