@@ -9680,7 +9680,7 @@ async function loadMainBalance(){
 .cmsg-row.mine .cmsg-name,.cmsg-row.grouped .cmsg-name{display:none;}
 
 /* ── Bubble ── */
-.cmsg-bubble{padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;white-space:pre-wrap;position:relative;cursor:pointer;transition:filter .12s;user-select:text;}
+.cmsg-bubble{padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;white-space:pre-wrap;overflow-wrap:anywhere;position:relative;cursor:pointer;transition:filter .12s;user-select:text;}
 .cmsg-bubble:active{filter:brightness(.88);}
 .cmsg-row:not(.mine) .cmsg-bubble{background:var(--bg3);border:1px solid var(--bd);border-bottom-left-radius:4px;}
 .cmsg-row.mine .cmsg-bubble{background:rgba(240,185,11,.18);border:1px solid rgba(240,185,11,.3);border-bottom-right-radius:4px;}
@@ -9754,6 +9754,9 @@ async function loadMainBalance(){
 .chat-emoji-tabs{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--bg3);}
 .chat-emoji-tab{flex:1;padding:9px 4px;font-size:12px;font-weight:600;color:var(--t3);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
 .chat-emoji-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--bg2);}
+/* [v7-FIX] ปุ่มปิด emoji picker */
+.chat-emoji-close-btn{flex-shrink:0;width:36px;height:36px;border:none;background:none;color:var(--t3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s;}
+.chat-emoji-close-btn:hover{color:var(--text);}
 .chat-emoji-content{overflow-y:auto;padding:8px 10px;flex:1;}
 .chat-emoji-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;}
 .chat-emoji-btn{font-size:21px;padding:5px;border-radius:8px;cursor:pointer;border:none;background:none;transition:all .12s;line-height:1;}
@@ -9850,6 +9853,8 @@ async function loadMainBalance(){
       <div class="chat-emoji-tabs">
         <div class="chat-emoji-tab active" id="chatEtabEmoji" onclick="chatSwitchEmojiTab('emoji')">😊 อีโมจิ</div>
         <div class="chat-emoji-tab" id="chatEtabSticker" onclick="chatSwitchEmojiTab('sticker')">🎭 สติ๊กเกอร์</div>
+        <!-- [v7-FIX] ปุ่มปิด picker -->
+        <button class="chat-emoji-close-btn" onclick="chatCloseEmoji()" title="ปิด">✕</button>
       </div>
       <div class="chat-emoji-content" id="chatEmojiContentArea"></div>
     </div>
@@ -11198,6 +11203,7 @@ let _chatEmojiOpen    = false;
 let _chatCurEmojiTab  = 'emoji';
 let _chatReplyCtx     = null;   // { name, text } for reply quotes
 let _chatLastMsgCnt   = 0;
+let _chatLoadBusy     = false;   // [v7-FIX] guard: ป้องกัน concurrent chatLoadMessages
 const _CHAT_POLL_MS   = 12000;
 
 // ─── Emoji / Sticker data ───────────────────────────────────────────
@@ -11514,13 +11520,33 @@ function chatSwitchEmojiTab(tab) {
 }
 function chatToggleEmoji() {
   _chatEmojiOpen = !_chatEmojiOpen;
-  const el = document.getElementById('chatEmojiPicker'); if (!el) return;
+  const el  = document.getElementById('chatEmojiPicker'); if (!el) return;
+  const btn = document.getElementById('chatEmojiToggleBtn');
   el.style.display = _chatEmojiOpen ? 'flex' : 'none';
-  if (_chatEmojiOpen) { chatSwitchEmojiTab(_chatCurEmojiTab); document.getElementById('chatInput')?.focus(); }
+  if (btn) btn.style.color = _chatEmojiOpen ? 'var(--gold)' : '';
+  if (_chatEmojiOpen) {
+    chatSwitchEmojiTab(_chatCurEmojiTab);
+    document.getElementById('chatInput')?.focus();
+    // [v7-FIX] click-outside: ปิด picker เมื่อคลิกนอกพื้นที่
+    setTimeout(() => {
+      document.addEventListener('click', _chatEmojiOutsideHandler);
+    }, 10);
+  } else {
+    document.removeEventListener('click', _chatEmojiOutsideHandler);
+  }
+}
+function _chatEmojiOutsideHandler(e) {
+  const picker = document.getElementById('chatEmojiPicker');
+  const btn    = document.getElementById('chatEmojiToggleBtn');
+  if (picker && !picker.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
+    chatCloseEmoji();
+  }
 }
 function chatCloseEmoji() {
   _chatEmojiOpen = false;
-  const el = document.getElementById('chatEmojiPicker'); if (el) el.style.display = 'none';
+  const el  = document.getElementById('chatEmojiPicker'); if (el) el.style.display = 'none';
+  const btn = document.getElementById('chatEmojiToggleBtn'); if (btn) btn.style.color = '';
+  document.removeEventListener('click', _chatEmojiOutsideHandler); // [v7-FIX] เคลียร์ listener
 }
 function chatInsertEmoji(e) {
   const inp = document.getElementById('chatInput'); if (!inp) return;
@@ -11692,6 +11718,8 @@ function chatSelectRoom(roomId) {
 // ─── โหลด Messages ───────────────────────────────────────────────────
 async function chatLoadMessages(forceScroll) {
   if (!_chatActiveRoomId) return;
+  if (_chatLoadBusy) return; // [v7-FIX] ป้องกัน concurrent fetch (poll ชน send)
+  _chatLoadBusy = true;
   const _snapRoomId = _chatActiveRoomId; // guard against room switch mid-flight
   try {
     const res = await apiGet({ action: 'listChatMessages', room_id: _chatActiveRoomId, limit: 100 });
@@ -11705,12 +11733,13 @@ async function chatLoadMessages(forceScroll) {
     const msgs    = res.messages;
     const lastId  = msgs.length ? (msgs[msgs.length - 1].msg_id || '') : '';
     const isNewMsg = msgs.length > _chatLastMsgCnt && _chatLastMsgCnt > 0;
-    if (!forceScroll && lastId === _chatLastMsgId) return; // nothing new
+    if (!forceScroll && lastId === _chatLastMsgId) return; // nothing new — finally will release lock
     _chatLastMsgId  = lastId;
     _chatLastMsgCnt = msgs.length;
     _chatMessages   = msgs;
     chatRenderMessages(forceScroll, isNewMsg);
   } catch(e) { /* silent */ }
+  finally { _chatLoadBusy = false; } // [v7-FIX] ปลด lock เสมอ ไม่ว่าจะ ok หรือ error
 }
 
 // ─── Render Messages ──────────────────────────────────────────────────
