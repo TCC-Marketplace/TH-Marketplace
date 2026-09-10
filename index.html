@@ -11601,8 +11601,8 @@ async function chatSendSticker(emoji) {
         if (!res || res.success === false) {
           throw new Error((res && res.error) ? res.error : 'GAS ไม่ตอบกลับ');
         }
-        await new Promise(r => setTimeout(r, 500));
-        _chatLastMsgId = null;
+        // [v8-FIX] ไม่ reset _chatLastMsgId — smart diff จะ append เฉพาะข้อความใหม่
+        await new Promise(r => setTimeout(r, 600));
         await chatLoadMessages(true);
       } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
     },
@@ -11746,15 +11746,47 @@ async function chatLoadMessages(forceScroll) {
   }
 }
 
-// ─── Render Messages ──────────────────────────────────────────────────
+// ─── Render Messages — smart diff (no full wipe → ไม่กระตุก) ────────
 function chatRenderMessages(scrollToBottom, isNewMsg) {
   const msgsEl = document.getElementById('chatMsgs'); if (!msgsEl) return;
   if (!_chatMessages.length) {
     msgsEl.innerHTML = '<div class="chat-empty"><div class="chat-empty-ico">💬</div><div style="font-size:12px;">ยังไม่มีข้อความ — เป็นคนแรกที่ทัก!</div></div>';
     return;
   }
+
   const wasBottom = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 100;
-  msgsEl.innerHTML = _chatMessages.map((m, i) => chatRenderMsgRow(m, _chatMessages[i - 1] || null)).join('');
+
+  // [v8] smart diff: อย่า wipe innerHTML ทั้งหมด
+  // 1) หา msg_id ที่อยู่ใน DOM แล้ว (รวม temp-)
+  // 2) ลบ row ที่ไม่อยู่ใน _chatMessages แล้ว (เช่น temp- ที่ถูกแทนด้วยของจริง)
+  // 3) append เฉพาะ row ที่ยังไม่มีใน DOM
+  // 4) อัพเดต date-separator ถ้าเปลี่ยน
+
+  const realIds   = new Set(_chatMessages.map(m => String(m.msg_id || m.id || '')));
+  const domRows   = msgsEl.querySelectorAll('.cmsg-row[data-mid]');
+
+  // ลบ temp- bubbles และ real rows ที่ถูกลบออกจาก GAS
+  domRows.forEach(row => {
+    const mid = row.getAttribute('data-mid') || '';
+    if (mid.startsWith('temp-') || !realIds.has(mid)) row.remove();
+  });
+
+  // หา id ที่อยู่ใน DOM หลังลบแล้ว (เฉพาะ real)
+  const presentIds = new Set(
+    Array.from(msgsEl.querySelectorAll('.cmsg-row[data-mid]'))
+      .map(r => r.getAttribute('data-mid') || '')
+  );
+
+  // append เฉพาะ rows ที่ยังไม่มีใน DOM
+  let lastInserted = null;
+  _chatMessages.forEach((m, i) => {
+    const mid = String(m.msg_id || m.id || '');
+    if (presentIds.has(mid)) { lastInserted = mid; return; }
+    const html = chatRenderMsgRow(m, _chatMessages[i - 1] || null);
+    msgsEl.insertAdjacentHTML('beforeend', html);
+    lastInserted = mid;
+  });
+
   const pill = document.getElementById('chatNewPill');
   if (isNewMsg && !wasBottom) { if (pill) pill.style.display = 'block'; }
   if (scrollToBottom || wasBottom) chatScrollBottom();
@@ -11821,19 +11853,39 @@ async function chatSendMsg() {
       throw new Error(errMsg);
     }
     console.log('[chatSendMsg] GAS OK → msg_id:', res.msg_id);
-    _chatSending = false;  // [v5-CHAT] ปลด lock ก่อน reload ป้องกัน double-lock
+
+    // [v8-FIX] ลบ temp bubble แทนที่ด้วย real msg_id จาก GAS ทันที — ไม่กระตุก
+    const realMsgId = res.msg_id || '';
+    const tempEl    = document.getElementById('chatMsg-' + tempId);
+    if (tempEl && realMsgId) {
+      // อัพเดต id และ data-mid ใน DOM ตรงๆ แทนที่จะ wipe แล้วใส่ใหม่
+      tempEl.id = 'chatMsg-' + realMsgId;
+      tempEl.setAttribute('data-mid', realMsgId);
+      // อัพเดต tick เป็น ✓✓ (optimistic bubble อาจไม่มี)
+      const tickEl = tempEl.querySelector('.cmsg-tick');
+      if (tickEl) tickEl.textContent = '✓✓';
+    }
+    // เพิ่ม real msg เข้า _chatMessages state ทันที (ไม่รอ GAS load)
+    const realMsg = { ...tempMsg, msg_id: realMsgId, created_at: res.created_at || tempMsg.created_at };
+    if (realMsgId && !_chatMessages.find(m => (m.msg_id || m.id) === realMsgId)) {
+      _chatMessages.push(realMsg);
+      _chatLastMsgId  = realMsgId;
+      _chatLastMsgCnt = _chatMessages.length;
+    }
+
+    _chatSending = false;
     if (btnEl) btnEl.disabled = false;
-    await new Promise(r => setTimeout(r, 400)); // wait GAS commit
-    _chatLastMsgId = null;
+
+    // [v8-FIX] ล้าง forceScroll reload หลัง send — smart diff จะ skip rows ที่มีอยู่แล้ว
+    // เรียก chatLoadMessages เพื่อ sync ข้อความจากฝั่งอื่น แต่ไม่ reset _chatLastMsgId
+    await new Promise(r => setTimeout(r, 600)); // wait GAS commit
     await chatLoadMessages(true);
-    // soft-refresh อีกครั้งใน 3s กรณี GAS เขียนช้า
-    setTimeout(() => { if (_chatActiveRoomId) { _chatLastMsgId = null; chatLoadMessages(false); } }, 3000);
   } catch(e) {
+    // [v8-FIX] ลบ temp bubble (ยังไม่ถูก rename ถ้า error เกิดก่อน GAS OK)
     document.getElementById('chatMsg-' + tempId)?.remove();
     showToast('⚠️ ส่งไม่สำเร็จ: ' + e.message, 'warn');
     inputEl.value = text;
   } finally {
-    // guard: ถ้า try block ออกก่อนปลด lock (เช่น throw ทันที) → finally ปลดให้เสมอ
     _chatSending = false;
     if (btnEl) btnEl.disabled = false;
   }
@@ -11912,8 +11964,8 @@ async function chatSendImage(event) {
       if (!imgRes || imgRes.success === false) {
         throw new Error((imgRes && imgRes.error) ? imgRes.error : 'GAS ไม่ตอบกลับ');
       }
-      await new Promise(r => setTimeout(r, 500));
-      _chatLastMsgId = null;
+      // [v8-FIX] ไม่ reset _chatLastMsgId — smart diff จะ append เฉพาะข้อความใหม่
+      await new Promise(r => setTimeout(r, 600));
       await chatLoadMessages(true);
       showToast('✅ ส่งรูปแล้ว', 'ok');
     } catch(e) { showToast('⚠️ ส่งรูปไม่สำเร็จ: ' + e.message, 'warn'); }
