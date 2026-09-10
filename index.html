@@ -4059,6 +4059,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 <div id="_confirm" style="display:none;">
   <div id="_confirm-box">
     <div id="_confirm-ico">⚠️</div>
+    <!-- [v5-CHAT] preview slot: แสดงสติ๊กเกอร์/รูปก่อนส่ง — ซ่อนถ้าไม่ใช้ -->
+    <div id="_confirm-preview" style="display:none;margin-bottom:14px;"></div>
     <div id="_confirm-msg">ยืนยันการดำเนินการ?</div>
     <div class="fc g8" style="justify-content:center;">
       <button class="btn btn-ghost" id="_confirm-cancel" style="min-width:100px;">ยกเลิก</button>
@@ -6355,8 +6357,34 @@ function showConfirm(msg, onOk, ico='⚠️', okLabel='ยืนยัน', okCl
   document.getElementById('_confirm-msg').innerHTML = msg;
   document.getElementById('_confirm-ok').className = `btn ${okClass}`;
   document.getElementById('_confirm-ok').textContent = okLabel;
+  // ซ่อน preview slot (ใช้เฉพาะ showChatConfirm)
+  const prev = document.getElementById('_confirm-preview');
+  if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; }
   el.style.display = 'flex';
   document.getElementById('_confirm-ok').onclick = () => { el.style.display = 'none'; onOk(); };
+  document.getElementById('_confirm-cancel').onclick = () => { el.style.display = 'none'; };
+}
+
+// ─── [v5-CHAT] showChatConfirm — in-app modal สำหรับ Chat ────────────
+// แสดง preview รูป/สติ๊กเกอร์ + ปุ่มยืนยัน/ยกเลิก
+// previewHtml : HTML ที่จะแสดงใน _confirm-preview (สติ๊กเกอร์หรือ <img>)
+// msg         : ข้อความ caption ใต้ preview
+// onOk        : callback เมื่อกด ยืนยัน
+// okLabel     : ข้อความปุ่มยืนยัน (default 'ส่ง')
+// okClass     : CSS class ปุ่ม (default 'btn-gold')
+function showChatConfirm(previewHtml, msg, onOk, okLabel='ส่ง', okClass='btn-gold') {
+  const el   = document.getElementById('_confirm');
+  const prev = document.getElementById('_confirm-preview');
+  document.getElementById('_confirm-ico').textContent = '';      // ไม่มี icon ถ้ามี preview
+  if (prev) {
+    prev.innerHTML     = previewHtml;
+    prev.style.display = 'block';
+  }
+  document.getElementById('_confirm-msg').innerHTML = msg;
+  document.getElementById('_confirm-ok').className  = `btn ${okClass}`;
+  document.getElementById('_confirm-ok').textContent = okLabel;
+  el.style.display = 'flex';
+  document.getElementById('_confirm-ok').onclick     = () => { el.style.display = 'none'; onOk(); };
   document.getElementById('_confirm-cancel').onclick = () => { el.style.display = 'none'; };
 }
 
@@ -11452,12 +11480,19 @@ function _chatRenderReactionBubble(msgId, rx, myId) {
 // ─── Delete message ──────────────────────────────────────────────────
 async function chatDeleteMsg(msgId) {
   if (!SESSION) return;
-  if (!confirm('ลบข้อความนี้ใช่ไหม?')) return;
-  try {
-    await apiPost({ action: 'deleteChatMessage', msg_id: msgId, sender_id: _chatMyId() });
-    await chatLoadMessages(true);
-    showToast('ลบข้อความแล้ว', 'ok');
-  } catch(e) { showToast('⚠️ ลบไม่สำเร็จ: ' + e.message, 'warn'); }
+  // [v5-CHAT] เปลี่ยนจาก browser confirm() → in-app modal
+  showChatConfirm(
+    '<span style="font-size:2rem;">🗑️</span>',
+    'ลบข้อความนี้ใช่ไหม?<br><small style="color:var(--t3);">การดำเนินการนี้ไม่สามารถยกเลิกได้</small>',
+    async () => {
+      try {
+        await apiPost({ action: 'deleteChatMessage', msg_id: msgId, sender_id: _chatMyId() });
+        await chatLoadMessages(true);
+        showToast('ลบข้อความแล้ว', 'ok');
+      } catch(e) { showToast('⚠️ ลบไม่สำเร็จ: ' + e.message, 'warn'); }
+    },
+    'ลบ', 'btn-err'
+  );
 }
 
 // ─── Emoji picker ────────────────────────────────────────────────────
@@ -11495,40 +11530,58 @@ function chatInsertEmoji(e) {
 }
 
 // ─── Send sticker ────────────────────────────────────────────────────
+// [v5-CHAT] ขั้นตอน: กด sticker → showChatConfirm (in-app preview) → ยืนยัน → ส่ง + retry 1 ครั้ง
 async function chatSendSticker(emoji) {
   if (!_chatActiveRoomId || !SESSION) return;
   chatCloseEmoji();
   const myName = _chatMyName();
   const myId   = _chatMyId();
   if (!myId) { showToast('⚠️ กรุณาเข้าสู่ระบบใหม่', 'warn'); return; }
-  // Optimistic bubble
-  const tempRow = document.createElement('div');
-  tempRow.className = 'cmsg-row mine';
-  tempRow.innerHTML = `<div class="cmsg-av" style="visibility:hidden">S</div>
-    <div class="cmsg-body" style="align-items:flex-end">
-      <div class="cmsg-bubble sticker-bubble"><span class="cmsg-sticker new">${emoji}</span></div>
-      <div class="cmsg-meta" style="justify-content:flex-end"><span>${chatFmtTime(new Date().toISOString())}</span></div>
-    </div>`;
-  document.getElementById('chatMsgs')?.appendChild(tempRow);
-  chatScrollBottom();
-  try {
-    const res = await apiPost({
-      action:      'sendChatMessage',
-      room_id:     _chatActiveRoomId,
-      sender_id:   myId,
-      sender_name: myName,
-      sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
-      message:     `⟦sticker⟧${emoji}`,
-      msg_type:    'text'
-    });
-    if (!res || res.success === false) {
-      const errMsg = (res && res.error) ? res.error : 'GAS ไม่ตอบกลับ';
-      console.error('[chatSendSticker] GAS error:', errMsg);
-      throw new Error(errMsg);
-    }
-    await new Promise(r => setTimeout(r, 600));
-    await chatLoadMessages(true);
-  } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
+
+  // [v5-CHAT] in-app confirm พร้อม sticker preview (ไม่ใช้ browser confirm)
+  showChatConfirm(
+    `<span class="cmsg-sticker" style="font-size:72px;display:block;text-align:center;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));animation:stickerPop .4s cubic-bezier(.34,1.56,.64,1) forwards;">${emoji}</span>`,
+    'ส่งสติ๊กเกอร์นี้?',
+    async () => {
+      // Optimistic bubble
+      const tempRow = document.createElement('div');
+      tempRow.className = 'cmsg-row mine';
+      tempRow.innerHTML = `<div class="cmsg-av" style="visibility:hidden">S</div>
+        <div class="cmsg-body" style="align-items:flex-end">
+          <div class="cmsg-bubble sticker-bubble"><span class="cmsg-sticker new">${emoji}</span></div>
+          <div class="cmsg-meta" style="justify-content:flex-end"><span>${chatFmtTime(new Date().toISOString())}</span></div>
+        </div>`;
+      document.getElementById('chatMsgs')?.appendChild(tempRow);
+      chatScrollBottom();
+
+      // [v5-CHAT] _chatSendOnce: ส่ง + retry 1 ครั้งอัตโนมัติถ้า GAS timeout
+      const payload = {
+        action:      'sendChatMessage',
+        room_id:     _chatActiveRoomId,
+        sender_id:   myId,
+        sender_name: myName,
+        sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
+        message:     `⟦sticker⟧${emoji}`,
+        msg_type:    'text'
+      };
+      try {
+        let res = await apiPost(payload);
+        if ((!res || res.success === false) && !(res && res.msg_id)) {
+          // retry ครั้งเดียวหลังรอ 1.5s
+          console.warn('[chatSendSticker] retry once after fail:', res?.error);
+          await new Promise(r => setTimeout(r, 1500));
+          res = await apiPost(payload);
+        }
+        if (!res || res.success === false) {
+          throw new Error((res && res.error) ? res.error : 'GAS ไม่ตอบกลับ');
+        }
+        await new Promise(r => setTimeout(r, 500));
+        _chatLastMsgId = null;
+        await chatLoadMessages(true);
+      } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
+    },
+    'ส่ง 📤', 'btn-gold'
+  );
 }
 
 // ─── Typing indicator (local UX only) ────────────────────────────────
@@ -11709,7 +11762,7 @@ async function chatSendMsg() {
 
   try {
     console.log('[chatSendMsg] POST → room:', _chatActiveRoomId, '| sender:', myId, '| len:', text.length);
-    const res = await apiPost({
+    const payload = {
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
       sender_id:   myId,
@@ -11717,29 +11770,44 @@ async function chatSendMsg() {
       sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
       message:     text,
       msg_type:    'text'
-    });
-    // ตรวจ GAS error — ถ้า success:false ต้อง throw เพื่อ rollback optimistic bubble
+    };
+
+    // [v5-CHAT] ส่งข้อความ + retry 1 ครั้งอัตโนมัติ
+    // สาเหตุ intermittent: GAS cold-start / queue ชน loadMainBalance → timeout
+    let res = await apiPost(payload);
+    if ((!res || res.success === false) && !(res && res.msg_id)) {
+      console.warn('[chatSendMsg] first attempt fail — retry in 1.5s | error:', res?.error);
+      await new Promise(r => setTimeout(r, 1500));
+      res = await apiPost(payload);
+    }
+
+    // ตรวจ GAS error หลัง retry — ถ้ายัง fail → throw เพื่อ rollback optimistic bubble
     if (!res || res.success === false) {
       const errMsg = (res && res.error) ? res.error : 'GAS ไม่ตอบกลับ';
-      console.error('[chatSendMsg] GAS error:', errMsg, '| room:', _chatActiveRoomId, '| sender:', myId);
+      console.error('[chatSendMsg] GAS error after retry:', errMsg, '| room:', _chatActiveRoomId);
       throw new Error(errMsg);
     }
     console.log('[chatSendMsg] GAS OK → msg_id:', res.msg_id);
-    await new Promise(r => setTimeout(r, 600)); // wait GAS commit
+    _chatSending = false;  // [v5-CHAT] ปลด lock ก่อน reload ป้องกัน double-lock
+    if (btnEl) btnEl.disabled = false;
+    await new Promise(r => setTimeout(r, 400)); // wait GAS commit
+    _chatLastMsgId = null;
     await chatLoadMessages(true);
-    // retry after 2.5s in case GAS was slow
-    setTimeout(() => { _chatLastMsgId = null; chatLoadMessages(false); }, 2500);
+    // soft-refresh อีกครั้งใน 3s กรณี GAS เขียนช้า
+    setTimeout(() => { if (_chatActiveRoomId) { _chatLastMsgId = null; chatLoadMessages(false); } }, 3000);
   } catch(e) {
     document.getElementById('chatMsg-' + tempId)?.remove();
     showToast('⚠️ ส่งไม่สำเร็จ: ' + e.message, 'warn');
     inputEl.value = text;
   } finally {
+    // guard: ถ้า try block ออกก่อนปลด lock (เช่น throw ทันที) → finally ปลดให้เสมอ
     _chatSending = false;
     if (btnEl) btnEl.disabled = false;
   }
 }
 
 // ─── ส่งรูปภาพ (ImgBB → URL, fallback compress) ──────────────────────
+// [v5-CHAT] ขั้นตอน: เลือกไฟล์ → อัปโหลด → showChatConfirm พร้อม thumbnail → ยืนยัน → ส่ง GAS + retry
 async function chatSendImage(event) {
   if (!_chatActiveRoomId || !SESSION) return;
   const file = event.target.files && event.target.files[0];
@@ -11747,22 +11815,46 @@ async function chatSendImage(event) {
   if (!file) return;
   if (!file.type.startsWith('image/')) { showToast('⚠️ รองรับเฉพาะรูปภาพ', 'warn'); return; }
   if (file.size > 10 * 1024 * 1024)   { showToast('⚠️ ไฟล์ใหญ่เกิน 10MB', 'warn'); return; }
+
   const btn = document.querySelector('.chat-toolbtn[title="ส่งรูป"]');
   if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
   showToast('⏳ กำลังอัปโหลดรูป...', 'info');
+
+  let imgUrl = '';
   try {
-    let imgUrl = '';
     try {
-      imgUrl = await uploadToImgbb(file); // already defined in MP
+      imgUrl = await uploadToImgbb(file);
     } catch(uploadErr) {
       showToast('⚠️ ImgBB ไม่พร้อม — ลองบีบอัดรูป...', 'warn');
       imgUrl = await _chatCompressImg(file, 480, 0.55);
       if (imgUrl.length > 180000) throw new Error('รูปใหญ่เกิน — กรุณาตั้งค่า ImgBB key');
     }
+  } catch(e) {
+    showToast('⚠️ อัปโหลดไม่สำเร็จ: ' + e.message, 'warn');
+    if (btn) { btn.textContent = '📎'; btn.disabled = false; }
+    return;
+  }
+
+  // [v5-CHAT] อัปโหลดเสร็จแล้ว → แสดง in-app confirm พร้อม thumbnail
+  const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  // thumbnail: ถ้าเป็น data URL ใช้ได้ตรง, ถ้าเป็น https URL ก็ใช้ได้
+  const thumbSrc = imgUrl.startsWith('data:') ? imgUrl : imgUrl;
+  const previewHtml = `<img src="${thumbSrc}"
+      alt="${escHtml(file.name)}"
+      style="max-width:220px;max-height:180px;border-radius:10px;
+             box-shadow:0 4px 16px rgba(0,0,0,.5);display:block;margin:0 auto;">`;
+  const captionHtml = `ส่งรูป <strong>${escHtml(file.name)}</strong><br>
+      <small style="color:var(--t3);">${sizeMB} MB</small>`;
+
+  if (btn) { btn.textContent = '📎'; btn.disabled = false; } // คืนปุ่มก่อน modal
+
+  showChatConfirm(previewHtml, captionHtml, async () => {
     const myName = _chatMyName();
     const myId   = _chatMyId();
-    if (!myId) throw new Error('ไม่พบข้อมูลผู้ใช้ — กรุณาเข้าสู่ระบบใหม่');
-    const imgRes = await apiPost({
+    if (!myId) { showToast('⚠️ ไม่พบข้อมูลผู้ใช้', 'warn'); return; }
+
+    showToast('⏳ กำลังส่งรูป...', 'info');
+    const payload = {
       action:      'sendChatMessage',
       room_id:     _chatActiveRoomId,
       sender_id:   myId,
@@ -11771,17 +11863,24 @@ async function chatSendImage(event) {
       message:     `⟦img⟧${imgUrl}`,
       msg_type:    'image',
       image_url:   imgUrl
-    });
-    if (!imgRes || imgRes.success === false) {
-      const errMsg = (imgRes && imgRes.error) ? imgRes.error : 'GAS ไม่ตอบกลับ';
-      console.error('[chatSendImage] GAS error:', errMsg);
-      throw new Error(errMsg);
-    }
-    await new Promise(r => setTimeout(r, 600));
-    await chatLoadMessages(true);
-    showToast('✅ ส่งรูปแล้ว', 'ok');
-  } catch(e) { showToast('⚠️ อัปโหลดไม่สำเร็จ: ' + e.message, 'warn'); }
-  finally { if (btn) { btn.textContent = '📎'; btn.disabled = false; } }
+    };
+    try {
+      // [v5-CHAT] retry 1 ครั้งถ้า GAS fail
+      let imgRes = await apiPost(payload);
+      if ((!imgRes || imgRes.success === false) && !(imgRes && imgRes.msg_id)) {
+        console.warn('[chatSendImage] retry once after fail:', imgRes?.error);
+        await new Promise(r => setTimeout(r, 1500));
+        imgRes = await apiPost(payload);
+      }
+      if (!imgRes || imgRes.success === false) {
+        throw new Error((imgRes && imgRes.error) ? imgRes.error : 'GAS ไม่ตอบกลับ');
+      }
+      await new Promise(r => setTimeout(r, 500));
+      _chatLastMsgId = null;
+      await chatLoadMessages(true);
+      showToast('✅ ส่งรูปแล้ว', 'ok');
+    } catch(e) { showToast('⚠️ ส่งรูปไม่สำเร็จ: ' + e.message, 'warn'); }
+  }, 'ส่ง 📤', 'btn-gold');
 }
 
 function _chatCompressImg(file, maxPx, quality) {
