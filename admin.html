@@ -625,7 +625,7 @@ textarea.fi{resize:vertical;min-height:70px;}
     <div class="mob-sheet-btn" onclick="mobNavGo('funding-admin',null);closeMobMore()"><span class="ico">🎁</span>Funding Free Refresh<span class="sb-badge" id="msheet-ff-cnt" style="margin-left:auto;"></span></div>
     <div class="mob-sheet-btn" onclick="mobNavGo('referral-mgmt',null);closeMobMore()"><span class="ico">🤝</span>Referral Management</div>
     <div class="mob-sheet-btn" onclick="mobNavGo('admin-approval',null);closeMobMore()"><span class="ico">👤</span>อนุมัติ Admin<span class="sb-badge warn" id="msheet-adm-cnt" style="margin-left:auto;"></span></div>
-    <div class="mob-sheet-btn" onclick="mobNavGo('chat-mgmt',null);closeMobMore()"><span class="ico">💬</span>Chat Management</div>
+    <div class="mob-sheet-btn" onclick="mobNavGo('chat-mgmt',null);closeMobMore()"><span class="ico">💬</span>แชทซัพพอร์ต</div>
     <div class="mob-sheet-btn" onclick="mobNavGo('settings',null);closeMobMore()"><span class="ico">⚙️</span>System Settings</div>
     <div class="mob-sheet-btn" style="color:var(--err);" onclick="adminLogout();closeMobMore()"><span class="ico">🚪</span>Logout</div>
   </div>
@@ -723,7 +723,7 @@ textarea.fi{resize:vertical;min-height:70px;}
 
   <div class="sb-section">Settings</div>
   <div class="sb-item" onclick="showSec('admin-approval',this)"><span class="sb-ico">👤</span>อนุมัติ Admin<span class="sb-badge warn" id="sb-adm-cnt"></span></div>
-  <div class="sb-item" onclick="showSec('chat-mgmt',this)"><span class="sb-ico">💬</span>Chat Management</div>
+  <div class="sb-item" onclick="showSec('chat-mgmt',this)"><span class="sb-ico">💬</span>แชทซัพพอร์ต</div>
   <div class="sb-item" onclick="showSec('settings',this)"><span class="sb-ico">⚙️</span>System Settings</div>
 </aside>
 
@@ -800,6 +800,7 @@ textarea.fi{resize:vertical;min-height:70px;}
       <button class="btn btn-ok w100" onclick="adminAction('kyc-override')">🪪 Manual KYC Override</button>
       <button class="btn btn-ghost w100" onclick="adminAction('reset-pw')">🔑 Reset Password Link</button>
       <button class="btn btn-err w100" onclick="adminAction('ban')">❌ Ban Account</button>
+      <button class="btn btn-ok w100" onclick="schAdminOpenChat(window._mudUid,window._mudName)">💬 แชทกับสมาชิก</button>
     </div>
     <div class="d"></div>
     <div style="font-weight:600;margin-bottom:10px;">🎁 FF Rights</div>
@@ -1221,125 +1222,20 @@ textarea.fi{resize:vertical;min-height:70px;}
 </div>
 
 
-<!-- ─── CHAT MANAGEMENT [vChat] ─── -->
+<!-- ─── SUPPORT CHAT [SCH v1] — iframe line-chat.html?mode=admin (โหลดครั้งแรกตอนกดเข้าเมนู · พิมพ์ ADMIN_KEY ในหน้าแชทเอง) ─── -->
+<style>
+#sec-chat-mgmt iframe{display:block;width:100%;height:calc(100vh - 180px);height:calc(100dvh - 180px);min-height:480px;border:0;border-radius:var(--rl);background:#000;}
+@media (max-width:768px){#sec-chat-mgmt iframe{height:calc(100vh - 230px);height:calc(100dvh - 230px);min-height:420px;}}
+</style>
 <div id="sec-chat-mgmt" class="section">
   <div class="mob-section-header">
     <span class="mob-section-icon">💬</span>
-    <span class="mob-section-title">Chat Management</span>
-    <div class="mob-section-actions">
-      <button class="btn btn-ghost btn-sm" onclick="initChatMgmt()">🔄</button>
-    </div>
+    <span class="mob-section-title">แชทซัพพอร์ต</span>
   </div>
   <div class="ptitle">
-    <h2>💬 Chat <span>Management</span></h2>
-    <button class="btn btn-ghost btn-sm" onclick="initChatMgmt()">🔄 รีเฟรช</button>
+    <h2>💬 แชท<span>ซัพพอร์ต</span></h2>
   </div>
-
-  <!-- Stat cards -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1rem;">
-    <div class="card" style="text-align:center;">
-      <div class="clbl">ห้องแชททั้งหมด</div>
-      <div class="cval mono" id="chat-stat-rooms">—</div>
-    </div>
-    <div class="card" style="text-align:center;">
-      <div class="clbl">ข้อความทั้งหมด</div>
-      <div class="cval mono" id="chat-stat-msgs">—</div>
-    </div>
-    <div class="card" style="text-align:center;">
-      <div class="clbl">ห้อง Order Chat</div>
-      <div class="cval mono" id="chat-stat-order">—</div>
-    </div>
-  </div>
-
-  <!-- Room List & Live Chat -->
-  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;">
-    <!-- Room list -->
-    <div class="card" style="overflow:hidden;">
-      <div style="font-weight:600;margin-bottom:10px;font-size:13px;">📋 ห้องแชททั้งหมด</div>
-      <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;">
-        <input id="chat-search-inp" class="fi" placeholder="ค้นหา Member ID / Order ID..." style="flex:1;min-width:120px;"
-          oninput="adminFilterChatRooms(this.value)">
-        <select id="chat-type-filter" class="fi" onchange="adminFilterChatRooms(document.getElementById('chat-search-inp').value)"
-          style="width:130px;">
-          <option value="">ทุกประเภท</option>
-          <option value="private_order">Order Chat</option>
-          <option value="private_admin">Admin Chat</option>
-          <option value="group">Group</option>
-        </select>
-        <button class="btn btn-gold btn-sm" onclick="adminShowCreateChatModal()" style="flex-shrink:0;">+ สร้างห้อง</button>
-      </div>
-      <!-- Modal สร้างห้องแชท -->
-      <div id="admin-create-chat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;">
-        <div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:20px;width:360px;max-width:92vw;max-height:90vh;overflow-y:auto;">
-          <div style="font-weight:700;font-size:14px;margin-bottom:14px;">💬 สร้างห้องแชทใหม่</div>
-          <!-- Member 1 -->
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 1 ID (Buyer) *</label>
-            <input id="cc-m1id" class="fi" placeholder="MEM-XXXXX" style="width:100%;" oninput="ccAutoName('cc-m1id','cc-m1name')">
-          </div>
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อ Member 1</label>
-            <input id="cc-m1name" class="fi" placeholder="กรอกเองหรือรอ Auto-fill" style="width:100%;">
-          </div>
-          <!-- Member 2 -->
-          <div style="margin-bottom:8px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Member 2 ID (Seller) *</label>
-            <input id="cc-m2id" class="fi" placeholder="MEM-XXXXX" style="width:100%;" oninput="ccAutoName('cc-m2id','cc-m2name')">
-          </div>
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อ Member 2</label>
-            <input id="cc-m2name" class="fi" placeholder="กรอกเองหรือรอ Auto-fill" style="width:100%;">
-          </div>
-          <!-- Room name -->
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ชื่อห้องแชท (ไม่บังคับ)</label>
-            <input id="cc-roomname" class="fi" placeholder="ปล่อยว่าง = ใช้ชื่อ Member อัตโนมัติ" style="width:100%;">
-          </div>
-          <!-- Order ID -->
-          <div style="margin-bottom:10px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">Order ID (ถ้ามี)</label>
-            <input id="cc-orderid" class="fi" placeholder="ไม่บังคับ" style="width:100%;">
-          </div>
-          <!-- Type -->
-          <div style="margin-bottom:14px;">
-            <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px;">ประเภทห้อง</label>
-            <select id="cc-roomtype" class="fi" style="width:100%;">
-              <option value="private_admin">Admin Chat</option>
-              <option value="private_order">Order Chat</option>
-            </select>
-          </div>
-          <div id="cc-err" style="font-size:11px;color:var(--err);margin-bottom:8px;display:none;"></div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button class="btn btn-sm" onclick="adminHideCreateChatModal()">ยกเลิก</button>
-            <button id="cc-submit-btn" class="btn btn-gold btn-sm" onclick="adminDoCreateChatRoom()">สร้างห้อง ➤</button>
-          </div>
-        </div>
-      </div>
-      <div id="admin-chat-room-list" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
-        <div class="tsm tm" style="padding:12px;text-align:center;">กำลังโหลด...</div>
-      </div>
-    </div>
-    <!-- Live chat view -->
-    <div class="card" style="display:flex;flex-direction:column;min-height:480px;padding:0;overflow:hidden;">
-      <div style="padding:12px 14px;border-bottom:1px solid var(--bd);font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
-        <span id="admin-chat-room-title">เลือกห้องแชทเพื่อดูข้อความ</span>
-        <span id="admin-chat-order-tag" style="font-size:11px;color:var(--gold);"></span>
-      </div>
-      <div id="admin-chat-msgs" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:5px;">
-        <div class="chat-empty" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--t3);">
-          <div style="font-size:36px;">💬</div>
-          <div style="font-size:12px;">เลือกห้องแชทจากด้านซ้าย</div>
-        </div>
-      </div>
-      <!-- Admin reply input -->
-      <div id="admin-chat-input-wrap" style="display:none;padding:10px 12px;border-top:1px solid var(--bd);gap:8px;align-items:flex-end;">
-        <textarea id="admin-chat-input" class="fi" placeholder="ส่งข้อความในฐานะ Admin..." rows="2"
-          style="flex:1;resize:none;border-radius:12px;font-size:12px;"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminChatSend();}"></textarea>
-        <button class="btn btn-gold btn-sm" onclick="adminChatSend()" style="flex-shrink:0;">ส่ง ➤</button>
-      </div>
-    </div>
-  </div>
+  <iframe id="sch-admin-frame" title="Support chat (admin)" src="about:blank" allow="clipboard-write"></iframe>
 </div>
 
 <!-- ─── SYSTEM SETTINGS ─── -->
@@ -1759,7 +1655,7 @@ function initSec(id) {
     wallets: initWallets, 'global-tx': initGTX,
     'funding-admin': initFFAdmin, 'referral-mgmt': initRef,
     'admin-approval': loadAdminApproval,
-    'chat-mgmt': initChatMgmt,   // [vChat]
+    'chat-mgmt': () => { if (typeof schAdminInit === 'function') schAdminInit(); },   // [SCH v1] แชทซัพพอร์ต (iframe)
     settings: initSettings,
   };
   if (m[id]) m[id]();
@@ -1879,6 +1775,7 @@ function openUserDetail(uid) {
   const _uid = String(uid).trim(); // [v27 FIX] normalize type
   const u = DA.users.find(x => String(x.uid).trim() === _uid); if (!u) return;
   document.getElementById('mud-title').textContent = `👤 ${u.email} (${u.uid})`;
+  window._mudUid = u.uid; window._mudName = u.email || u.uid;   // [SCH v1] ใช้กับปุ่ม 💬 แชทกับสมาชิก
   document.getElementById('mud-info').innerHTML = `
     <div>
       <div style="font-size:13px;line-height:2.2;">
@@ -3946,358 +3843,62 @@ async function admModalChangeLevel(admin_id, new_level) {
   await changeAdminLevel(admin_id, new_level);
 }
 
-// ════════════════════════════════════════════════════════════════════
-// [vChat] ADMIN CHAT MANAGEMENT
-// ════════════════════════════════════════════════════════════════════
+// [SCH v1] Chat Management (Buyer ↔ Seller v7) ถูกถอดออกแล้ว — ใช้แผงแชทซัพพอร์ต (iframe line-chat.html?mode=admin · บล็อก [SCH v1] ท้ายไฟล์) แทน
 
-let _adminChatRooms    = [];   // all rooms
-let _adminChatFiltered = [];   // filtered rooms
-let _adminActiveRoomId = null; // room ที่ Admin เปิดดู
-let _adminChatPoll     = null; // polling timer Admin side
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   [SCH v1] SUPPORT CHAT (admin) — แทน Chat Management (Buyer ↔ Seller v7) เดิม · โครงสร้างเดียวกับ admin_Easy_USe_v1.html
+   • แผง #sec-chat-mgmt = iframe ของ line-chat.html?mode=admin  (พิมพ์ ADMIN_KEY ในหน้าแชทเอง เก็บใน sessionStorage ของแท็บ)
+   • ADMIN_KEY ของแชทแยกจาก login admin ของหน้านี้ — ไม่ฝังใน HTML นี้
+   • สลับไปแผงอื่น = ส่ง sc-visible:false ให้ iframe หยุด poll/ส่ง "อ่านแล้ว" (ใช้ MutationObserver ดู class ของแผง ไม่แก้ showSec)
+   • ปุ่ม 💬 แชทกับสมาชิก (โมดัลสมาชิก) → เปิดห้องของสมาชิกคนนั้นตรงๆ
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  // URL ที่โฮสต์ line-chat.html (relative ได้ถ้าอยู่โดเมน/โฟลเดอร์เดียวกับหน้าแอดมิน — ถ้าโฮสต์คนละโดเมนให้ใส่ URL เต็ม)
+  var SCH_CHAT_URL = 'line-chat.html';
+  // uid ในระบบแชท = BNB ID (member_id) · ถ้า Worker แชทตั้งให้ตรวจสมาชิกผ่าน GAS_URL_2 (ระบบทดลอง) ต้องใส่ 't_' ตรงนี้
+  var SCH_UID_PREFIX = '';
 
-// ─── Load ทุก Chat Rooms (Admin อ่านทั้งหมด) ───────────────────────
-async function initChatMgmt() {
-  document.getElementById('admin-chat-room-list').innerHTML =
-    '<div class="tsm tm" style="padding:12px;text-align:center;">⏳ กำลังโหลด...</div>';
-  try {
-    // Admin ดึง rooms ทั้งหมด — ใช้ member_id='ALL' เป็น flag พิเศษ
-    // GAS listChatRooms ส่ง 'ALL' จะคืนทุก room
-    const res = await apiGet({ action: 'listChatRooms', member_id: 'ALL' });
-    _adminChatRooms    = (res && res.rooms) ? res.rooms : [];
-    _adminChatFiltered = [..._adminChatRooms];
-    // stats
-    const totalRooms = _adminChatRooms.length;
-    const orderRooms = _adminChatRooms.filter(r => r.room_type === 'private_order').length;
-    document.getElementById('chat-stat-rooms').textContent = totalRooms;
-    document.getElementById('chat-stat-order').textContent = orderRooms;
-    // นับ total messages (อ่านจาก Chat_Messages ทั้งหมด)
-    try {
-      const mRes = await apiGet({ action: 'listChatMessages', room_id: 'ALL', limit: 9999 });
-      document.getElementById('chat-stat-msgs').textContent = mRes && mRes.messages ? mRes.messages.length : '—';
-    } catch(_) { document.getElementById('chat-stat-msgs').textContent = '—'; }
-    adminRenderChatRoomList(_adminChatFiltered);
-    if (_adminActiveRoomId) adminLoadChatMessages(_adminActiveRoomId);
-  } catch(e) {
-    document.getElementById('admin-chat-room-list').innerHTML =
-      '<div class="tsm" style="color:var(--err);padding:12px;text-align:center;">โหลดไม่ได้: ' + e.message + '</div>';
+  var TGT = '*';
+  try { var o = new URL(SCH_CHAT_URL, location.href).origin; if (o && o !== 'null') TGT = o; } catch (e) {}
+
+  function frameEl() { return document.getElementById('sch-admin-frame'); }
+  function panelOn() { var p = document.getElementById('sec-chat-mgmt'); return !!(p && p.classList.contains('active')); }
+  function buildUrl(uid, name) {
+    var u = new URL(SCH_CHAT_URL, location.href);
+    u.searchParams.set('mode', 'admin');
+    if (uid) { u.searchParams.set('uid', SCH_UID_PREFIX + uid); u.searchParams.set('name', name || uid); }
+    return u.toString();
   }
-}
-
-// ─── Render Room List ────────────────────────────────────────────────
-function adminRenderChatRoomList(rooms) {
-  const el = document.getElementById('admin-chat-room-list');
-  if (!el) return;
-  if (!rooms.length) {
-    el.innerHTML = '<div class="tsm tm" style="padding:12px;text-align:center;">ไม่มีห้องแชท</div>';
-    return;
+  function postVisible() {
+    var f = frameEl();
+    if (!f || !f.getAttribute('data-sch') || !f.contentWindow) return;
+    try { f.contentWindow.postMessage({ type: 'sc-visible', on: panelOn() }, TGT); } catch (e) {}
   }
-  el.innerHTML = rooms.map(room => {
-    const isActive = room.room_id === _adminActiveRoomId;
-    const m1  = room.member1_name || room.member1_id || '?';
-    const m2  = room.member2_name || room.member2_id || '?';
-    const tag = room.room_type === 'private_order' ? '📦' : room.room_type === 'private_admin' ? '🛡️' : '👥';
-    const lastMsg   = room.last_message ? room.last_message.slice(0, 40) : '—';
-    const lastTime  = room.last_message_at ? new Date(room.last_message_at).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-    const orderTag  = room.order_id ? `<span style="font-size:9px;color:var(--gold);">${room.order_id}</span>` : '';
-    return `
-      <div onclick="adminSelectRoom('${room.room_id}')"
-        style="padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid ${isActive?'var(--gold)':'var(--bd)'};background:${isActive?'rgba(240,185,11,.08)':''};transition:all .15s;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
-          <span style="font-size:12px;">${tag}</span>
-          <span style="font-size:11px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m1} ↔ ${m2}</span>
-          <span style="font-size:9px;color:var(--t3);flex-shrink:0;">${lastTime}</span>
-        </div>
-        <div style="font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${orderTag} ${lastMsg}</div>
-      </div>`;
-  }).join('');
-}
 
-// ─── Filter rooms ─────────────────────────────────────────────────
-function adminFilterChatRooms(q) {
-  const typeVal = document.getElementById('chat-type-filter')?.value || '';
-  const query   = (q || '').toLowerCase().trim();
-  _adminChatFiltered = _adminChatRooms.filter(r => {
-    if (typeVal && r.room_type !== typeVal) return false;
-    if (!query) return true;
-    return (
-      (r.room_id      || '').toLowerCase().includes(query) ||
-      (r.order_id     || '').toLowerCase().includes(query) ||
-      (r.member1_id   || '').toLowerCase().includes(query) ||
-      (r.member2_id   || '').toLowerCase().includes(query) ||
-      (r.member1_name || '').toLowerCase().includes(query) ||
-      (r.member2_name || '').toLowerCase().includes(query)
-    );
-  });
-  adminRenderChatRoomList(_adminChatFiltered);
-}
+  // เข้าเมนู "แชทซัพพอร์ต" — โหลด iframe ครั้งแรกครั้งเดียว (เข้าซ้ำไม่รีโหลด) · เรียกจาก initSec('chat-mgmt')
+  window.schAdminInit = function () {
+    var f = frameEl(); if (!f) return;
+    if (!f.getAttribute('data-sch')) { f.setAttribute('data-sch', '1'); f.src = buildUrl(); }
+  };
+  // ปุ่ม "💬 แชทกับสมาชิก" ในโมดัลสมาชิก — ปิดโมดัล เข้าแผงแชท เปิดห้องของสมาชิกคนนั้นตรงๆ
+  window.schAdminOpenChat = function (uid, name) {
+    uid = String(uid || '').trim();
+    if (!uid) return;
+    try { closeM('m-user-detail'); } catch (e) {}
+    var f = frameEl(); if (!f) return;
+    f.setAttribute('data-sch', '1');   // กัน schAdminInit() โหลดซ้ำตอน showSec เรียก initSec
+    try { showSec('chat-mgmt', document.querySelector('.sb-item[onclick*="chat-mgmt"]')); } catch (e) {}
+    f.src = buildUrl(uid, String(name || ''));
+  };
 
-// ─── Select Room ──────────────────────────────────────────────────
-async function adminSelectRoom(roomId) {
-  _adminActiveRoomId = roomId;
-  adminRenderChatRoomList(_adminChatFiltered); // อัป active state
-  const room = _adminChatRooms.find(r => r.room_id === roomId);
-  if (room) {
-    const m1 = room.member1_name || room.member1_id || '?';
-    const m2 = room.member2_name || room.member2_id || '?';
-    document.getElementById('admin-chat-room-title').textContent = m1 + ' ↔ ' + m2;
-    const orderTag = document.getElementById('admin-chat-order-tag');
-    if (orderTag) orderTag.textContent = room.order_id ? '📦 ' + room.order_id : '';
-    // แสดง input
-    const iw = document.getElementById('admin-chat-input-wrap');
-    if (iw) iw.style.display = 'flex';
-  }
-  await adminLoadChatMessages(roomId);
-  // เริ่ม poll
-  if (_adminChatPoll) clearInterval(_adminChatPoll);
-  _adminChatPoll = setInterval(() => { adminLoadChatMessages(roomId); }, 15000);
-}
-
-// ─── adminParseMsg — แปลง markers เหมือน index v7 ─────────────────
-// รองรับ: ⟦del⟧ | ⟦sticker⟧emoji | ⟦img⟧url | ⟦reply:name|text⟧body
-function adminParseMsg(raw) {
-  raw = String(raw ?? '');
-  if (raw.startsWith('⟦del⟧'))
-    return { type: 'deleted' };
-  if (raw.startsWith('⟦sticker⟧'))
-    return { type: 'sticker', emoji: raw.slice(9) || '😊' };
-  if (raw.startsWith('⟦img⟧')) {
-    const content = raw.slice(5);
-    if (content.startsWith('http') || content.startsWith('data:'))
-      return { type: 'image', url: content };
-    return { type: 'sticker', emoji: content }; // backward compat
-  }
-  if (raw.startsWith('⟦reply:')) {
-    const end = raw.indexOf('⟧');
-    if (end > -1) {
-      const meta = raw.slice(7, end);
-      const sep  = meta.indexOf('|');
-      return {
-        type:      'reply',
-        quoteName: meta.slice(0, sep),
-        quoteText: meta.slice(sep + 1),
-        text:      raw.slice(end + 1)
-      };
-    }
-  }
-  return { type: 'text', text: raw };
-}
-
-// ─── adminEsc — HTML escape ──────────────────────────────────────────
-function adminEsc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ─── Load Messages ────────────────────────────────────────────────
-async function adminLoadChatMessages(roomId) {
-  if (!roomId) return;
-  try {
-    const res = await apiGet({ action: 'listChatMessages', room_id: roomId, limit: 100 });
-    const msgs = (res && res.messages) ? res.messages : [];
-    const el   = document.getElementById('admin-chat-msgs');
-    if (!el) return;
-    if (!msgs.length) {
-      el.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:12px;padding:20px;">ยังไม่มีข้อความในห้องนี้</div>';
-      return;
-    }
-    el.innerHTML = msgs.map(msg => {
-      const isAdmin = String(msg.sender_role || '').toLowerCase() === 'admin';
-      const sName   = adminEsc(msg.sender_name || msg.sender_id || '?');
-      const role    = msg.sender_role || '?';
-      const time    = msg.created_at ? new Date(msg.created_at).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-      const bgColor = isAdmin ? 'rgba(82,196,26,.1)' : role === 'seller' ? 'rgba(240,185,11,.1)' : 'rgba(74,144,217,.1)';
-      const roleTag = isAdmin ? '🛡️ Admin' : role === 'seller' ? '🏪 Seller' : '👤 Buyer';
-
-      // parse markers — รองรับ msg_type='image' + image_url field (format ใหม่) ด้วย
-      let rawMsg = String(msg.message ?? '');
-      if (msg.msg_type === 'image' && msg.image_url && !rawMsg.startsWith('⟦img⟧'))
-        rawMsg = `⟦img⟧${msg.image_url}`;
-      const parsed = adminParseMsg(rawMsg);
-
-      let msgHtml = '';
-      switch (parsed.type) {
-        case 'deleted':
-          msgHtml = `<div style="font-size:11px;font-style:italic;color:var(--t3);">🚫 ลบข้อความแล้ว</div>`;
-          break;
-        case 'sticker':
-          msgHtml = `<div style="font-size:48px;line-height:1;padding:2px 0;" title="สติ๊กเกอร์">${parsed.emoji}</div>`;
-          break;
-        case 'image':
-          msgHtml = `<a href="${adminEsc(parsed.url)}" target="_blank" rel="noopener">
-            <img src="${adminEsc(parsed.url)}" style="max-width:140px;max-height:110px;object-fit:cover;border-radius:6px;border:1px solid var(--bd);display:block;" onerror="this.style.display='none'">
-          </a>`;
-          break;
-        case 'reply': {
-          const quoteHtml = `<div style="background:rgba(0,0,0,.15);border-left:3px solid var(--gold);border-radius:4px;padding:3px 7px;margin-bottom:5px;font-size:10px;">
-            <div style="color:var(--gold);font-weight:600;margin-bottom:1px;">${adminEsc(parsed.quoteName)}</div>
-            <div style="color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${adminEsc(parsed.quoteText)}</div>
-          </div>`;
-          msgHtml = `${quoteHtml}<div style="font-size:12px;white-space:pre-wrap;word-break:break-word;">${adminEsc(parsed.text)}</div>`;
-          break;
-        }
-        default: // text
-          msgHtml = `<div style="font-size:12px;white-space:pre-wrap;word-break:break-word;">${adminEsc(parsed.text)}</div>`;
-      }
-
-      // reactions summary (ถ้ามี)
-      let rxHtml = '';
-      if (msg.reactions && msg.reactions !== '{}') {
-        try {
-          const rx = JSON.parse(msg.reactions);
-          const entries = Object.entries(rx).filter(([k, v]) => k !== '_users' && v > 0);
-          if (entries.length) {
-            rxHtml = `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;">` +
-              entries.map(([e, c]) => `<span style="background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:12px;padding:1px 6px;font-size:11px;">${e} ${c}</span>`).join('') +
-              `</div>`;
-          }
-        } catch {}
-      }
-
-      return `
-        <div style="padding:8px 10px;border-radius:8px;background:${bgColor};border:1px solid var(--bd);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <span style="font-size:10px;font-weight:700;color:var(--t2);">${sName} <span class="bdg" style="font-size:9px;">${roleTag}</span></span>
-            <span style="font-size:9px;color:var(--t3);">${time}</span>
-          </div>
-          ${msgHtml}
-          ${rxHtml}
-          <div style="text-align:right;margin-top:4px;">
-            <button onclick="adminDeleteChatMsg('${adminEsc(msg.msg_id)}')" style="background:none;border:none;color:var(--err);font-size:10px;cursor:pointer;opacity:.6;" title="ลบข้อความ">🗑️</button>
-          </div>
-        </div>`;
-    }).join('');
-    el.scrollTop = el.scrollHeight;
-  } catch(e) { /* silent */ }
-}
-
-// ─── Admin ส่งข้อความในฐานะ Admin ──────────────────────────────────
-async function adminChatSend() {
-  if (!_adminActiveRoomId || !ADMIN) return;
-  const inputEl = document.getElementById('admin-chat-input');
-  const msg     = (inputEl?.value || '').trim();
-  if (!msg) return;
-  inputEl.value = '';
-  try {
-    await apiPost({
-      action:       'sendChatMessage',
-      room_id:      _adminActiveRoomId,
-      sender_id:    'ADMIN:' + ADMIN.admin_id,
-      sender_name:  ADMIN.name || 'Admin',
-      sender_role:  'admin',
-      message:      msg,
-      msg_type:     'text'
-    });
-    await adminLoadChatMessages(_adminActiveRoomId);
-  } catch(e) {
-    showToast('⚠️ ส่งข้อความไม่ได้: ' + e.message, 'warn');
-    if (inputEl) inputEl.value = msg;
-  }
-}
-
-// ─── Admin สร้างห้องแชทใหม่ ────────────────────────────────────────
-function adminShowCreateChatModal() {
-  const m = document.getElementById('admin-create-chat-modal');
-  if (!m) return;
-  // reset fields
-  ['cc-m1id','cc-m1name','cc-m2id','cc-m2name','cc-roomname','cc-orderid'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('cc-err').style.display = 'none';
-  m.style.display = 'flex';
-}
-function adminHideCreateChatModal() {
-  const m = document.getElementById('admin-create-chat-modal');
-  if (m) m.style.display = 'none';
-}
-
-// Auto-fill ชื่อ member จาก member_id ที่พิมพ์
-let _ccLookupTimer = {};
-function ccAutoName(idField, nameField) {
-  const mid = (document.getElementById(idField)?.value || '').trim();
-  if (_ccLookupTimer[idField]) clearTimeout(_ccLookupTimer[idField]);
-  if (!mid || mid.length < 4) return;
-  _ccLookupTimer[idField] = setTimeout(async () => {
-    try {
-      const res = await apiGet({ action: 'getMemberData', member_id: mid });
-      if (res && res.success && res.member) {
-        const nameEl = document.getElementById(nameField);
-        if (nameEl && !nameEl.value) {
-          nameEl.value = res.member.username || res.member.member_id || mid;
-        }
-      }
-    } catch(_) {}
-  }, 600);
-}
-
-async function adminDoCreateChatRoom() {
-  const m1id     = (document.getElementById('cc-m1id')?.value    || '').trim();
-  const m1name   = (document.getElementById('cc-m1name')?.value  || '').trim() || m1id;
-  const m2id     = (document.getElementById('cc-m2id')?.value    || '').trim();
-  const m2name   = (document.getElementById('cc-m2name')?.value  || '').trim() || m2id;
-  const roomName = (document.getElementById('cc-roomname')?.value || '').trim() || (m1name + ' & ' + m2name);
-  const orderId  = (document.getElementById('cc-orderid')?.value  || '').trim();
-  const roomType = document.getElementById('cc-roomtype')?.value  || 'private_admin';
-  const errEl    = document.getElementById('cc-err');
-
-  if (!m1id || !m2id) {
-    errEl.textContent = 'กรุณาระบุ Member 1 ID และ Member 2 ID';
-    errEl.style.display = 'block';
-    return;
-  }
-  errEl.style.display = 'none';
-  const btn = document.getElementById('cc-submit-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังสร้าง...'; }
-  try {
-    const res = await apiPost({
-      action:       'createChatRoom',
-      room_type:    roomType,
-      order_id:     orderId,
-      member1_id:   m1id,
-      member1_name: m1name,
-      member2_id:   m2id,
-      member2_name: m2name,
-      room_name:    roomName
-    });
-    if (res && res.success) {
-      showToast(res.existed ? '✅ ห้องนี้มีอยู่แล้ว' : `✅ สร้างห้อง "${roomName}" สำเร็จ`, 'ok');
-      adminHideCreateChatModal();
-      await initChatMgmt();
-      if (res.room?.room_id) adminSelectRoom(res.room.room_id);
-    } else {
-      errEl.textContent = res?.error || 'สร้างห้องไม่ได้';
-      errEl.style.display = 'block';
-    }
-  } catch(e) {
-    errEl.textContent = 'Error: ' + e.message;
-    errEl.style.display = 'block';
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'สร้างห้อง ➤'; }
-  }
-}
-
-// ─── Admin ลบข้อความ (ด้วยสิทธิ์ Admin) ────────────────────────────
-async function adminDeleteChatMsg(msgId) {
-  if (!confirm('ลบข้อความนี้?')) return;
-  try {
-    const res = await apiPost({
-      action:    'deleteChatMessage',
-      msg_id:    msgId,
-      sender_id: 'ADMIN:' + (ADMIN?.admin_id || 'ADM')
-    });
-    if (res && res.success) {
-      showToast('✅ ลบข้อความแล้ว', 'ok');
-      await adminLoadChatMessages(_adminActiveRoomId);
-    } else {
-      showToast('⚠️ ' + (res?.error || 'ลบไม่ได้'), 'warn');
-    }
-  } catch(e) {
-    showToast('⚠️ เกิดข้อผิดพลาด', 'warn');
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════
-// [vChat] END ADMIN CHAT MANAGEMENT
-// ════════════════════════════════════════════════════════════════════
-
+  var p = document.getElementById('sec-chat-mgmt');
+  if (p && window.MutationObserver) new MutationObserver(postVisible).observe(p, { attributes: true, attributeFilter: ['class'] });
+  var f0 = frameEl();
+  if (f0) f0.addEventListener('load', postVisible);
+})();
 </script>
 </body>
 </html>
