@@ -4059,8 +4059,6 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 <div id="_confirm" style="display:none;">
   <div id="_confirm-box">
     <div id="_confirm-ico">⚠️</div>
-    <!-- [v5-CHAT] preview slot: แสดงสติ๊กเกอร์/รูปก่อนส่ง — ซ่อนถ้าไม่ใช้ -->
-    <div id="_confirm-preview" style="display:none;margin-bottom:14px;"></div>
     <div id="_confirm-msg">ยืนยันการดำเนินการ?</div>
     <div class="fc g8" style="justify-content:center;">
       <button class="btn btn-ghost" id="_confirm-cancel" style="min-width:100px;">ยกเลิก</button>
@@ -4107,7 +4105,7 @@ let curPage='home', curRole='member', selPlan_='A', selPO_=45, cdTimers={}, txPa
 const TX_PP=5;
 const MNAV=[
   {id:'marketplace',lbl:'Marketplace'},
-  {id:'chat',lbl:'💬 แชท',authRequired:true},
+  {id:'chat',lbl:'💬 ซัพพอร์ต',authRequired:true},
   {id:'dashboard',lbl:'My Account',authRequired:true},
 ];
 const SNAV=[
@@ -4146,6 +4144,8 @@ function toggleRole(){
 }
 
 function go(pg){
+  // [SCH v1] 'chat' = เปิดแชทซัพพอร์ต (overlay iframe) ไม่ใช่หน้าในแอปอีกต่อไป
+  if(pg==='chat'){ if(typeof schGoFromNav==='function') schGoFromNav(); return; }
   // redirect หน้าสมาชิกเก่าไป dashboard พร้อม tab ที่ถูกต้อง
   const dashMap={
     'wallet':'wallet','txh':'wallet','orders':'orders','ord-det':'orders',
@@ -4179,11 +4179,6 @@ function go(pg){
   }
   // ─── Guard: หน้าเดิมแล้ว → ข้าม re-init ───
   if(curPage===pg) return;
-  // [vChat] หยุด poll เมื่อออกจากหน้า chat + คืน body scroll
-  if(curPage==='chat' && pg!=='chat') {
-    if(typeof chatStopPoll==='function') chatStopPoll();
-    document.body.style.overflow = '';  // คืน scroll
-  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const el=document.getElementById('p-'+pg);
   if(el){el.classList.add('active');curPage=pg;}
@@ -4195,7 +4190,6 @@ function go(pg){
     if(sellerPages.includes(pg)) bnSetActive('seller');
     else if(pg==='home') bnSetActive('home');
     else if(pg==='marketplace') bnSetActive('marketplace');
-    else if(pg==='chat') bnSetActive('chat');  // [vChat]
   }
   initPg(pg);
 }
@@ -4229,7 +4223,6 @@ function initPg(p){
   const m={
     'home':initHome,'marketplace':initMP,
     'dashboard':()=>{ dTab(curDTab); },   // ← ไม่ force initWallet ซ้ำ — go() จัดการแล้ว
-    'chat':()=>{ document.body.style.overflow='hidden'; initChat(); },  // [vChat]
     'kyc-wizard':initKYC,'seller-dashboard':initSD,'seller-shop':initSShop,
     'seller-products':initSProds,'seller-orders':()=>filterSOrd('all',null),
     'seller-wallet':initSW,'seller-analytics':initSA,
@@ -5529,8 +5522,8 @@ function filterOrd(st, btn){
       <td>${acts}</td>
       <td>
         <button class="btn btn-ghost btn-sm" style="font-size:11px;white-space:nowrap;"
-          onclick="startChatFromOrder('${o.buyer_member_id}','${o.buyer_full_name||o.buyer_member_id}','${SESSION.member_id}','${SESSION.username||SESSION.member_id}','${o.order_id}')">
-          💬 แชท
+          onclick="schOpenFromOrder('${o.order_id}')">
+          💬 ซัพพอร์ต
         </button>
       </td>
     </tr>`;
@@ -5611,8 +5604,8 @@ function filterOrd(st, btn){
         ${actsHtml}
         <div class="mob-card-acts" style="margin-top:6px;border-top:1px solid var(--bd);padding-top:8px;">
           <button class="btn btn-ghost" style="width:100%;font-size:12px;"
-            onclick="startChatFromOrder('${o.buyer_member_id}','${o.buyer_full_name||o.buyer_member_id}','${SESSION.member_id}','${SESSION.username||SESSION.member_id}','${o.order_id}')">
-            💬 แชทกับผู้ซื้อ
+            onclick="schOpenFromOrder('${o.order_id}')">
+            💬 ติดต่อซัพพอร์ต
           </button>
         </div>
       </div>`;
@@ -5722,17 +5715,14 @@ function openOD(oid){
         <tbody>${genPTbl(ff)}</tbody>
       </table>`;
   }else{ffe.innerHTML='<div class="empty"><div class="empty-ico">🎁</div><p>ไม่มี Funding Free</p></div>';}
-  // [vChat] ปุ่มแชทกับร้านค้าใน Order Detail
+  // [SCH v1] ปุ่มติดต่อซัพพอร์ตใน Order Detail (แทนแชทกับร้านค้าเดิม)
   const odActsEl = document.getElementById('od-acts');
   if (odActsEl && o.status !== 'completed' && o.status !== 'cancelled') {
-    const sellerMemberId = o.seller_id || o.seller || '';
-    const sellerName     = o.shop_name || o.seller || 'ร้านค้า';
-    const buyerName      = SESSION.username || SESSION.full_name || SESSION.email?.split('@')[0] || 'ผู้ซื้อ';
     const existingHtml   = odActsEl.innerHTML;
     odActsEl.innerHTML   = existingHtml +
       `<button class="btn btn-ghost w100" style="margin-top:6px;"
-         onclick="startChatFromOrder('${SESSION.member_id}','${buyerName}','${sellerMemberId}','${sellerName}','${o.order_id||o.id}')">
-         💬 แชทกับร้านค้า
+         onclick="schOpenFromOrder('${o.order_id||o.id}')">
+         💬 ติดต่อซัพพอร์ต
        </button>`;
   }
 
@@ -6357,34 +6347,8 @@ function showConfirm(msg, onOk, ico='⚠️', okLabel='ยืนยัน', okCl
   document.getElementById('_confirm-msg').innerHTML = msg;
   document.getElementById('_confirm-ok').className = `btn ${okClass}`;
   document.getElementById('_confirm-ok').textContent = okLabel;
-  // ซ่อน preview slot (ใช้เฉพาะ showChatConfirm)
-  const prev = document.getElementById('_confirm-preview');
-  if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; }
   el.style.display = 'flex';
   document.getElementById('_confirm-ok').onclick = () => { el.style.display = 'none'; onOk(); };
-  document.getElementById('_confirm-cancel').onclick = () => { el.style.display = 'none'; };
-}
-
-// ─── [v5-CHAT] showChatConfirm — in-app modal สำหรับ Chat ────────────
-// แสดง preview รูป/สติ๊กเกอร์ + ปุ่มยืนยัน/ยกเลิก
-// previewHtml : HTML ที่จะแสดงใน _confirm-preview (สติ๊กเกอร์หรือ <img>)
-// msg         : ข้อความ caption ใต้ preview
-// onOk        : callback เมื่อกด ยืนยัน
-// okLabel     : ข้อความปุ่มยืนยัน (default 'ส่ง')
-// okClass     : CSS class ปุ่ม (default 'btn-gold')
-function showChatConfirm(previewHtml, msg, onOk, okLabel='ส่ง', okClass='btn-gold') {
-  const el   = document.getElementById('_confirm');
-  const prev = document.getElementById('_confirm-preview');
-  document.getElementById('_confirm-ico').textContent = '';      // ไม่มี icon ถ้ามี preview
-  if (prev) {
-    prev.innerHTML     = previewHtml;
-    prev.style.display = 'block';
-  }
-  document.getElementById('_confirm-msg').innerHTML = msg;
-  document.getElementById('_confirm-ok').className  = `btn ${okClass}`;
-  document.getElementById('_confirm-ok').textContent = okLabel;
-  el.style.display = 'flex';
-  document.getElementById('_confirm-ok').onclick     = () => { el.style.display = 'none'; onOk(); };
   document.getElementById('_confirm-cancel').onclick = () => { el.style.display = 'none'; };
 }
 
@@ -9136,7 +9100,7 @@ async function initHome(){
   }catch(e){}
   // ✅ โหลด Deposit Addresses จาก Config + Notifications (login เท่านั้น)
   loadDepositAddresses();
-  if(SESSION){ loadNotifications(); chatCheckUnread(); }
+  if(SESSION){ loadNotifications(); if(typeof schRefresh==='function') schRefresh(); }
 }
 
 // ─── REAL MARKETPLACE ───
@@ -9454,11 +9418,11 @@ document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if
 const GAS_MAIN_URL = 'https://script.google.com/macros/s/AKfycbwocCEr-mQu6esBJBRRElo68Y2GLPJryhAShi9FSm__G9mD0TV5oa9IAa8cFxBn_GlILw/exec';
 // ↑ แก้เฉพาะบรรทัดนี้เมื่อ re-deploy GAS_TCC_Main ─────────────
 
-// [v5-BRIDGE FIX] apiPostMain: แยก timeout 8s ออกจาก fetchWithTimeout ของ chat (15s)
-// ป้องกัน Bridge fetch ที่ช้า/ล้มเหลวไปชน queue ของ sendChatMessage
+// [v5-BRIDGE FIX] apiPostMain: แยก timeout 8s ออกจาก fetchWithTimeout (15s) ของ GAS MP
+// ป้องกัน Bridge fetch ที่ช้า/ล้มเหลวไปชน queue ของ request อื่น
 async function apiPostMain(body){
   const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), 8000); // 8s timeout — แยกจาก chat
+  const tid  = setTimeout(() => ctrl.abort(), 8000); // 8s timeout — แยกจาก GAS MP
   try{
     const res = await fetch(GAS_MAIN_URL,{
       method:'POST', redirect:'follow',
@@ -9586,291 +9550,7 @@ async function loadMainBalance(){
 
 <!-- ══ MOBILE BOTTOM NAV ══ -->
 
-<!-- ══════════════════════════════════════════════════════════════
-     [vChat] CHAT PAGE — ระบบแชท Buyer ↔ Seller (v7 — TOS1 engine)
-     ══════════════════════════════════════════════════════════════ -->
-<style>
-/* ══ Chat Page Layout ══ */
-#p-chat{
-  display:none;
-  position:fixed !important;
-  top:60px; left:0; right:0; bottom:0;
-  z-index:90;
-  flex-direction:column;
-  padding:0 !important; margin:0 !important;
-  max-width:100% !important; width:100% !important;
-  overflow:hidden;
-  background:var(--bg);
-}
-#p-chat.active{display:flex !important;}
-@media(max-width:768px){
-  #p-chat{ bottom:calc(64px + env(safe-area-inset-bottom,0px)); }
-}
-
-/* ── Sidebar ── */
-.chat-sidebar{
-  width:260px; flex-shrink:0;
-  background:var(--bg2); border-right:1px solid var(--bd);
-  display:flex; flex-direction:column; overflow:hidden;
-  position:relative; transform:none; transition:none;
-}
-@media(max-width:768px){
-  .chat-sidebar{
-    position:fixed !important; left:0; top:60px;
-    bottom:calc(64px + env(safe-area-inset-bottom,0px));
-    height:auto !important; width:280px; z-index:310;
-    transform:translateX(-100%); transition:transform .25s ease;
-  }
-  .chat-sidebar.open{transform:translateX(0) !important;}
-}
-@media(min-width:769px){
-  .chat-sidebar{transform:none !important;}
-  .chat-sob{display:none !important;}
-}
-.chat-sob{
-  display:none; position:fixed; top:60px; left:0; right:0;
-  bottom:calc(64px + env(safe-area-inset-bottom,0px));
-  background:rgba(0,0,0,.5); z-index:305;
-}
-.chat-sob.open{display:block;}
-.chat-sbhdr{display:flex;align-items:center;gap:8px;padding:12px 10px;border-bottom:1px solid var(--bd);flex-shrink:0;}
-.chat-sbhdr-ttl{font-size:14px;font-weight:700;flex:1;}
-.chat-sbclose{background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;padding:4px;}
-.chat-sblist{flex:1;overflow-y:auto;padding:4px 0;}
-/* Room items (TOS1 style) */
-.chat-sbitem{display:flex;align-items:center;gap:9px;padding:9px 10px;cursor:pointer;transition:background .15s;position:relative;border-left:3px solid transparent;}
-.chat-sbitem:hover{background:rgba(240,185,11,.06);}
-.chat-sbitem.active{border-left-color:var(--gold);background:rgba(240,185,11,.08);}
-.chat-sbav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;}
-.chat-sbinfo{flex:1;min-width:0;}
-.chat-sbname{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.chat-sblast{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.chat-sbbdg{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--err);color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;min-width:16px;text-align:center;}
-
-/* ── Main area ── */
-.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;}
-.chat-hdr{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--bd);flex-shrink:0;}
-.chat-hdrav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b8860b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000;flex-shrink:0;}
-.chat-hdrinfo{flex:1;min-width:0;}
-.chat-hdrname{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.chat-hdrsub{font-size:10px;color:var(--t3);}
-.chat-sbtoggle{background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:6px;display:none;}
-@media(max-width:768px){.chat-sbtoggle{display:flex;align-items:center;}}
-.chat-hbtn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:background .15s;}
-.chat-hbtn:hover{background:rgba(255,255,255,.07);color:var(--text);}
-
-/* ── Messages wrap ── */
-.chat-msgs{
-  flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
-  padding:10px 12px 6px; display:flex; flex-direction:column;
-  gap:1px; scroll-behavior:smooth; min-height:0; position:relative;
-}
-/* Date separator */
-.chat-datesep{text-align:center;font-size:10px;color:var(--t3);margin:8px 0;display:flex;align-items:center;gap:6px;}
-.chat-datesep::before,.chat-datesep::after{content:'';flex:1;height:1px;background:var(--bd);}
-
-/* ── Message rows (TOS1 style) ── */
-.cmsg-row{display:flex;gap:7px;align-items:flex-end;margin-bottom:1px;position:relative;}
-.cmsg-row.mine{flex-direction:row-reverse;}
-.cmsg-row.grouped .cmsg-av{visibility:hidden;}
-.cmsg-av{width:30px;height:30px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;align-self:flex-end;}
-.cmsg-body{display:flex;flex-direction:column;max-width:74%;}
-.cmsg-row.mine .cmsg-body{align-items:flex-end;}
-.cmsg-name{font-size:9px;color:var(--t3);margin-bottom:2px;padding-left:2px;}
-.cmsg-row.mine .cmsg-name,.cmsg-row.grouped .cmsg-name{display:none;}
-
-/* ── Bubble ── */
-.cmsg-bubble{padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word;white-space:pre-wrap;overflow-wrap:anywhere;position:relative;cursor:pointer;transition:filter .12s;user-select:text;}
-.cmsg-bubble:active{filter:brightness(.88);}
-.cmsg-row:not(.mine) .cmsg-bubble{background:var(--bg3);border:1px solid var(--bd);border-bottom-left-radius:4px;}
-.cmsg-row.mine .cmsg-bubble{background:rgba(240,185,11,.18);border:1px solid rgba(240,185,11,.3);border-bottom-right-radius:4px;}
-.cmsg-bubble.admin-msg{background:rgba(82,196,26,.1);border:1px solid rgba(82,196,26,.25);}
-.cmsg-deleted .cmsg-bubble{background:var(--bg2)!important;border-style:dashed!important;}
-.cmsg-deleted-text{font-style:italic;color:var(--t3);font-size:12px;}
-
-/* ── Reply quote inside bubble ── */
-.cmsg-quote{background:rgba(0,0,0,.2);border-left:3px solid var(--gold);border-radius:6px;padding:4px 8px;margin-bottom:6px;font-size:11px;}
-.cmsg-quote-name{color:var(--gold);font-weight:600;margin-bottom:1px;}
-.cmsg-quote-text{color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;}
-
-/* ── Image ── */
-.cmsg-img{max-width:180px;max-height:160px;object-fit:cover;border-radius:10px;cursor:pointer;display:block;border:1px solid var(--bd);transition:filter .15s;}
-.cmsg-img:hover{filter:brightness(.85);}
-.cmsg-img-ph{width:180px;height:120px;background:var(--bg3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--t3);font-size:10px;border:1px dashed var(--bd);}
-.cmsg-img-ph span{font-size:22px;}
-
-/* ── Sticker ── */
-.cmsg-sticker{font-size:68px;line-height:1;display:inline-block;cursor:pointer;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));transition:transform .15s;user-select:none;}
-.cmsg-sticker:hover{transform:scale(1.1);}
-.cmsg-sticker:active{transform:scale(0.92);}
-@keyframes stickerPop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.18)}80%{transform:scale(0.94)}100%{transform:scale(1);opacity:1}}
-.cmsg-sticker.new{animation:stickerPop .4s cubic-bezier(.34,1.56,.64,1) forwards;}
-.cmsg-bubble.sticker-bubble{background:transparent!important;border:none!important;padding:2px!important;box-shadow:none!important;}
-.cmsg-bubble.sticker-bubble:active{filter:none;}
-
-/* ── Meta (time + tick) ── */
-.cmsg-meta{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--t3);margin-top:3px;padding:0 2px;}
-.cmsg-row.mine .cmsg-meta{justify-content:flex-end;}
-.cmsg-tick{color:var(--gold);font-size:10px;}
-
-/* ── Reactions ── */
-.cmsg-reactions{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
-.react-pill{display:inline-flex;align-items:center;gap:2px;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;padding:2px 7px;font-size:11px;cursor:pointer;transition:all .15s;user-select:none;}
-.react-pill:hover{border-color:var(--gold);}
-.react-pill.mine{border-color:var(--gold);background:rgba(240,185,11,.12);}
-.react-pill-cnt{font-size:10px;color:var(--t3);}
-
-/* ── Reaction bar popup ── */
-.reaction-bar{position:absolute;bottom:calc(100% + 6px);background:var(--bg2);border:1px solid var(--bd);border-radius:30px;padding:5px 8px;display:flex;gap:3px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:popIn .15s ease;white-space:nowrap;}
-.cmsg-row.mine .reaction-bar{right:0;}
-.cmsg-row:not(.mine) .reaction-bar{left:38px;}
-@keyframes popIn{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}
-.rbar-btn{font-size:22px;cursor:pointer;padding:2px 3px;border:none;background:none;border-radius:8px;transition:transform .15s;}
-.rbar-btn:hover{transform:scale(1.35);}
-
-/* ── Typing indicator ── */
-.chat-typing-row{display:flex;gap:7px;align-items:flex-end;padding:3px 0;}
-.chat-typing-dots{display:flex;gap:3px;align-items:center;padding:8px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:14px;border-bottom-left-radius:4px;}
-.chat-typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--t3);display:block;animation:typingBounce 1.3s infinite;}
-.chat-typing-dots span:nth-child(2){animation-delay:.22s;}
-.chat-typing-dots span:nth-child(3){animation-delay:.44s;}
-@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-
-/* ── New message pill ── */
-.chat-new-pill{position:sticky;bottom:8px;align-self:center;background:var(--gold);color:#000;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;z-index:20;animation:popIn .2s ease;box-shadow:0 4px 14px rgba(240,185,11,.4);white-space:nowrap;margin:4px auto 0;display:none;}
-
-/* ── Reply preview ── */
-.chat-reply-preview{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-top:1px solid var(--bd);flex-shrink:0;animation:slideUp .15s ease;}
-@keyframes slideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.chat-rp-bar{width:3px;height:32px;background:var(--gold);border-radius:2px;flex-shrink:0;}
-.chat-rp-content{flex:1;min-width:0;}
-.chat-rp-name{font-size:11px;color:var(--gold);font-weight:600;}
-.chat-rp-text{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.chat-rp-cancel{background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;padding:4px;line-height:1;}
-.chat-rp-cancel:hover{color:var(--text);}
-
-/* ── Emoji/Sticker picker ── */
-.chat-emoji-picker{background:var(--bg2);border-top:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;max-height:250px;overflow:hidden;animation:slideUp .15s ease;}
-.chat-emoji-tabs{display:flex;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--bg3);}
-.chat-emoji-tab{flex:1;padding:9px 4px;font-size:12px;font-weight:600;color:var(--t3);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
-.chat-emoji-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--bg2);}
-/* [v7-FIX] ปุ่มปิด emoji picker */
-.chat-emoji-close-btn{flex-shrink:0;width:36px;height:36px;border:none;background:none;color:var(--t3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s;}
-.chat-emoji-close-btn:hover{color:var(--text);}
-.chat-emoji-content{overflow-y:auto;padding:8px 10px;flex:1;}
-.chat-emoji-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;}
-.chat-emoji-btn{font-size:21px;padding:5px;border-radius:8px;cursor:pointer;border:none;background:none;transition:all .12s;line-height:1;}
-.chat-emoji-btn:hover{background:rgba(255,255,255,.09);transform:scale(1.25);}
-/* Sticker packs */
-.chat-stk-pack-hdr{display:flex;align-items:center;gap:5px;padding:5px 2px 4px;margin-bottom:2px;border-bottom:1px solid var(--bd);margin-top:4px;}
-.chat-stk-pack-icon{font-size:16px;}
-.chat-stk-pack-name{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;}
-.chat-stk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px;}
-.chat-stk-btn{font-size:34px;padding:7px 4px;border-radius:10px;cursor:pointer;border:none;background:none;transition:all .15s;line-height:1;text-align:center;}
-.chat-stk-btn:hover{background:rgba(255,255,255,.09);transform:scale(1.3);}
-
-/* ── Input area ── */
-.chat-iw{display:flex;align-items:flex-end;gap:7px;padding:8px 10px;background:var(--bg2);border-top:1px solid var(--bd);flex-shrink:0;padding-bottom:max(8px,env(safe-area-inset-bottom));}
-.chat-toolbtn{width:34px;height:34px;border-radius:50%;background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
-.chat-toolbtn:hover{background:rgba(255,255,255,.07);color:var(--text);}
-.chat-input{flex:1;background:var(--bg3);border:1px solid var(--bd);border-radius:18px;padding:8px 13px;color:var(--text);font-size:13px;outline:none;resize:none;min-height:36px;max-height:88px;overflow-y:auto;line-height:1.4;font-family:inherit;transition:border-color .2s;}
-.chat-input:focus{border-color:var(--gold);}
-.chat-sendbtn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b8860b);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#000;font-size:15px;flex-shrink:0;transition:all .15s;}
-.chat-sendbtn:hover{filter:brightness(1.1);transform:scale(1.06);}
-.chat-sendbtn:disabled{opacity:.4;cursor:not-allowed;}
-
-/* ── Lightbox ── */
-.chat-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:6000;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:fadeIn .2s ease;flex-direction:column;gap:12px;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.chat-lightbox img{max-width:95vw;max-height:78vh;border-radius:10px;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.7);}
-
-/* ── Empty state ── */
-.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--t3);text-align:center;padding:2rem;}
-.chat-empty-ico{font-size:44px;}
-</style>
-
-<div id="p-chat" class="page">
-  <!-- Sidebar overlay (mobile) -->
-  <div class="chat-sob" id="chatSob" onclick="chatCloseSidebar()"></div>
-
-  <!-- Sidebar: Room List -->
-  <div class="chat-sidebar" id="chatSidebar">
-    <div class="chat-sbhdr">
-      <span class="chat-sbhdr-ttl">💬 ห้องแชท</span>
-      <button class="chat-sbclose" onclick="chatCloseSidebar()">✕</button>
-    </div>
-    <div class="chat-sblist" id="chatRoomList">
-      <div style="padding:14px;color:var(--t3);font-size:12px;text-align:center;">กำลังโหลด...</div>
-    </div>
-  </div>
-
-  <!-- Main Chat Area -->
-  <div class="chat-main">
-    <!-- Header -->
-    <div class="chat-hdr">
-      <button class="chat-sbtoggle" onclick="chatOpenSidebar()">☰</button>
-      <div class="chat-hdrav" id="chatHdrAv">?</div>
-      <div class="chat-hdrinfo">
-        <div class="chat-hdrname" id="chatHdrName">เลือกห้องแชท</div>
-        <div class="chat-hdrsub" id="chatHdrSub">—</div>
-      </div>
-      <button class="chat-hbtn" onclick="chatLoadMessages(true)" title="รีเฟรช">🔄</button>
-      <button class="chat-hbtn" onclick="chatScrollBottom()" title="ลงล่าง">⬇</button>
-    </div>
-
-    <!-- Messages (scroll area) -->
-    <div class="chat-msgs" id="chatMsgs">
-      <div class="chat-empty">
-        <div class="chat-empty-ico">💬</div>
-        <div style="font-size:13px;font-weight:600;">เลือกห้องแชทจากด้านซ้าย</div>
-        <div style="font-size:11px;">หรือกด 💬 แชทกับร้านค้า จากหน้า Orders</div>
-      </div>
-    </div>
-
-    <!-- New message pill -->
-    <div class="chat-new-pill" id="chatNewPill" onclick="chatScrollBottom();this.style.display='none'">⬇ ข้อความใหม่</div>
-
-    <!-- Typing indicator -->
-    <div id="chatTypingWrap" style="padding:0 12px 3px;flex-shrink:0;min-height:0;">
-      <div class="chat-typing-row" id="chatTypingInd" style="display:none;">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--bg3);flex-shrink:0;"></div>
-        <div class="chat-typing-dots"><span></span><span></span><span></span></div>
-      </div>
-    </div>
-
-    <!-- Reply preview -->
-    <div id="chatReplyPreview" class="chat-reply-preview" style="display:none;">
-      <div class="chat-rp-bar"></div>
-      <div class="chat-rp-content">
-        <div class="chat-rp-name" id="chatRpName"></div>
-        <div class="chat-rp-text" id="chatRpText"></div>
-      </div>
-      <button class="chat-rp-cancel" onclick="chatCancelReply()">✕</button>
-    </div>
-
-    <!-- Emoji/Sticker picker -->
-    <div id="chatEmojiPicker" class="chat-emoji-picker" style="display:none;">
-      <div class="chat-emoji-tabs">
-        <div class="chat-emoji-tab active" id="chatEtabEmoji" onclick="chatSwitchEmojiTab('emoji')">😊 อีโมจิ</div>
-        <div class="chat-emoji-tab" id="chatEtabSticker" onclick="chatSwitchEmojiTab('sticker')">🎭 สติ๊กเกอร์</div>
-        <!-- [v7-FIX] ปุ่มปิด picker -->
-        <button class="chat-emoji-close-btn" onclick="chatCloseEmoji()" title="ปิด">✕</button>
-      </div>
-      <div class="chat-emoji-content" id="chatEmojiContentArea"></div>
-    </div>
-
-    <!-- Input Area -->
-    <div class="chat-iw" id="chatInputWrap" style="display:none;">
-      <input type="file" id="chatImgFile" accept="image/*" style="display:none" onchange="chatSendImage(event)">
-      <button class="chat-toolbtn" id="chatEmojiToggleBtn" onclick="chatToggleEmoji()" title="อีโมจิ/สติ๊กเกอร์">😊</button>
-      <button class="chat-toolbtn" onclick="document.getElementById('chatImgFile').click()" title="ส่งรูป">📎</button>
-      <textarea id="chatInput" class="chat-input" placeholder="พิมพ์ข้อความ..." rows="1"
-        oninput="chatAutoResize(this)"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSendMsg();}"></textarea>
-      <button class="chat-sendbtn" id="chatSendBtn" onclick="chatSendMsg()">➤</button>
-    </div>
-  </div>
-</div>
+<!-- [SCH v1] หน้าแชท Buyer ↔ Seller v7 (CSS+HTML) ถูกถอดออกแล้ว — แชทเป็น overlay iframe (บล็อก [SCH v1] ท้ายไฟล์) -->
 
 <nav class="bnav" id="bnav">
   <!-- 5 slots: หน้าแรก | สินค้า | TRADE(center) | แชท | โปรไฟล์ -->
@@ -9887,7 +9567,7 @@ async function loadMainBalance(){
     <div class="bnav-trade-icon">📈</div>
     <span>TRADE</span>
   </div>
-  <!-- แชท (slot 4) — [vChat] -->
+  <!-- แชท (slot 4) — [SCH v1] เปิดแชทซัพพอร์ต (overlay) ผ่าน go('chat') -->
   <div class="bnav-item" id="bn-chat" onclick="bnGo('chat')" style="position:relative;">
     <span class="bi">💬</span><span>แชท</span>
     <span class="bnav-bdg" id="bn-chat-bdg" style="display:none;"></span>
@@ -9901,11 +9581,11 @@ async function loadMainBalance(){
 <span id="bn-notif-bdg" style="display:none;"></span>
 <script>
 function bnGo(pg){
+  if(pg==='chat'){ go('chat'); return; }   // [SCH v1] แชท = overlay ไม่ใช่หน้า → ไม่ไฮไลต์แท็บ
   go(pg);
   // bnav 5 slots: home | marketplace | TRADE | chat | profile
   if(pg==='profile') bnSetActive('profile');
   else if(pg==='shop'||pg==='marketplace') bnSetActive('marketplace');
-  else if(pg==='chat') bnSetActive('chat');
   else if(pg==='home') bnSetActive('home');
   else bnSetActive(pg); // null = bnSetActive จะ return early ไม่ highlight ใด
 }
@@ -9934,7 +9614,6 @@ function bnSetActive(key){
     marketplace:'bn-marketplace',
     trade:'bn-trade',
     shop:'bn-marketplace',
-    chat:'bn-chat',
     wallet:null,
     dashboard:null,
     seller:null,
@@ -11186,876 +10865,258 @@ function mmnClose(label){
   if(lbl && label){ lbl.textContent = label; }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// ════════════════════════════════════════════════════════════════════
-// [vChat] CHAT SYSTEM v7 — TOS1 engine · MP schema
-// Schema: Chat_Rooms / Chat_Messages · member_id · apiGet/apiPost
-// ════════════════════════════════════════════════════════════════════
+// [SCH v1] ระบบแชท Buyer ↔ Seller v7 (JS) ถูกถอดออกแล้ว — ใช้ Support Chat (บล็อก [SCH v1] ท้ายไฟล์) แทน
 
-// ─── State ──────────────────────────────────────────────────────────
-let _chatRooms        = [];
-let _chatActiveRoomId = null;
-let _chatMessages     = [];
-let _chatPollTimer    = null;
-let _chatLastMsgId    = null;   // dedup guard
-let _chatSending      = false;
-let _chatEmojiOpen    = false;
-let _chatCurEmojiTab  = 'emoji';
-let _chatReplyCtx     = null;   // { name, text } for reply quotes
-let _chatLastMsgCnt   = 0;
-let _chatPollInFlight = false;  // [v7-FIX2] guard เฉพาะ poll background — ไม่บล็อก forceScroll
-const _CHAT_POLL_MS   = 12000;
+</script>
+<!-- ═══════════════════════════════════════════════════════════════════
+  [SCH v1] SUPPORT CHAT — แชทสมาชิก ↔ ทีมซัพพอร์ต (แทนระบบแชท Buyer ↔ Seller v7 เดิม)
+  โครงสร้างเดียวกับ index_Easy_USe_v1.html:
+  • iframe = line-chat.html (โหมดสมาชิก) คุยกับ Worker line-chat-worker โดยตรง
+  • แอปนี้ถือ chat token แล้วส่งให้ iframe ทาง postMessage (targetOrigin เจาะจง)
+  • ขอ token: GAS_TCC_Main action issueSession {uid, passHash} (GAS_MAIN_URL ตัวเดียวกับ Easy_USe) → Worker /api/session
+  • overlay ปิด = ส่ง sc-visible:false ให้ iframe หยุด poll/ส่ง "อ่านแล้ว" · badge poll หยุดเมื่อแท็บถูกซ่อน
+  • ทางเข้า: เมนู/ปุ่มแท็บล่าง "แชท" → go('chat') · ปุ่ม "ติดต่อซัพพอร์ต" ในหน้า Order → schOpenFromOrder(orderId)
+  ═══════════════════════════════════════════════════════════════════ -->
+<style>
+.sch-ov{display:none;position:fixed;inset:0;z-index:9000;max-width:480px;margin:0 auto;background:var(--bg);flex-direction:column}
+.sch-ov.on{display:flex}
+.sch-ov iframe{flex:1;width:100%;height:100%;border:0;background:var(--bg)}
+.sch-ld{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:var(--bg);z-index:2}
+.sch-sp{width:34px;height:34px;border-radius:50%;border:3px solid rgba(240,165,0,.25);border-top-color:#f0a500;animation:schspin .8s linear infinite}
+@keyframes schspin{to{transform:rotate(360deg)}}
+</style>
+<div class="sch-ov" id="sch-ov"><div class="sch-ld" id="sch-ld"><div class="sch-sp"></div></div><iframe id="sch-frame" title="Support chat" src="about:blank" allow="clipboard-write"></iframe></div>
+<script>
+(function () {
+  'use strict';
 
-// ─── Emoji / Sticker data ───────────────────────────────────────────
-const _CHAT_EMOJIS = ['😀','😂','🥰','😎','🤔','😭','😡','🥺','😍','🎉','👍','👎','❤️','🔥','✅','💯','🙏','👏','😱','🤣','💪','🤝','😊','😅','🫡','💬','📈','💰','🚀','⭐','🏆','💎','🙌','😤','🤩','🫶'];
-const _CHAT_REACT_EMOJIS = ['👍','❤️','😂','😮','😢','🔥'];
-const _CHAT_STICKER_PACKS = [
-  {id:'happy',  icon:'😄', name:'ยิ้มแย้ม',   stickers:['😀','😂','🤣','😊','😍','🤩','😎','🥳','😜','🤗','😇','🥰','😘','😋','🤪','😁']},
-  {id:'love',   icon:'❤️', name:'ความรัก',   stickers:['❤️','🧡','💛','💚','💙','💜','🖤','🤍','💕','💞','💖','💘','💝','🫶','🥺','😳']},
-  {id:'sad',    icon:'😢', name:'อารมณ์',    stickers:['😢','😭','😱','😤','😠','🤬','😩','😫','😔','😒','🙄','😶','🫠','🥱','😴','🤯']},
-  {id:'greet',  icon:'👋', name:'ทักทาย',   stickers:['👋','🙏','👍','👎','👌','💪','🤝','🫶','👏','✌️','🤞','☝️','🫡','🤙','👐','🙌']},
-  {id:'money',  icon:'💰', name:'การเงิน',  stickers:['💰','💵','💎','📈','🤑','💹','🏦','💳','🪙','💸','🎰','📊','💼','🔑','🏆','🚀']},
-  {id:'party',  icon:'🎉', name:'ฉลอง',     stickers:['🎉','🎊','🏆','🥇','🎯','🔥','✨','💫','🌟','⭐','🎁','🎈','🎂','🥂','🍾','🎶']},
-  {id:'animals',icon:'🐶', name:'สัตว์',    stickers:['🐶','🐱','🐸','🐼','🐨','🦊','🐰','🦁','🐯','🐺','🦋','🐝','🦄','🐲','🦕','🐙']},
-  {id:'food',   icon:'🍔', name:'อาหาร',    stickers:['🍔','🍕','🌮','🍜','🍣','🍩','🎂','🧁','🍦','🍫','☕','🧋','🍺','🥂','🍾','🍿']}
-];
+  /* ── ตั้งค่า (ตรวจ 2 ค่านี้ให้ตรงของจริงก่อน deploy) ── */
+  // URL ที่โฮสต์ line-chat.html (เขียนแบบ relative ได้ถ้าอยู่โดเมน/โฟลเดอร์เดียวกับหน้านี้ — ถ้าโฮสต์คนละโดเมนให้ใส่ URL เต็ม https://…/line-chat.html)
+  var SCH_CHAT_URL = 'line-chat.html';
+  // URL ของ Worker line-chat-worker (ต้องตรงกับ DEFAULT_API ใน line-chat.html)
+  var SCH_API_URL  = 'https://line-chat-worker.tcc-team-developer.workers.dev';
+  var SCH_POLL_MS  = 30000;   // poll จำนวนยังไม่อ่านทุก 30 วิ (เฉพาะตอนแท็บมองเห็นและ overlay ปิด)
 
-// ─── Helper: _chatMyId / _chatMyName ────────────────────────────────
-// SESSION.member_id อาจว่างถ้า localStorage session เก่า — fallback หลายชั้น
-function _chatMyId() {
-  if (!SESSION) return '';
-  return String(SESSION.member_id || SESSION.uid || SESSION.bnb_id || '').trim();
-}
-function _chatMyName() {
-  if (!SESSION) return 'สมาชิก';
-  return String(SESSION.username || SESSION.full_name || SESSION.name ||
-                SESSION.member_id || SESSION.uid || 'สมาชิก').trim();
-}
+  var TGT = '*', ORIGIN_OK = false;
+  try {
+    var o = new URL(SCH_CHAT_URL, location.href).origin;
+    if (o && o !== 'null') { TGT = o; ORIGIN_OK = true; }
+  } catch (e) {}
 
-// ─── Helper: escHtml ─────────────────────────────────────────────────
-function escHtml(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+  var chat = null, chatUid = '', chatP = null, blockUntil = 0, timer = null;
+  var gasTok = null, gasP = null;
+  var frameMode = '', schPushed = false, schScreen = '', frameReady = false, ldTimer = null, silentBack = false, preloaded = false;
 
-// ─── Helper: linkify URLs ────────────────────────────────────────────
-function chatLinkify(text) {
-  const urlPat = /(https?:\/\/[^\s<>"']+)/g;
-  const parts = []; let last = 0, m;
-  while ((m = urlPat.exec(text)) !== null) {
-    parts.push(escHtml(text.slice(last, m.index)));
-    const url = m[0];
-    parts.push(`<a href="${escHtml(url)}" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;word-break:break-all" onclick="event.stopPropagation()">${escHtml(url)}</a>`);
-    last = m.index + url.length;
+  function $id(i) { return document.getElementById(i); }
+  function isOpen() { var el = $id('sch-ov'); return !!(el && el.classList.contains('on')); }
+
+  /* ── session ของ MP (SESSION.uid = BNB ID · passHash จาก TCC login engine) ── */
+  function uidNow() { try { return (typeof SESSION !== 'undefined' && SESSION && SESSION.uid) ? String(SESSION.uid).trim() : ''; } catch (e) { return ''; } }
+  function hasSession() { return !!uidNow(); }
+  function modeNow() { var u = uidNow(); return u ? 'm:' + u : 'visitor'; }
+  function schLoading(on) { var l = $id('sch-ld'); if (l) l.style.display = on ? 'flex' : 'none'; clearTimeout(ldTimer); if (on) ldTimer = setTimeout(function () { schLoading(false); }, 20000); }
+  function toast(m, t) { try { if (typeof showToast === 'function') showToast(m, t || 'warn'); } catch (e) {} }
+
+  /* ── GAS session token (HMAC) — ขอจาก GAS_TCC_Main ด้วย uid + passHash แล้วแคชจนใกล้หมดอายุ ── */
+  function tokUid(t) {
+    try {
+      var p = String(t || '').split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
+      while (p.length % 4) p += '=';
+      var j = JSON.parse(atob(p));
+      return j && j.u ? String(j.u).trim() : '';
+    } catch (e) { return ''; }
   }
-  parts.push(escHtml(text.slice(last)));
-  return parts.join('');
-}
-
-// ─── Helper: parse message markers ──────────────────────────────────
-// Markers: ⟦del⟧ | ⟦sticker⟧emoji | ⟦img⟧url | ⟦reply:name|text⟧body
-function chatParseMsg(raw) {
-  raw = String(raw ?? '');
-  let quote = null, isDeleted = false, isImg = false, imgUrl = '', isSticker = false, stickerEmoji = '', text = raw;
-  if (raw.startsWith('⟦del⟧'))        { isDeleted = true; text = ''; }
-  else if (raw.startsWith('⟦sticker⟧')){ isSticker = true; stickerEmoji = raw.slice(9); text = ''; }
-  else if (raw.startsWith('⟦img⟧'))   {
-    const content = raw.slice(5); text = '';
-    if (content.startsWith('http') || content.startsWith('data:')) { isImg = true; imgUrl = content; }
-    else { isSticker = true; stickerEmoji = content; } // backward compat
+  function cacheRead() { try { return JSON.parse(sessionStorage.getItem('mp_sch_gas') || 'null'); } catch (e) { return null; } }
+  function cacheWrite(o) { try { if (o) sessionStorage.setItem('mp_sch_gas', JSON.stringify(o)); else sessionStorage.removeItem('mp_sch_gas'); } catch (e) {} }
+  async function gasToken() {
+    var uid = uidNow(); if (!uid) return '';
+    var c = gasTok || cacheRead();
+    if (c && c.uid === uid && c.token && c.exp_ms - 60000 > Date.now()) { gasTok = c; return c.token; }
+    if (gasP) return gasP;
+    var ph = ''; try { ph = SESSION.passHash || ''; } catch (e) {}
+    if (!ph || typeof GAS_MAIN_URL === 'undefined') return '';
+    var remember = false; try { remember = localStorage.getItem('tcc_remember_me') === '1'; } catch (e) {}
+    gasP = (async function () {
+      var ctrl = new AbortController(), tm = setTimeout(function () { ctrl.abort(); }, 20000);
+      try {
+        var r = await fetch(GAS_MAIN_URL, {
+          method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctrl.signal,
+          body: JSON.stringify({ action: 'issueSession', data: { uid: uid, passHash: ph, remember: remember }, token: '' })
+        });
+        var j = await r.json();
+        if (!j || !j.ok || !j.data || !j.data.token) return '';
+        var tu = tokUid(j.data.token);
+        if (tu && tu.toLowerCase() !== uid.toLowerCase()) return '';   // token ไม่ใช่ของ uid นี้ → ไม่ใช้
+        if (uidNow() !== uid) return '';                                // สลับบัญชีระหว่างรอ
+        gasTok = { uid: uid, token: j.data.token, exp_ms: Number(j.data.exp_ms) || (Date.now() + 2 * 3600 * 1000) };
+        cacheWrite(gasTok);
+        return gasTok.token;
+      } catch (e) { return ''; } finally { clearTimeout(tm); gasP = null; }
+    })();
+    return gasP;
   }
-  else if (raw.startsWith('⟦reply:')) {
-    const end = raw.indexOf('⟧');
-    if (end > -1) {
-      const meta = raw.slice(7, end); const sep = meta.indexOf('|');
-      quote = { name: meta.slice(0, sep), text: meta.slice(sep + 1) };
-      text = raw.slice(end + 1);
+
+  // chat token ของ Worker (แลกจาก GAS token — Worker ให้ GAS ตรวจครั้งเดียว) · แคชไว้จนใกล้หมดอายุ
+  async function ensureChat(user) {
+    var uid = uidNow();
+    if (chat && chatUid === uid && chat.exp_ms - 60000 > Date.now()) return chat;
+    if (chatP) return chatP;
+    if (!user && Date.now() < blockUntil) throw new Error('blocked');   // พังติดกัน → พัก 5 นาที กันยิง GAS ซ้ำ
+    chatP = (async function () {
+      try {
+        var t = await gasToken();
+        if (!t) throw new Error('no-token');
+        var r = await fetch(SCH_API_URL + '/api/session', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: t })
+        });
+        var d = await r.json().catch(function () { return {}; });
+        if (!r.ok || !d.token) throw new Error(d.error || ('HTTP ' + r.status));
+        if (uidNow() !== uid) throw new Error('uid-changed');
+        chat = d; chatUid = uid; blockUntil = 0;
+        return d;
+      } catch (e) {
+        chat = null; chatUid = ''; blockUntil = Date.now() + 5 * 60 * 1000;
+        throw e;
+      } finally { chatP = null; }
+    })();
+    return chatP;
+  }
+
+  /* ── badge (แท็บล่าง "แชท") ── */
+  function setBadge(n) {
+    var el = $id('bn-chat-bdg'); if (!el) return;
+    if (n > 0) { el.textContent = n > 9 ? '9+' : String(n); el.style.display = 'flex'; }
+    else el.style.display = 'none';
+  }
+  async function pollBadge() {
+    if (!SCH_API_URL || document.hidden || isOpen()) return;
+    if (!hasSession()) { chat = null; chatUid = ''; setBadge(0); return; }
+    try {
+      var c = await ensureChat(false);
+      schPreload();
+      var r = await fetch(SCH_API_URL + '/api/unread', { headers: { Authorization: 'Bearer ' + c.token } });
+      if (r.status === 401) { chat = null; chatUid = ''; return; }
+      var d = await r.json();
+      var n = d && (typeof d.total === 'number' ? d.total : d.unread);
+      setBadge(n || 0);
+    } catch (e) { /* เงียบ — ลองใหม่รอบหน้า */ }
+  }
+  function startPoll() { if (timer) return; pollBadge(); timer = setInterval(pollBadge, SCH_POLL_MS); }
+  function stopPoll() { if (timer) { clearInterval(timer); timer = null; } }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) stopPoll(); else startPoll(); });
+  setTimeout(function () { if (!document.hidden) startPoll(); }, 4000);   // รอให้แอปบูตเสร็จก่อน
+  window.schRefresh = function () { pollBadge(); };                       // เรียกหลังโหลดหน้า/ล็อกอิน เพื่ออัปเดต badge
+
+  /* ── สื่อสารกับ iframe ── */
+  function postVisible(on) {
+    var f = $id('sch-frame');
+    if (!f || !f.getAttribute('data-sch') || !f.contentWindow) return;
+    try { f.contentWindow.postMessage({ type: 'sc-visible', on: !!on }, TGT); } catch (e) {}
+  }
+  async function sendInit() {
+    var f = $id('sch-frame');
+    if (!f || !f.contentWindow) return;
+    var t = '', c = null;
+    if (hasSession()) {
+      t = await gasToken();
+      if (chat && chatUid === uidNow() && chat.exp_ms - 60000 > Date.now()) c = chat;   // มีแคชก็ส่งให้เลย · ไม่มี → ให้ iframe แลก token เองแบบขนาน
     }
+    var msg = { type: 'sc-init', token: t, api: SCH_API_URL, lang: 'th', avatar: '' };   // MP เป็นภาษาไทยล้วน
+    if (c) msg.chat = c; else if (!t) msg.visitor = true;
+    try { f.contentWindow.postMessage(msg, TGT); } catch (e) {}
+    postVisible(isOpen());
   }
-  return { text, quote, isDeleted, isImg, imgUrl, isSticker, stickerEmoji };
-}
+  window.addEventListener('message', function (ev) {
+    var f = $id('sch-frame');
+    if (!f || ev.source !== f.contentWindow) return;
+    if (ORIGIN_OK && ev.origin !== TGT) return;
+    var d = ev.data;
+    if (!d || typeof d.type !== 'string') return;
+    if (d.type === 'sc-need-init') sendInit();
+    else if (d.type === 'sc-close') window.schClose();
+    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); }
+    else if (d.type === 'sc-screen') schScreen = String(d.id || '');
+    else if (d.type === 'sc-login') { schPushed = false; window.schClose(); try { if (typeof lgGoLogin === 'function') lgGoLogin(); } catch (e) {} }   // ไม่มี session (Visitor) กด "เข้าสู่ระบบ" ในแชท
+    else if (d.type === 'sc-reset') { frameMode = ''; reloadFrame(); if (isOpen()) schLoading(true); }                          // เซสชันเปลี่ยนกลางทาง → โหลดแชทใหม่
+    else if (d.type === 'sc-unread') setBadge(parseInt(d.n, 10) || 0);                                                           // ยอดค้างอ่านรวมจากหน้าแชท
+  });
+  (function () {
+    var f = $id('sch-frame');
+    if (f) f.addEventListener('load', function () { if (f.getAttribute('data-sch')) postVisible(isOpen()); });
+  })();
 
-// ─── Helper: format time ────────────────────────────────────────────
-function chatFmtTime(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-}
-
-// ─── Helper: date separator label ───────────────────────────────────
-function chatDateSep(iso) {
-  if (!iso) return '';
-  const d = new Date(iso); if (isNaN(d.getTime())) return '';
-  const now = new Date();
-  const dDay   = new Date(d.getFullYear(),   d.getMonth(),   d.getDate());
-  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diff   = Math.round((nowDay - dDay) / 86400000);
-  if (diff === 0) return 'วันนี้';
-  if (diff === 1) return 'เมื่อวาน';
-  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-// ─── Helper: avatar color hue from name ─────────────────────────────
-function chatStrHue(s) { let h = 0; for (const c of String(s || '')) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
-
-// ─── Render one message row (TOS1 style, MP fields) ─────────────────
-function chatRenderMsgRow(msg, prevMsg) {
-  const myId       = _chatMyId();
-  const senderId   = String(msg.sender_id || '').trim();
-  const isMine     = senderId === myId;
-  const isAdmin    = String(msg.sender_role || '').toLowerCase() === 'admin';
-  const senderName = escHtml(msg.sender_name || (isMine ? 'ฉัน' : '?'));
-  const raw        = String(msg.message ?? '');
-  const msgId      = msg.msg_id || msg.id || '';
-  const ts         = msg.created_at || '';
-  const t          = chatFmtTime(ts);
-
-  // grouping: same sender consecutively
-  const prevId   = prevMsg ? String(prevMsg.sender_id || '').trim() : null;
-  const grouped  = !!(prevMsg && prevId === senderId);
-
-  const { text, quote, isDeleted, isImg, imgUrl, isSticker, stickerEmoji } = chatParseMsg(raw);
-
-  // Date separator
-  const curLabel  = chatDateSep(ts);
-  const prevLabel = prevMsg ? chatDateSep(prevMsg.created_at || '') : '';
-  let sep = '';
-  if (curLabel && (!prevMsg || curLabel !== prevLabel)) {
-    sep = `<div class="chat-datesep">${curLabel}</div>`;
+  /* ── เปิด/ปิดหน้าแชท ── */
+  // เปลี่ยนหน้าใน iframe แบบ replace (ไม่เพิ่ม entry ใน history ของแท็บ → ปุ่ม Back ของเครื่องไม่ถูกกินโดย iframe)
+  function navFrame(f, url) {
+    try { if (f.contentWindow) { f.contentWindow.location.replace(url); return; } } catch (e) {}
+    f.src = url;
   }
-
-  // Quote inside bubble
-  let quoteHtml = '';
-  if (quote) quoteHtml = `<div class="cmsg-quote"><div class="cmsg-quote-name">${escHtml(quote.name)}</div><div class="cmsg-quote-text">${escHtml(quote.text)}</div></div>`;
-
-  // Bubble content
-  let bubbleInner = '';
-  let bubbleClass = 'cmsg-bubble';
-  if (!isMine && !isAdmin) bubbleClass += ' them';
-  else if (isMine)         bubbleClass += ' mine';
-  else if (isAdmin)        bubbleClass += ' admin-msg';
-
-  if (isDeleted) {
-    bubbleInner = `<span class="cmsg-deleted-text">🚫 ลบข้อความแล้ว</span>`;
-  } else if (isSticker) {
-    bubbleClass = 'cmsg-bubble sticker-bubble';
-    bubbleInner = `<span class="cmsg-sticker new" onclick="event.stopPropagation()" title="สติ๊กเกอร์">${stickerEmoji || '😊'}</span>`;
-  } else if (isImg) {
-    const safeUrl = escHtml(imgUrl);
-    bubbleInner = `<div class="cmsg-img-ph" id="chatImgPh-${escHtml(msgId)}" style="display:none"><span>🔄</span><span style="font-size:10px">กำลังโหลด...</span></div>
-      <img class="cmsg-img" src="${safeUrl}"
-        onclick="chatOpenLightbox('${safeUrl}')"
-        onload="const ph=document.getElementById('chatImgPh-${escHtml(msgId)}');if(ph)ph.style.display='none'"
-        onerror="this.style.display='none';const ph=document.getElementById('chatImgPh-${escHtml(msgId)}');if(ph){ph.innerHTML='<span>🖼</span><span style=\\'font-size:10px\\'>โหลดรูปไม่ได้</span>';ph.style.display='flex';}"
-        loading="lazy">`;
-  } else {
-    bubbleInner = quoteHtml + chatLinkify(text);
+  function reloadFrame() {
+    var f = $id('sch-frame'); if (!f) return;
+    frameMode = modeNow(); frameReady = false; schScreen = '';
+    f.setAttribute('data-sch', '1');
+    navFrame(f, 'about:blank');
+    setTimeout(function () { navFrame(f, SCH_CHAT_URL); }, 30);
   }
-
-  // Long-press actions attr
-  const safeRaw  = raw.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  const longpress = !isSticker
-    ? `oncontextmenu="event.preventDefault();chatShowMsgActions('${escHtml(msgId)}','${isMine?'own':'other'}','${senderName}','${safeRaw}',this);return false;"`
-    : `onclick="event.stopPropagation()"`;
-
-  // Avatar
-  const avLetter = (senderName[0] || '?').toUpperCase();
-  const avStyle  = `background:hsl(${chatStrHue(senderName)},52%,36%);`;
-
-  return `${sep}
-  <div class="cmsg-row${isMine?' mine':''}${grouped?' grouped':''}" id="chatMsg-${escHtml(msgId)}" data-mid="${escHtml(msgId)}">
-    <div class="cmsg-av" style="${avStyle}">${avLetter}</div>
-    <div class="cmsg-body">
-      ${!grouped ? `<div class="cmsg-name">${senderName}</div>` : ''}
-      <div class="${bubbleClass}${isDeleted?' cmsg-deleted':''}" ${longpress}>${bubbleInner}</div>
-      <div class="cmsg-meta">
-        <span>${t}</span>
-        ${isMine && !isDeleted ? `<span class="cmsg-tick">✓✓</span>` : ''}
-      </div>
-    </div>
-  </div>`;
-}
-
-// ─── Lightbox ────────────────────────────────────────────────────────
-function chatOpenLightbox(src) {
-  const box = document.createElement('div');
-  box.className = 'chat-lightbox';
-  const safeUrl = escHtml(src);
-  box.innerHTML = `
-    <img src="${safeUrl}" alt="ภาพ">
-    <div style="display:flex;gap:10px;justify-content:center">
-      <a href="${safeUrl}" download target="_blank" rel="noopener"
-         style="background:var(--gold);color:#000;padding:8px 20px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"
-         onclick="event.stopPropagation()">⬇ ดาวน์โหลด</a>
-      <button onclick="this.closest('.chat-lightbox').remove()"
-         style="background:var(--bg3);border:1px solid var(--bd);color:var(--t2);padding:8px 20px;border-radius:10px;font-size:13px;cursor:pointer;">✕ ปิด</button>
-    </div>`;
-  box.onclick = e => { if (e.target === box) box.remove(); };
-  document.body.appendChild(box);
-}
-
-// ─── Scroll to bottom ────────────────────────────────────────────────
-function chatScrollBottom() {
-  const el = document.getElementById('chatMsgs');
-  if (!el) return;
-  setTimeout(() => { el.scrollTop = el.scrollHeight; }, 80);
-  const pill = document.getElementById('chatNewPill');
-  if (pill) pill.style.display = 'none';
-}
-
-// ─── Message action bar (long-press) ─────────────────────────────────
-function chatShowMsgActions(msgId, role, senderName, rawMsg, el) {
-  chatCloseAllReactionBars();
-  const { text, isDeleted } = chatParseMsg(rawMsg);
-  if (isDeleted) return;
-  const bar = document.createElement('div');
-  bar.className = 'reaction-bar';
-  bar.id = 'chatRbar-' + msgId;
-  const reacts  = _CHAT_REACT_EMOJIS.map(e => `<button class="rbar-btn" onclick="chatToggleReaction('${escHtml(msgId)}','${e}');chatCloseAllReactionBars()" title="${e}">${e}</button>`).join('');
-  const replyBtn = `<button class="rbar-btn" onclick="chatSetReply('${escHtml(senderName)}','${escHtml(text.slice(0,60)).replace(/'/g,"\\'")}');chatCloseAllReactionBars()" title="ตอบกลับ">↩️</button>`;
-  const copyBtn  = text ? `<button class="rbar-btn" onclick="navigator.clipboard.writeText('${text.replace(/'/g,"\\'")}').then(()=>showToast('คัดลอกแล้ว','ok'));chatCloseAllReactionBars()" title="คัดลอก">📋</button>` : '';
-  const delBtn   = role === 'own' ? `<button class="rbar-btn" onclick="chatDeleteMsg('${escHtml(msgId)}');chatCloseAllReactionBars()" title="ลบ">🗑️</button>` : '';
-  bar.innerHTML  = reacts + replyBtn + copyBtn + delBtn;
-  el.style.position = 'relative';
-  el.appendChild(bar);
-  setTimeout(() => { document.addEventListener('click', chatCloseAllReactionBars, { once: true }); }, 10);
-}
-function chatCloseAllReactionBars() { document.querySelectorAll('.reaction-bar').forEach(b => b.remove()); }
-
-// ─── Reply ───────────────────────────────────────────────────────────
-function chatSetReply(name, text) {
-  _chatReplyCtx = { name, text };
-  const rp = document.getElementById('chatReplyPreview');
-  const rn = document.getElementById('chatRpName');
-  const rt = document.getElementById('chatRpText');
-  if (rn) rn.textContent = name;
-  if (rt) rt.textContent = text;
-  if (rp) rp.style.display = 'flex';
-  document.getElementById('chatInput')?.focus();
-}
-function chatCancelReply() {
-  _chatReplyCtx = null;
-  const rp = document.getElementById('chatReplyPreview');
-  if (rp) rp.style.display = 'none';
-}
-
-// ─── Reaction ────────────────────────────────────────────────────────
-async function chatToggleReaction(msgId, emoji) {
-  if (!SESSION || !_chatActiveRoomId) return;
-  // find msg in local state and update reactions optimistically
-  const msg = _chatMessages.find(m => (m.msg_id || m.id || '') === msgId);
-  if (!msg) return;
-  let rx = {};
-  try { rx = JSON.parse(msg.reactions_json || '{}'); } catch {}
-  if (!rx._users) rx._users = {};
-  const myId = _chatMyId();
-  const prev = rx._users[myId];
-  if (prev === emoji) {
-    delete rx._users[myId]; rx[emoji] = Math.max(0, (rx[emoji] || 1) - 1);
-    if (!rx[emoji]) delete rx[emoji];
-  } else {
-    if (prev) { rx[prev] = Math.max(0, (rx[prev] || 1) - 1); if (!rx[prev]) delete rx[prev]; }
-    rx._users[myId] = emoji; rx[emoji] = (rx[emoji] || 0) + 1;
-  }
-  msg.reactions_json = JSON.stringify(rx);
-  _chatRenderReactionBubble(msgId, rx, myId);
-  // persist — GAS sendChatMessage doesn't have reaction patch; silent best-effort
-  try {
-    await apiPost({ action: 'patchChatReaction', msg_id: msgId, member_id: myId, emoji,
-                    room_id: _chatActiveRoomId });
-  } catch {}
-}
-function _chatRenderReactionBubble(msgId, rx, myId) {
-  const mine    = rx._users ? rx._users[myId] : null;
-  const entries = Object.entries(rx).filter(([k, v]) => k !== '_users' && v > 0);
-  const newHtml = entries.map(([e, c]) =>
-    `<span class="react-pill${mine === e ? ' mine' : ''}" onclick="chatToggleReaction('${msgId}','${e}')">${e}<span class="react-pill-cnt">${c}</span></span>`
-  ).join('');
-  const row = document.querySelector(`[data-mid="${msgId}"]`);
-  if (!row) return;
-  let rd = row.querySelector('.cmsg-reactions');
-  if (!entries.length) { if (rd) rd.remove(); return; }
-  if (!rd) {
-    rd = document.createElement('div'); rd.className = 'cmsg-reactions';
-    const meta = row.querySelector('.cmsg-meta'); const body = row.querySelector('.cmsg-body');
-    if (meta) body.insertBefore(rd, meta); else if (body) body.appendChild(rd);
-  }
-  rd.innerHTML = newHtml;
-}
-
-// ─── Delete message ──────────────────────────────────────────────────
-async function chatDeleteMsg(msgId) {
-  if (!SESSION) return;
-  // [v5-CHAT] เปลี่ยนจาก browser confirm() → in-app modal
-  showChatConfirm(
-    '<span style="font-size:2rem;">🗑️</span>',
-    'ลบข้อความนี้ใช่ไหม?<br><small style="color:var(--t3);">การดำเนินการนี้ไม่สามารถยกเลิกได้</small>',
-    async () => {
-      try {
-        await apiPost({ action: 'deleteChatMessage', msg_id: msgId, sender_id: _chatMyId() });
-        await chatLoadMessages(true);
-        showToast('ลบข้อความแล้ว', 'ok');
-      } catch(e) { showToast('⚠️ ลบไม่สำเร็จ: ' + e.message, 'warn'); }
-    },
-    'ลบ', 'btn-err'
-  );
-}
-
-// ─── Emoji picker ────────────────────────────────────────────────────
-function chatBuildEmojiTab() {
-  const area = document.getElementById('chatEmojiContentArea'); if (!area) return;
-  area.innerHTML = `<div class="chat-emoji-grid">${_CHAT_EMOJIS.map(e => `<button class="chat-emoji-btn" onclick="chatInsertEmoji('${e}')">${e}</button>`).join('')}</div>`;
-}
-function chatBuildStickerTab() {
-  const area = document.getElementById('chatEmojiContentArea'); if (!area) return;
-  area.innerHTML = _CHAT_STICKER_PACKS.map(pack => `
-    <div class="chat-stk-pack-hdr"><span class="chat-stk-pack-icon">${pack.icon}</span><span class="chat-stk-pack-name">${pack.name}</span></div>
-    <div class="chat-stk-grid">${pack.stickers.map(s => `<button class="chat-stk-btn" onclick="chatSendSticker('${s}')" title="${s}">${s}</button>`).join('')}</div>`).join('');
-}
-function chatSwitchEmojiTab(tab) {
-  _chatCurEmojiTab = tab;
-  document.getElementById('chatEtabEmoji')?.classList.toggle('active', tab === 'emoji');
-  document.getElementById('chatEtabSticker')?.classList.toggle('active', tab === 'sticker');
-  if (tab === 'emoji') chatBuildEmojiTab(); else chatBuildStickerTab();
-}
-function chatToggleEmoji() {
-  _chatEmojiOpen = !_chatEmojiOpen;
-  const el  = document.getElementById('chatEmojiPicker'); if (!el) return;
-  const btn = document.getElementById('chatEmojiToggleBtn');
-  el.style.display = _chatEmojiOpen ? 'flex' : 'none';
-  if (btn) btn.style.color = _chatEmojiOpen ? 'var(--gold)' : '';
-  if (_chatEmojiOpen) {
-    chatSwitchEmojiTab(_chatCurEmojiTab);
-    document.getElementById('chatInput')?.focus();
-    // [v7-FIX] click-outside: ปิด picker เมื่อคลิกนอกพื้นที่
-    setTimeout(() => {
-      document.addEventListener('click', _chatEmojiOutsideHandler);
-    }, 10);
-  } else {
-    document.removeEventListener('click', _chatEmojiOutsideHandler);
-  }
-}
-function _chatEmojiOutsideHandler(e) {
-  const picker = document.getElementById('chatEmojiPicker');
-  const btn    = document.getElementById('chatEmojiToggleBtn');
-  if (picker && !picker.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
-    chatCloseEmoji();
-  }
-}
-function chatCloseEmoji() {
-  _chatEmojiOpen = false;
-  const el  = document.getElementById('chatEmojiPicker'); if (el) el.style.display = 'none';
-  const btn = document.getElementById('chatEmojiToggleBtn'); if (btn) btn.style.color = '';
-  document.removeEventListener('click', _chatEmojiOutsideHandler); // [v7-FIX] เคลียร์ listener
-}
-function chatInsertEmoji(e) {
-  const inp = document.getElementById('chatInput'); if (!inp) return;
-  const pos = inp.selectionStart || inp.value.length;
-  inp.value = inp.value.slice(0, pos) + e + inp.value.slice(pos);
-  inp.focus(); chatAutoResize(inp);
-}
-
-// ─── Send sticker ────────────────────────────────────────────────────
-// [v5-CHAT] ขั้นตอน: กด sticker → showChatConfirm (in-app preview) → ยืนยัน → ส่ง + retry 1 ครั้ง
-async function chatSendSticker(emoji) {
-  if (!_chatActiveRoomId || !SESSION) return;
-  chatCloseEmoji();
-  const myName = _chatMyName();
-  const myId   = _chatMyId();
-  if (!myId) { showToast('⚠️ กรุณาเข้าสู่ระบบใหม่', 'warn'); return; }
-
-  // [v5-CHAT] in-app confirm พร้อม sticker preview (ไม่ใช้ browser confirm)
-  showChatConfirm(
-    `<span class="cmsg-sticker" style="font-size:72px;display:block;text-align:center;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));animation:stickerPop .4s cubic-bezier(.34,1.56,.64,1) forwards;">${emoji}</span>`,
-    'ส่งสติ๊กเกอร์นี้?',
-    async () => {
-      // Optimistic bubble
-      const tempRow = document.createElement('div');
-      tempRow.className = 'cmsg-row mine';
-      tempRow.innerHTML = `<div class="cmsg-av" style="visibility:hidden">S</div>
-        <div class="cmsg-body" style="align-items:flex-end">
-          <div class="cmsg-bubble sticker-bubble"><span class="cmsg-sticker new">${emoji}</span></div>
-          <div class="cmsg-meta" style="justify-content:flex-end"><span>${chatFmtTime(new Date().toISOString())}</span></div>
-        </div>`;
-      document.getElementById('chatMsgs')?.appendChild(tempRow);
-      chatScrollBottom();
-
-      // [v5-CHAT] _chatSendOnce: ส่ง + retry 1 ครั้งอัตโนมัติถ้า GAS timeout
-      const payload = {
-        action:      'sendChatMessage',
-        room_id:     _chatActiveRoomId,
-        sender_id:   myId,
-        sender_name: myName,
-        sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
-        message:     `⟦sticker⟧${emoji}`,
-        msg_type:    'text'
-      };
-      try {
-        let res = await apiPost(payload);
-        if ((!res || res.success === false) && !(res && res.msg_id)) {
-          // retry ครั้งเดียวหลังรอ 1.5s
-          console.warn('[chatSendSticker] retry once after fail:', res?.error);
-          await new Promise(r => setTimeout(r, 1500));
-          res = await apiPost(payload);
-        }
-        if (!res || res.success === false) {
-          throw new Error((res && res.error) ? res.error : 'GAS ไม่ตอบกลับ');
-        }
-        // [v8-FIX] ไม่ reset _chatLastMsgId — smart diff จะ append เฉพาะข้อความใหม่
-        await new Promise(r => setTimeout(r, 600));
-        await chatLoadMessages(true);
-      } catch(e) { tempRow.remove(); showToast('⚠️ ส่งสติ๊กเกอร์ไม่สำเร็จ: ' + e.message, 'warn'); }
-    },
-    'ส่ง 📤', 'btn-gold'
-  );
-}
-
-// ─── Typing indicator (local UX only) ────────────────────────────────
-function chatShowTyping() {
-  const el = document.getElementById('chatTypingInd'); if (!el) return;
-  el.style.display = 'flex';
-  clearTimeout(window._chatTypingHide);
-  window._chatTypingHide = setTimeout(() => { el.style.display = 'none'; }, 2500);
-}
-
-// ─── Auto resize textarea ────────────────────────────────────────────
-function chatAutoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 88) + 'px';
-}
-
-// ─── เปิดหน้า Chat ───────────────────────────────────────────────────
-async function initChat() {
-  if (!SESSION) { showToast('⚠️ กรุณาเข้าสู่ระบบก่อน', 'warn'); go('home'); return; }
-  _chatLastMsgId  = null;
-  _chatLastMsgCnt = 0;
-  await chatLoadRooms(_chatActiveRoomId || null);
-}
-
-// ─── โหลด Room List ──────────────────────────────────────────────────
-async function chatLoadRooms(selectRoomId) {
-  const listEl = document.getElementById('chatRoomList');
-  if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--t3);font-size:12px;text-align:center;">⏳ กำลังโหลด...</div>';
-  try {
-    const res = await apiGet({ action: 'listChatRooms', member_id: _chatMyId() });
-    if (res && res.success === false) {
-      console.error('[chatLoadRooms] GAS error:', res.error);
-      if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--err);font-size:12px;text-align:center;">⚠️ ' + (res.error||'โหลดไม่ได้') + '</div>';
+  // เปิดแชทเฉพาะสมาชิกที่ล็อกอิน (MP ไม่มีโหมด Visitor) · ล็อกอิน/ออก/เปลี่ยนคน แล้วเปิดใหม่ = โหลดแชทใหม่ตามบัญชี
+  window.schOpen = function () {
+    if (!hasSession()) {
+      toast('⚠️ กรุณาเข้าสู่ระบบก่อนใช้แชท', 'warn');
+      try { if (typeof lgGoLogin === 'function') lgGoLogin(); } catch (e) {}
       return;
     }
-    _chatRooms = (res && res.rooms) ? res.rooms : [];
-    chatRenderRoomList();
-    if (selectRoomId)        chatSelectRoom(selectRoomId);
-    else if (_chatActiveRoomId) chatSelectRoom(_chatActiveRoomId);
-  } catch(e) {
-    if (listEl) listEl.innerHTML = '<div style="padding:14px;color:var(--err);font-size:12px;text-align:center;">โหลดไม่ได้</div>';
-  }
-}
-
-// ─── Render Room List ─────────────────────────────────────────────────
-function chatRenderRoomList() {
-  const listEl = document.getElementById('chatRoomList'); if (!listEl) return;
-  if (!_chatRooms.length) {
-    listEl.innerHTML = '<div style="padding:16px;color:var(--t3);font-size:12px;text-align:center;">ยังไม่มีห้องแชท<br><span style="font-size:11px;">กด 💬 แชทกับร้านค้าจากหน้า Orders</span></div>';
-    return;
-  }
-  const myId = SESSION.member_id;
-  listEl.innerHTML = _chatRooms.map(room => {
-    const isActive = room.room_id === _chatActiveRoomId;
-    let partnerName = '';
-    if      (room.member1_id === myId) partnerName = room.member2_name || room.room_name || 'ร้านค้า';
-    else if (room.member2_id === myId) partnerName = room.member1_name || room.room_name || 'ผู้ซื้อ';
-    else                               partnerName = room.room_name || 'ห้องแชท';
-    const initials = partnerName.trim().charAt(0).toUpperCase() || '?';
-    const hue      = chatStrHue(partnerName);
-    const lastMsg  = room.last_message || '—';
-    const lastTime = room.last_message_at ? chatFmtTime(room.last_message_at) : '';
-    const orderTag = room.order_id ? `<span style="font-size:9px;color:var(--gold);">📦 ${room.order_id}</span> ` : '';
-    return `<div class="chat-sbitem${isActive ? ' active' : ''}" onclick="chatSelectRoom('${room.room_id}')" id="chatRoomItem-${room.room_id}">
-        <div class="chat-sbav" style="background:hsl(${hue},50%,36%);">${initials}</div>
-        <div class="chat-sbinfo">
-          <div class="chat-sbname">${escHtml(partnerName)}</div>
-          <div class="chat-sblast">${orderTag}${escHtml(lastMsg)}</div>
-        </div>
-        ${lastTime ? `<div style="font-size:9px;color:var(--t3);flex-shrink:0;align-self:flex-start;padding-top:4px;">${lastTime}</div>` : ''}
-      </div>`;
-  }).join('');
-}
-
-// ─── เลือกห้อง ────────────────────────────────────────────────────────
-function chatSelectRoom(roomId) {
-  _chatActiveRoomId = roomId;
-  _chatLastMsgId    = null;
-  _chatLastMsgCnt   = 0;
-  document.querySelectorAll('.chat-sbitem').forEach(el => el.classList.remove('active'));
-  document.getElementById('chatRoomItem-' + roomId)?.classList.add('active');
-  const room = _chatRooms.find(r => r.room_id === roomId);
-  if (room) {
-    const myId = SESSION.member_id;
-    let partnerName = '';
-    if      (room.member1_id === myId) partnerName = room.member2_name || 'ร้านค้า';
-    else if (room.member2_id === myId) partnerName = room.member1_name || 'ผู้ซื้อ';
-    else                               partnerName = room.room_name || 'ห้องแชท';
-    const avEl  = document.getElementById('chatHdrAv');
-    const nmEl  = document.getElementById('chatHdrName');
-    const subEl = document.getElementById('chatHdrSub');
-    if (avEl)  avEl.textContent  = partnerName.charAt(0).toUpperCase();
-    if (nmEl)  nmEl.textContent  = partnerName;
-    if (subEl) subEl.textContent = room.order_id ? '📦 Order: ' + room.order_id : (room.room_type === 'private_admin' ? '🛡️ ติดต่อ Admin' : '💬 แชทส่วนตัว');
-    document.getElementById('chatInputWrap').style.display = '';
-  }
-  // Show loading in msgs area
-  const msgsEl = document.getElementById('chatMsgs');
-  if (msgsEl) msgsEl.innerHTML = '<div class="chat-empty"><div class="chat-empty-ico" style="font-size:28px;">⏳</div><div style="font-size:12px;">กำลังโหลด...</div></div>';
-  chatLoadMessages(true);
-  chatStartPoll();
-  chatCloseSidebar();
-  chatMarkRead(roomId);
-  chatCancelReply();
-  chatCloseEmoji();
-}
-
-// ─── โหลด Messages ───────────────────────────────────────────────────
-async function chatLoadMessages(forceScroll) {
-  if (!_chatActiveRoomId) return;
-  // [v7-FIX2] เฉพาะ poll background (forceScroll=false) ถ้ากำลัง in-flight อยู่แล้วให้ skip
-  // forceScroll=true (จาก chatSendMsg/chatSendSticker/chatOpenRoom) ห้าม block เด็ดขาด
-  if (!forceScroll && _chatPollInFlight) return;
-  if (!forceScroll) _chatPollInFlight = true;
-  const _snapRoomId = _chatActiveRoomId; // guard against room switch mid-flight
-  try {
-    const res = await apiGet({ action: 'listChatMessages', room_id: _chatActiveRoomId, limit: 100 });
-    if (_snapRoomId !== _chatActiveRoomId) return; // room changed during fetch
-    if (!res) return;
-    if (res.success === false) {
-      console.error('[chatLoadMessages] GAS error:', res.error, '| room:', _chatActiveRoomId);
-      return;
+    var ov = $id('sch-ov'), f = $id('sch-frame');
+    if (!ov || !f) return;
+    ov.classList.add('on');
+    if (!schPushed) { schPushed = true; try { history.pushState({ sch: 1 }, '', location.href); } catch (e) {} }   // 1 entry ต่อการเปิดแชท → ปุ่ม Back ของเครื่องปิดแชทได้
+    setBadge(0);
+    if (!f.getAttribute('data-sch') || frameMode !== modeNow()) {
+      if (frameMode && frameMode !== modeNow()) { chat = null; chatUid = ''; }
+      reloadFrame();   // โหลดครั้งแรก / บัญชีเปลี่ยน
+    } else postVisible(true);
+    schLoading(!frameReady);   // spinner จนกว่า iframe พร้อม (โหลดล่วงหน้าแล้ว = ไม่แสดง)
+    ensureChat(true).catch(function () {});   // เตรียม chat token ไว้ให้ iframe
+  };
+  // ทางเข้าจากเมนู/แท็บล่าง: go('chat') ใน go() ของแอป
+  window.schGoFromNav = function () { window.schOpen(); };
+  // ปุ่ม "ติดต่อซัพพอร์ต" ในหน้า Order — เปิดแชทซัพพอร์ต แล้วเตือนให้แจ้งเลข Order
+  window.schOpenFromOrder = function (orderId) {
+    if (!hasSession()) { window.schOpen(); return; }
+    window.schOpen();
+    if (orderId) toast('💬 แจ้งเลข Order ' + String(orderId) + ' ในแชทกับซัพพอร์ตได้เลย', 'info');
+  };
+  // ย้อนกลับ (ปุ่ม Back ของเครื่อง): อยู่ในห้อง → ให้ iframe ย้อนไปหน้ารายการก่อน · อยู่หน้ารายการ → ปิดแชท · คืน true = จัดการแล้ว
+  window.schHandleBack = function () {
+    if (!isOpen()) return false;
+    var f = $id('sch-frame');
+    if (schScreen === 'chat' && f && f.contentWindow) {
+      try { f.contentWindow.postMessage({ type: 'sc-back' }, TGT); } catch (e) {}
+      try { history.pushState({ sch: 1 }, '', location.href); } catch (e) {}   // คง entry ไว้
+      return true;
     }
-    if (!res.messages) return;
-    const msgs     = res.messages;
-    const lastId   = msgs.length ? (msgs[msgs.length - 1].msg_id || '') : '';
-    const isNewMsg = msgs.length > _chatLastMsgCnt && _chatLastMsgCnt > 0;
-    if (!forceScroll && lastId === _chatLastMsgId) return; // nothing new
-    _chatLastMsgId  = lastId;
-    _chatLastMsgCnt = msgs.length;
-    _chatMessages   = msgs;
-    chatRenderMessages(forceScroll, isNewMsg);
-  } catch(e) { /* silent */ }
-  finally {
-    if (!forceScroll) _chatPollInFlight = false; // ปลด poll lock เสมอ
-  }
-}
-
-// ─── Render Messages — smart diff (no full wipe → ไม่กระตุก) ────────
-function chatRenderMessages(scrollToBottom, isNewMsg) {
-  const msgsEl = document.getElementById('chatMsgs'); if (!msgsEl) return;
-  if (!_chatMessages.length) {
-    msgsEl.innerHTML = '<div class="chat-empty"><div class="chat-empty-ico">💬</div><div style="font-size:12px;">ยังไม่มีข้อความ — เป็นคนแรกที่ทัก!</div></div>';
-    return;
-  }
-
-  const wasBottom = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 100;
-
-  // [v8] smart diff: อย่า wipe innerHTML ทั้งหมด
-  // 1) หา msg_id ที่อยู่ใน DOM แล้ว (รวม temp-)
-  // 2) ลบ row ที่ไม่อยู่ใน _chatMessages แล้ว (เช่น temp- ที่ถูกแทนด้วยของจริง)
-  // 3) append เฉพาะ row ที่ยังไม่มีใน DOM
-  // 4) อัพเดต date-separator ถ้าเปลี่ยน
-
-  const realIds   = new Set(_chatMessages.map(m => String(m.msg_id || m.id || '')));
-  const domRows   = msgsEl.querySelectorAll('.cmsg-row[data-mid]');
-
-  // ลบ temp- bubbles และ real rows ที่ถูกลบออกจาก GAS
-  domRows.forEach(row => {
-    const mid = row.getAttribute('data-mid') || '';
-    if (mid.startsWith('temp-') || !realIds.has(mid)) row.remove();
+    schPushed = false;   // entry ถูกใช้ไปแล้ว → ปิดแชท
+    window.schClose();
+    return true;
+  };
+  window.addEventListener('popstate', function () {
+    if (silentBack) { silentBack = false; return; }
+    window.schHandleBack();
   });
-
-  // หา id ที่อยู่ใน DOM หลังลบแล้ว (เฉพาะ real)
-  const presentIds = new Set(
-    Array.from(msgsEl.querySelectorAll('.cmsg-row[data-mid]'))
-      .map(r => r.getAttribute('data-mid') || '')
-  );
-
-  // append เฉพาะ rows ที่ยังไม่มีใน DOM
-  let lastInserted = null;
-  _chatMessages.forEach((m, i) => {
-    const mid = String(m.msg_id || m.id || '');
-    if (presentIds.has(mid)) { lastInserted = mid; return; }
-    const html = chatRenderMsgRow(m, _chatMessages[i - 1] || null);
-    msgsEl.insertAdjacentHTML('beforeend', html);
-    lastInserted = mid;
-  });
-
-  const pill = document.getElementById('chatNewPill');
-  if (isNewMsg && !wasBottom) { if (pill) pill.style.display = 'block'; }
-  if (scrollToBottom || wasBottom) chatScrollBottom();
-}
-
-// ─── ส่งข้อความ ──────────────────────────────────────────────────────
-async function chatSendMsg() {
-  if (_chatSending || !_chatActiveRoomId || !SESSION) return;
-  const inputEl = document.getElementById('chatInput'); if (!inputEl) return;
-  let text = (inputEl.value || '').trim(); if (!text) return;
-  // Prepend reply marker
-  if (_chatReplyCtx) {
-    text = `⟦reply:${_chatReplyCtx.name}|${_chatReplyCtx.text.slice(0, 60)}⟧${text}`;
-    chatCancelReply();
+  // โหลด iframe ล่วงหน้า (ซ่อนไว้) เมื่อมี session + แลก chat token สำเร็จแล้ว → เปิดแชทครั้งแรกได้ทันที
+  function schPreload() {
+    if (preloaded || isOpen()) return;
+    var f = $id('sch-frame'); if (!f || f.getAttribute('data-sch') || !hasSession()) return;
+    preloaded = true; reloadFrame();
   }
-  inputEl.value = ''; chatAutoResize(inputEl); chatCloseEmoji();
-  _chatSending = true;
-  const btnEl  = document.getElementById('chatSendBtn');
-  if (btnEl) btnEl.disabled = true;
-  const myName = _chatMyName();
-  const myId   = _chatMyId();
-  if (!myId) {
-    showToast('⚠️ ไม่พบข้อมูลผู้ใช้ — กรุณาเข้าสู่ระบบใหม่', 'warn');
-    _chatSending = false;
-    if (document.getElementById('chatSendBtn')) document.getElementById('chatSendBtn').disabled = false;
-    inputEl.value = text;
-    return;
-  }
-
-  // Optimistic bubble
-  const tempId  = 'temp-' + Date.now();
-  const tempMsg = { msg_id: tempId, sender_id: myId, sender_name: myName, sender_role: SESSION.role || 'buyer', message: text, msg_type: 'text', created_at: new Date().toISOString() };
-  const msgsEl  = document.getElementById('chatMsgs');
-  if (msgsEl) {
-    msgsEl.insertAdjacentHTML('beforeend', chatRenderMsgRow(tempMsg, _chatMessages[_chatMessages.length - 1] || null));
-    chatScrollBottom();
-  }
-
-  try {
-    console.log('[chatSendMsg] POST → room:', _chatActiveRoomId, '| sender:', myId, '| len:', text.length);
-    const payload = {
-      action:      'sendChatMessage',
-      room_id:     _chatActiveRoomId,
-      sender_id:   myId,
-      sender_name: myName,
-      sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
-      message:     text,
-      msg_type:    'text'
-    };
-
-    // [v5-CHAT] ส่งข้อความ + retry 1 ครั้งอัตโนมัติ
-    // สาเหตุ intermittent: GAS cold-start / queue ชน loadMainBalance → timeout
-    let res = await apiPost(payload);
-    if ((!res || res.success === false) && !(res && res.msg_id)) {
-      console.warn('[chatSendMsg] first attempt fail — retry in 1.5s | error:', res?.error);
-      await new Promise(r => setTimeout(r, 1500));
-      res = await apiPost(payload);
-    }
-
-    // ตรวจ GAS error หลัง retry — ถ้ายัง fail → throw เพื่อ rollback optimistic bubble
-    if (!res || res.success === false) {
-      const errMsg = (res && res.error) ? res.error : 'GAS ไม่ตอบกลับ';
-      console.error('[chatSendMsg] GAS error after retry:', errMsg, '| room:', _chatActiveRoomId);
-      throw new Error(errMsg);
-    }
-    console.log('[chatSendMsg] GAS OK → msg_id:', res.msg_id);
-
-    // [v8-FIX] ลบ temp bubble แทนที่ด้วย real msg_id จาก GAS ทันที — ไม่กระตุก
-    const realMsgId = res.msg_id || '';
-    const tempEl    = document.getElementById('chatMsg-' + tempId);
-    if (tempEl && realMsgId) {
-      // อัพเดต id และ data-mid ใน DOM ตรงๆ แทนที่จะ wipe แล้วใส่ใหม่
-      tempEl.id = 'chatMsg-' + realMsgId;
-      tempEl.setAttribute('data-mid', realMsgId);
-      // อัพเดต tick เป็น ✓✓ (optimistic bubble อาจไม่มี)
-      const tickEl = tempEl.querySelector('.cmsg-tick');
-      if (tickEl) tickEl.textContent = '✓✓';
-    }
-    // เพิ่ม real msg เข้า _chatMessages state ทันที (ไม่รอ GAS load)
-    const realMsg = { ...tempMsg, msg_id: realMsgId, created_at: res.created_at || tempMsg.created_at };
-    if (realMsgId && !_chatMessages.find(m => (m.msg_id || m.id) === realMsgId)) {
-      _chatMessages.push(realMsg);
-      _chatLastMsgId  = realMsgId;
-      _chatLastMsgCnt = _chatMessages.length;
-    }
-
-    _chatSending = false;
-    if (btnEl) btnEl.disabled = false;
-
-    // [v8-FIX] ล้าง forceScroll reload หลัง send — smart diff จะ skip rows ที่มีอยู่แล้ว
-    // เรียก chatLoadMessages เพื่อ sync ข้อความจากฝั่งอื่น แต่ไม่ reset _chatLastMsgId
-    await new Promise(r => setTimeout(r, 600)); // wait GAS commit
-    await chatLoadMessages(true);
-  } catch(e) {
-    // [v8-FIX] ลบ temp bubble (ยังไม่ถูก rename ถ้า error เกิดก่อน GAS OK)
-    document.getElementById('chatMsg-' + tempId)?.remove();
-    showToast('⚠️ ส่งไม่สำเร็จ: ' + e.message, 'warn');
-    inputEl.value = text;
-  } finally {
-    _chatSending = false;
-    if (btnEl) btnEl.disabled = false;
-  }
-}
-
-// ─── ส่งรูปภาพ (ImgBB → URL, fallback compress) ──────────────────────
-// [v5-CHAT] ขั้นตอน: เลือกไฟล์ → อัปโหลด → showChatConfirm พร้อม thumbnail → ยืนยัน → ส่ง GAS + retry
-async function chatSendImage(event) {
-  if (!_chatActiveRoomId || !SESSION) return;
-  const file = event.target.files && event.target.files[0];
-  event.target.value = '';
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('⚠️ รองรับเฉพาะรูปภาพ', 'warn'); return; }
-  if (file.size > 10 * 1024 * 1024)   { showToast('⚠️ ไฟล์ใหญ่เกิน 10MB', 'warn'); return; }
-
-  const btn = document.querySelector('.chat-toolbtn[title="ส่งรูป"]');
-  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
-  showToast('⏳ กำลังอัปโหลดรูป...', 'info');
-
-  let imgUrl = '';
-  try {
-    try {
-      imgUrl = await uploadToImgbb(file);
-    } catch(uploadErr) {
-      showToast('⚠️ ImgBB ไม่พร้อม — ลองบีบอัดรูป...', 'warn');
-      imgUrl = await _chatCompressImg(file, 480, 0.55);
-      if (imgUrl.length > 180000) throw new Error('รูปใหญ่เกิน — กรุณาตั้งค่า ImgBB key');
-    }
-  } catch(e) {
-    showToast('⚠️ อัปโหลดไม่สำเร็จ: ' + e.message, 'warn');
-    if (btn) { btn.textContent = '📎'; btn.disabled = false; }
-    return;
-  }
-
-  // [v5-CHAT] อัปโหลดเสร็จแล้ว → แสดง in-app confirm พร้อม thumbnail
-  // [v7-FIX] ตัดชื่อไฟล์ยาวเกินไม่ให้หลุด modal
-  const rawName  = file.name;
-  const dispName = rawName.length > 32 ? rawName.slice(0, 16) + '…' + rawName.slice(-12) : rawName;
-  const sizeStr  = file.size >= 1024 * 1024
-    ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
-    : (file.size / 1024).toFixed(0) + ' KB';
-  const previewHtml = `<img src="${escHtml(imgUrl)}"
-      alt="${escHtml(dispName)}"
-      style="max-width:min(220px,70vw);max-height:180px;border-radius:10px;
-             box-shadow:0 4px 16px rgba(0,0,0,.5);display:block;margin:0 auto;">`;
-  const captionHtml = `ส่งรูป<br>
-      <strong style="font-size:12px;word-break:break-all;display:block;margin:4px 0 2px;">${escHtml(dispName)}</strong>
-      <small style="color:var(--t3);">${sizeStr}</small>`;
-
-  if (btn) { btn.textContent = '📎'; btn.disabled = false; } // คืนปุ่มก่อน modal
-
-  showChatConfirm(previewHtml, captionHtml, async () => {
-    const myName = _chatMyName();
-    const myId   = _chatMyId();
-    if (!myId) { showToast('⚠️ ไม่พบข้อมูลผู้ใช้', 'warn'); return; }
-
-    showToast('⏳ กำลังส่งรูป...', 'info');
-    const payload = {
-      action:      'sendChatMessage',
-      room_id:     _chatActiveRoomId,
-      sender_id:   myId,
-      sender_name: myName,
-      sender_role: SESSION.role === 'seller' ? 'seller' : 'buyer',
-      message:     `⟦img⟧${imgUrl}`,
-      msg_type:    'image',
-      image_url:   imgUrl
-    };
-    try {
-      // [v5-CHAT] retry 1 ครั้งถ้า GAS fail
-      let imgRes = await apiPost(payload);
-      if ((!imgRes || imgRes.success === false) && !(imgRes && imgRes.msg_id)) {
-        console.warn('[chatSendImage] retry once after fail:', imgRes?.error);
-        await new Promise(r => setTimeout(r, 1500));
-        imgRes = await apiPost(payload);
-      }
-      if (!imgRes || imgRes.success === false) {
-        throw new Error((imgRes && imgRes.error) ? imgRes.error : 'GAS ไม่ตอบกลับ');
-      }
-      // [v8-FIX] ไม่ reset _chatLastMsgId — smart diff จะ append เฉพาะข้อความใหม่
-      await new Promise(r => setTimeout(r, 600));
-      await chatLoadMessages(true);
-      showToast('✅ ส่งรูปแล้ว', 'ok');
-    } catch(e) { showToast('⚠️ ส่งรูปไม่สำเร็จ: ' + e.message, 'warn'); }
-  }, 'ส่ง 📤', 'btn-gold');
-}
-
-function _chatCompressImg(file, maxPx, quality) {
-  return new Promise((resolve, reject) => {
-    const img = new Image(); const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let w = img.width, h = img.height;
-      if (w > maxPx || h > maxPx) { const r = Math.min(maxPx / w, maxPx / h); w = Math.round(w * r); h = Math.round(h * r); }
-      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-    img.onerror = () => reject(new Error('อ่านรูปไม่ได้')); img.src = url;
-  });
-}
-
-// ─── Mark Read ───────────────────────────────────────────────────────
-async function chatMarkRead(roomId) {
-  if (!roomId || !SESSION) return;
-  try { await apiPost({ action: 'markChatRead', room_id: roomId, member_id: _chatMyId() }); } catch {}
-}
-
-// ─── Polling ─────────────────────────────────────────────────────────
-function chatStartPoll() {
-  chatStopPoll();
-  _chatPollTimer = setInterval(() => {
-    if (curPage === 'chat' && _chatActiveRoomId) chatLoadMessages(false);
-  }, _CHAT_POLL_MS);
-}
-function chatStopPoll() {
-  if (_chatPollTimer) { clearInterval(_chatPollTimer); _chatPollTimer = null; }
-}
-
-// ─── Sidebar Open/Close ──────────────────────────────────────────────
-function chatOpenSidebar() {
-  document.getElementById('chatSidebar')?.classList.add('open');
-  document.getElementById('chatSob')?.classList.add('open');
-}
-function chatCloseSidebar() {
-  document.getElementById('chatSidebar')?.classList.remove('open');
-  document.getElementById('chatSob')?.classList.remove('open');
-}
-
-// ─── startChatFromOrder ───────────────────────────────────────────────
-async function startChatFromOrder(buyerId, buyerName, sellerId, sellerName, orderId) {
-  if (!SESSION) { showToast('⚠️ กรุณาเข้าสู่ระบบก่อน', 'warn'); return; }
-  showToast('⏳ กำลังเปิดห้องแชท...', 'info');
-  try {
-    const res = await apiPost({
-      action:       'createChatRoom',
-      room_type:    'private_order',
-      order_id:     orderId,
-      member1_id:   buyerId,
-      member1_name: buyerName,
-      member2_id:   sellerId,
-      member2_name: sellerName,
-      room_name:    sellerName + ' (Order ' + orderId + ')'
-    });
-    if (!res || !res.room) throw new Error('สร้างห้องแชทไม่ได้');
-    const roomId = res.room.room_id;
-    go('chat');
-    await chatLoadRooms(roomId);
-    if (!res.existed) showToast('✅ เปิดห้องแชทใหม่', 'ok');
-  } catch(e) { showToast('⚠️ ไม่สามารถเปิดห้องแชทได้: ' + e.message, 'warn'); }
-}
-
-// ─── Unread badge ─────────────────────────────────────────────────────
-async function chatCheckUnread() {
-  if (!SESSION) return 0;
-  try {
-    const res   = await apiGet({ action: 'getChatUnread', member_id: _chatMyId() });
-    const count = (res && res.unread) ? res.unread : 0;
-    const bdg   = document.getElementById('bn-chat-bdg');
-    if (bdg) {
-      if (count > 0) { bdg.textContent = count > 9 ? '9+' : String(count); bdg.style.display = 'flex'; }
-      else bdg.style.display = 'none';
-    }
-    return count;
-  } catch { return 0; }
-}
-
-// ════════════════════════════════════════════════════════════════════
-// [vChat] END CHAT SYSTEM v7
-// ════════════════════════════════════════════════════════════════════
-
+  window.schClose = function () {
+    var ov = $id('sch-ov'); if (!ov) return;
+    ov.classList.remove('on');
+    schLoading(false);
+    if (schPushed) { schPushed = false; silentBack = true; setTimeout(function () { silentBack = false; }, 800); try { history.back(); } catch (e) {} }   // คืน history entry ที่ push ตอนเปิด
+    postVisible(false);
+    setTimeout(pollBadge, 2500);   // รอ iframe ส่ง "อ่านแล้ว" ก่อนค่อยนับใหม่
+  };
+})();
 </script>
 </body>
 </html>
