@@ -13407,6 +13407,8 @@ function chatRefreshOrderBadges() {
   function startPoll() { if (timer) return; pollBadge(); timer = setInterval(pollBadge, SCH_POLL_MS); }
   function stopPoll() { if (timer) { clearInterval(timer); timer = null; } }
   document.addEventListener('visibilitychange', function () { if (document.hidden) stopPoll(); else startPoll(); });
+  // [PERF] ปลุก Worker (isolate + schema) ขนานไปกับการขอ token จาก GAS → เปิดแชทครั้งแรกไม่ต้องรอ Worker ตื่น
+  setTimeout(function () { if (hasSession()) { try { fetch(SCH_API_URL + '/api/public/menu', { cache: 'no-store' }).catch(function () {}); } catch (e) {} } }, 500);
   setTimeout(function () { if (!document.hidden) startPoll(); }, 800);   // เริ่มเร็ว (เดิม 4 วิ) — pollBadge เช็ก session เอง · ไม่มี session = ไม่ยิงอะไร
   window.mpGasToken = function () { return gasToken(); };                  // ให้ apiPostMain ใช้ token เดียวกัน (ไม่ขอซ้ำ)
   window.schLang = function () {                                          // แอปเปลี่ยนภาษา → แจ้ง iframe (sc-lang) ให้เปลี่ยนสด
