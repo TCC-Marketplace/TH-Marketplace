@@ -5272,7 +5272,7 @@ function toggleRole(){
 }
 
 function go(pg){
-  // [SCH v1] 'chat' = แชทระบบใหม่ (line-chat-marketplace.html: ซัพพอร์ต + ห้องกลุ่ม) เปิดเป็น overlay · 'support' = alias
+  // [SCH v1] 'chat' = แชทระบบใหม่ (line-chat.html: ซัพพอร์ต + ห้องกลุ่ม) เปิดเป็น overlay · 'support' = alias
   // แชท Buyer↔Seller v7 เดิมย้ายไป route 'shop-chat' (เข้าจากปุ่ม "แชทกับร้านค้า" ในหน้า Orders เท่านั้น)
   if(pg==='chat'||pg==='support'){ if(typeof schGoFromNav==='function') schGoFromNav(); return; }
   // redirect หน้าสมาชิกเก่าไป dashboard พร้อม tab ที่ถูกต้อง
@@ -11069,7 +11069,7 @@ async function loadMainBalance(){
     <div class="bnav-trade-icon">📈</div>
     <span>TRADE</span>
   </div>
-  <!-- แชท (slot 4) — [SCH v1] เปิดแชทระบบใหม่ (overlay line-chat-marketplace.html) ผ่าน go('chat') · แชท Buyer↔Seller v7 = go('shop-chat') จากหน้า Orders -->
+  <!-- แชท (slot 4) — [SCH v1] เปิดแชทระบบใหม่ (overlay line-chat.html) ผ่าน go('chat') · แชท Buyer↔Seller v7 = go('shop-chat') จากหน้า Orders -->
   <div class="bnav-item" id="bn-chat" onclick="bnGo('chat')" style="position:relative;">
     <span class="bi">💬</span><span data-i18n="mp_ui_0339">แชท</span>
     <span class="bnav-bdg" id="bn-chat-bdg" style="display:none;"></span>
@@ -13257,12 +13257,12 @@ function chatRefreshOrderBadges() {
 <!-- ═══════════════════════════════════════════════════════════════════
   [SCH v1] SUPPORT CHAT — แชทสมาชิก ↔ ทีมซัพพอร์ต (แยกจากแชท Buyer ↔ Seller v7 ที่ยังใช้งานอยู่)
   โครงสร้างเดียวกับ index_Easy_USe_v1.html:
-  • iframe = line-chat-marketplace.html (โหมดสมาชิก) คุยกับ Worker line-chat-marketplace โดยตรง
+  • iframe = line-chat.html (โหมดสมาชิก) คุยกับ Worker line-chat-marketplace โดยตรง
   • แอปนี้ถือ chat token แล้วส่งให้ iframe ทาง postMessage (targetOrigin เจาะจง)
   • ขอ token: GAS_TCC_Main action issueSession {uid, passHash} (GAS_MAIN_URL ตัวเดียวกับ Easy_USe) → Worker /api/session
   • overlay ปิด = ส่ง sc-visible:false ให้ iframe หยุด poll/ส่ง "อ่านแล้ว" · badge poll หยุดเมื่อแท็บถูกซ่อน
   • ทางเข้า: แท็บล่าง/เมนู "แชท" → go('chat') · ปุ่ม "ติดต่อซัพพอร์ต" ในหน้า Order → schOpenFromOrder(orderId)
-  • badge แท็บล่าง bn-chat-bdg = ยอดค้างอ่านรวมของ line-chat-marketplace.html · แชท Buyer↔Seller v7 แยกเป็น route 'shop-chat' (ยอดค้างอ่านแสดงบนปุ่ม "แชทกับร้านค้า")
+  • badge แท็บล่าง bn-chat-bdg = ยอดค้างอ่านรวมของ line-chat.html · แชท Buyer↔Seller v7 แยกเป็น route 'shop-chat' (ยอดค้างอ่านแสดงบนปุ่ม "แชทกับร้านค้า")
   ═══════════════════════════════════════════════════════════════════ -->
 <style>
 .sch-ov{display:none;position:fixed;inset:0;z-index:9000;max-width:480px;margin:0 auto;background:var(--bg);flex-direction:column}
@@ -13278,9 +13278,9 @@ function chatRefreshOrderBadges() {
   'use strict';
 
   /* ── ตั้งค่า (ตรวจ 2 ค่านี้ให้ตรงของจริงก่อน deploy) ── */
-  // URL ที่โฮสต์ line-chat-marketplace.html (เขียนแบบ relative ได้ถ้าอยู่โดเมน/โฟลเดอร์เดียวกับหน้านี้ — ถ้าโฮสต์คนละโดเมนให้ใส่ URL เต็ม https://…/line-chat-marketplace.html)
-  var SCH_CHAT_URL = 'line-chat-marketplace.html';
-  // URL ของ Worker line-chat-marketplace (ต้องตรงกับ DEFAULT_API ใน line-chat-marketplace.html)
+  // URL ที่โฮสต์ line-chat.html (เขียนแบบ relative ได้ถ้าอยู่โดเมน/โฟลเดอร์เดียวกับหน้านี้ — ถ้าโฮสต์คนละโดเมนให้ใส่ URL เต็ม https://…/line-chat.html)
+  var SCH_CHAT_URL = 'line-chat.html';
+  // URL ของ Worker line-chat-marketplace (ต้องตรงกับ DEFAULT_API ใน line-chat.html)
   var SCH_API_URL  = 'https://line-chat-marketplace.tcc-team-developer.workers.dev';
   var SCH_POLL_MS  = 30000;   // poll จำนวนยังไม่อ่านทุก 30 วิ (เฉพาะตอนแท็บมองเห็นและ overlay ปิด)
 
@@ -13308,7 +13308,7 @@ function chatRefreshOrderBadges() {
     if (on) ldTimer = setTimeout(function () {
       var l2 = $id('sch-ld');
       if (!frameReady && l2 && isOpen()) {   // ครบเวลาแล้วยังไม่พร้อม → แสดงปุ่มลองใหม่ แทนหน้าดำ
-        console.warn('[SCH] frame not ready after 15s — check SCH_CHAT_URL / line-chat-marketplace.html / chat token');
+        console.warn('[SCH] frame not ready after 15s — check SCH_CHAT_URL / line-chat.html / chat token');
         l2.style.display = 'flex';
         l2.innerHTML = '<div style="text-align:center;color:var(--t2,#aaa);font-size:14px;padding:20px"><div style="margin-bottom:14px">' + window.tccT('mp_sch_0004') +
           '</div><button class="btn btn-gold" onclick="schRetry()">' + window.tccT('mp_sch_0005') + '</button> <button class="btn btn-ghost" onclick="schClose()">' + window.tccT('mp_sch_0006') + '</button></div>';
