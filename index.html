@@ -5125,6 +5125,9 @@ const TCC_I18N = {
   // ── [SCH v1] Support Chat (แชทซัพพอร์ต) — mp_sch_NNNN ──
   'mp_sch_0001':["⚠️ กรุณาเข้าสู่ระบบก่อนใช้แชท","⚠️ Please log in before using chat","⚠️ Vui lòng đăng nhập trước khi dùng chat","⚠️ សូមចូលគណនីមុនពេលប្រើការជជែក","⚠️ ချက်တင်မသုံးမီ ကျေးဇူးပြု၍ လော့ဂ်အင်ဝင်ပါ","⚠️ ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນໃຊ້ແຊັດ","⚠️ Sila log masuk sebelum menggunakan sembang","⚠️ Silakan masuk terlebih dahulu sebelum menggunakan chat","⚠️ 使用聊天前请先登录"],
   'mp_sch_0002':["💬 แจ้งเลข Order {p1} ในแชทกับซัพพอร์ตได้เลย","💬 Just tell support your Order {p1} in the chat","💬 Hãy báo mã Order {p1} cho bộ phận hỗ trợ trong chat","💬 សូមប្រាប់លេខ Order {p1} ទៅក្រុមគាំទ្រក្នុងការជជែក","💬 ချက်တင်ထဲတွင် Order {p1} ကို ဆက်သွယ်ရေးအဖွဲ့သို့ ပြောပြနိုင်ပါသည်","💬 ແຈ້ງເລກ Order {p1} ໃຫ້ທີມຊ່ວຍເຫຼືອໃນແຊັດໄດ້ເລີຍ","💬 Sila maklumkan nombor Order {p1} kepada sokongan dalam sembang","💬 Sampaikan nomor Order {p1} ke tim dukungan melalui chat","💬 请在聊天中向客服提供订单号 {p1}"],
+  'mp_sch_0004':["⚠️ โหลดแชทไม่สำเร็จ","⚠️ Couldn't load chat","⚠️ Không tải được chat","⚠️ មិនអាចផ្ទុកការជជែកបាន","⚠️ ချက်တင်ကို မဖွင့်နိုင်ပါ","⚠️ ໂຫຼດແຊັດບໍ່ສຳເລັດ","⚠️ Gagal memuatkan sembang","⚠️ Gagal memuat chat","⚠️ 聊天加载失败"],
+  'mp_sch_0005':["ลองใหม่","Retry","Thử lại","ព្យាយាមម្តងទៀត","ထပ်စမ်းရန်","ລອງໃໝ່","Cuba lagi","Coba lagi","重试"],
+  'mp_sch_0006':["ปิด","Close","Đóng","បិទ","ပိတ်ရန်","ປິດ","Tutup","Tutup","关闭"],
   'mp_sch_0003':["💬 ติดต่อซัพพอร์ต","💬 Contact support","💬 Liên hệ hỗ trợ","💬 ទាក់ទងផ្នែកជំនួយ","💬 ဆက်သွယ်ရေးအဖွဲ့ကို ဆက်သွယ်ရန်","💬 ຕິດຕໍ່ທີມຊ່ວຍເຫຼືອ","💬 Hubungi sokongan","💬 Hubungi dukungan","💬 联系客服"],
 };
 const LANG_IDX={th:0,en:1,vi:2,kh:3,mm:4,la:5,ms:6,id:7,zh:8};
@@ -5182,6 +5185,7 @@ window.tccSetLang=function(lang){
   try{sessionStorage.setItem('tcc_lang_pick',lang);}catch(e){}
   tccSyncUrlLang();
   tccApplyLang();
+  try{ if(typeof window.schLang==='function') window.schLang(); }catch(e){}   // [SCH v1] sync ภาษาไปแชทซัพพอร์ต
   const names={th:'ภาษาไทย',en:'English',vi:'Tiếng Việt',kh:'ភាសាខ្មែរ',mm:'မြန်မာဘာသာ',la:'ພາສາລາວ',ms:'Bahasa Melayu',id:'Bahasa Indonesia',zh:'简体中文'};
   if(typeof showToast==='function')try{showToast('🌐 '+(names[lang]||lang));}catch(e){}
 };
@@ -5268,7 +5272,7 @@ function toggleRole(){
 }
 
 function go(pg){
-  // [SCH v1] 'chat' = แชทระบบใหม่ (line-chat.html: ซัพพอร์ต + ห้องกลุ่ม) เปิดเป็น overlay · 'support' = alias
+  // [SCH v1] 'chat' = แชทระบบใหม่ (line-chat-marketplace.html: ซัพพอร์ต + ห้องกลุ่ม) เปิดเป็น overlay · 'support' = alias
   // แชท Buyer↔Seller v7 เดิมย้ายไป route 'shop-chat' (เข้าจากปุ่ม "แชทกับร้านค้า" ในหน้า Orders เท่านั้น)
   if(pg==='chat'||pg==='support'){ if(typeof schGoFromNav==='function') schGoFromNav(); return; }
   // redirect หน้าสมาชิกเก่าไป dashboard พร้อม tab ที่ถูกต้อง
@@ -9035,6 +9039,7 @@ function updateAuthUI(){
     toggleHomeSections();
     // ── Bridge: โหลด TCC Main Balance หลัง login ──
     if(typeof loadMainBalance==='function') loadMainBalance();
+    if(typeof schRefresh==='function') schRefresh();   // [SCH v1] เปลี่ยน/ล็อกอินบัญชี → เตรียม token แชทใหม่
     // ── [v21 FIX A] โหลด MP Wallet Balance หลัง login ──────────────────
     // [v21 FIX A] เดิมเช็ค getElementById('p-wallet') ซึ่งไม่มีอยู่จริง (element คือ p-dashboard)
     // → isWalletPage = false ตลอด → initWallet() ไม่ถูกเรียก → มือถือไม่แสดง TX
@@ -10219,10 +10224,15 @@ async function submitRefresh(){
 // ─── REAL HOME STATS ───
 // Simple in-memory cache to avoid duplicate API calls
 const _apiCache = {};
+const _apiInflight={};
 function apiCached(key, params, ttl=60000){
   const now=Date.now();
   if(_apiCache[key]&&now-_apiCache[key].ts<ttl) return Promise.resolve(_apiCache[key].data);
-  return apiGet(params).then(d=>{ _apiCache[key]={data:d,ts:now}; return d; });
+  // [PERF] request เดียวกันที่กำลังโหลดอยู่ → ใช้ promise เดิม ไม่ยิง GAS ซ้ำ (ทำให้ prefetch ตอนบูตใช้ร่วมกับ initHome ได้)
+  if(_apiInflight[key]) return _apiInflight[key];
+  return _apiInflight[key]=apiGet(params)
+    .then(d=>{ _apiCache[key]={data:d,ts:Date.now()}; return d; })
+    .finally(()=>{ delete _apiInflight[key]; });
 }
 
 // ─── toggle home sections ───
@@ -10297,7 +10307,7 @@ async function initHome(){
   }catch(e){}
   // ✅ โหลด Deposit Addresses จาก Config + Notifications (login เท่านั้น)
   loadDepositAddresses();
-  if(SESSION){ loadNotifications(); chatCheckUnread(); if(typeof schRefresh==='function') schRefresh(); }
+  if(SESSION){ loadNotifications(); chatCheckUnread(); }
 }
 
 // ─── REAL MARKETPLACE ───
@@ -10618,6 +10628,11 @@ const GAS_MAIN_URL = 'https://script.google.com/macros/s/AKfycbwocCEr-mQu6esBJBR
 // [v5-BRIDGE FIX] apiPostMain: แยก timeout 8s ออกจาก fetchWithTimeout ของ chat (15s)
 // ป้องกัน Bridge fetch ที่ช้า/ล้มเหลวไปชน queue ของ sendChatMessage
 async function apiPostMain(body){
+  // [AUTH FIX] GAS_TCC_Main ต้องมี session token (เดิมไม่ส่ง → UNAUTHORIZED ทุกครั้ง + เสีย roundtrip เปล่า)
+  // ใช้ token เดียวกับแชทซัพพอร์ต (issueSession → แคชใน sessionStorage ~2 ชม.) · ไม่ได้ token → ส่งแบบเดิม
+  if(body && !body.token && typeof window.mpGasToken==='function'){
+    try{ const _t = await window.mpGasToken(); if(_t) body = Object.assign({}, body, {token:_t}); }catch(e){}
+  }
   const ctrl = new AbortController();
   const tid  = setTimeout(() => ctrl.abort(), 8000); // 8s timeout — แยกจาก chat
   try{
@@ -10675,8 +10690,14 @@ async function loadMainBalance(){
 (async function initApp(){
   renderNav();
   renderBell();
-  await loadSession();   // [v14] await — บล็อกจนกว่า getMemberData/syncMember เสร็จ
+  // [PERF] ข้อมูลสาธารณะไม่ขึ้นกับ session → ยิงพร้อมกับ loadSession เลย (เดิมต้องรอ getMemberData เสร็จก่อนถึงเริ่มโหลดสินค้า)
+  try{
+    apiCached('products',{action:'read',sheet:'Products'}).catch(()=>{});
+    apiCached('stats',{action:'stats'}).catch(()=>{});
+  }catch(e){}
   loadCategories();      // [v35] ดึง Categories จาก GAS → populate #prod-category (async, ไม่บล็อก)
+  await loadSession();   // [v14] await — บล็อกจนกว่า getMemberData/syncMember เสร็จ
+  if(SESSION && typeof schRefresh==='function') schRefresh();   // [PERF] เตรียม token/แชทซัพพอร์ตตั้งแต่ต้น (เดิมรอสินค้าโหลดเสร็จก่อน)
   initHome();
 })();
 // ถ้าไม่มี session และ URL มี ?ref= → ไปหน้า login อัตโนมัติเพื่อ register
@@ -11048,7 +11069,7 @@ async function loadMainBalance(){
     <div class="bnav-trade-icon">📈</div>
     <span>TRADE</span>
   </div>
-  <!-- แชท (slot 4) — [SCH v1] เปิดแชทระบบใหม่ (overlay line-chat.html) ผ่าน go('chat') · แชท Buyer↔Seller v7 = go('shop-chat') จากหน้า Orders -->
+  <!-- แชท (slot 4) — [SCH v1] เปิดแชทระบบใหม่ (overlay line-chat-marketplace.html) ผ่าน go('chat') · แชท Buyer↔Seller v7 = go('shop-chat') จากหน้า Orders -->
   <div class="bnav-item" id="bn-chat" onclick="bnGo('chat')" style="position:relative;">
     <span class="bi">💬</span><span data-i18n="mp_ui_0339">แชท</span>
     <span class="bnav-bdg" id="bn-chat-bdg" style="display:none;"></span>
@@ -13236,12 +13257,12 @@ function chatRefreshOrderBadges() {
 <!-- ═══════════════════════════════════════════════════════════════════
   [SCH v1] SUPPORT CHAT — แชทสมาชิก ↔ ทีมซัพพอร์ต (แยกจากแชท Buyer ↔ Seller v7 ที่ยังใช้งานอยู่)
   โครงสร้างเดียวกับ index_Easy_USe_v1.html:
-  • iframe = line-chat.html (โหมดสมาชิก) คุยกับ Worker line-chat-worker โดยตรง
+  • iframe = line-chat-marketplace.html (โหมดสมาชิก) คุยกับ Worker line-chat-marketplace โดยตรง
   • แอปนี้ถือ chat token แล้วส่งให้ iframe ทาง postMessage (targetOrigin เจาะจง)
   • ขอ token: GAS_TCC_Main action issueSession {uid, passHash} (GAS_MAIN_URL ตัวเดียวกับ Easy_USe) → Worker /api/session
   • overlay ปิด = ส่ง sc-visible:false ให้ iframe หยุด poll/ส่ง "อ่านแล้ว" · badge poll หยุดเมื่อแท็บถูกซ่อน
   • ทางเข้า: แท็บล่าง/เมนู "แชท" → go('chat') · ปุ่ม "ติดต่อซัพพอร์ต" ในหน้า Order → schOpenFromOrder(orderId)
-  • badge แท็บล่าง bn-chat-bdg = ยอดค้างอ่านรวมของ line-chat.html · แชท Buyer↔Seller v7 แยกเป็น route 'shop-chat' (ยอดค้างอ่านแสดงบนปุ่ม "แชทกับร้านค้า")
+  • badge แท็บล่าง bn-chat-bdg = ยอดค้างอ่านรวมของ line-chat-marketplace.html · แชท Buyer↔Seller v7 แยกเป็น route 'shop-chat' (ยอดค้างอ่านแสดงบนปุ่ม "แชทกับร้านค้า")
   ═══════════════════════════════════════════════════════════════════ -->
 <style>
 .sch-ov{display:none;position:fixed;inset:0;z-index:9000;max-width:480px;margin:0 auto;background:var(--bg);flex-direction:column}
@@ -13257,9 +13278,9 @@ function chatRefreshOrderBadges() {
   'use strict';
 
   /* ── ตั้งค่า (ตรวจ 2 ค่านี้ให้ตรงของจริงก่อน deploy) ── */
-  // URL ที่โฮสต์ line-chat.html (เขียนแบบ relative ได้ถ้าอยู่โดเมน/โฟลเดอร์เดียวกับหน้านี้ — ถ้าโฮสต์คนละโดเมนให้ใส่ URL เต็ม https://…/line-chat.html)
-  var SCH_CHAT_URL = 'line-chat.html';
-  // URL ของ Worker line-chat-worker (ต้องตรงกับ DEFAULT_API ใน line-chat.html)
+  // URL ที่โฮสต์ line-chat-marketplace.html (เขียนแบบ relative ได้ถ้าอยู่โดเมน/โฟลเดอร์เดียวกับหน้านี้ — ถ้าโฮสต์คนละโดเมนให้ใส่ URL เต็ม https://…/line-chat-marketplace.html)
+  var SCH_CHAT_URL = 'line-chat-marketplace.html';
+  // URL ของ Worker line-chat-marketplace (ต้องตรงกับ DEFAULT_API ใน line-chat-marketplace.html)
   var SCH_API_URL  = 'https://line-chat-marketplace.tcc-team-developer.workers.dev';
   var SCH_POLL_MS  = 30000;   // poll จำนวนยังไม่อ่านทุก 30 วิ (เฉพาะตอนแท็บมองเห็นและ overlay ปิด)
 
@@ -13271,7 +13292,7 @@ function chatRefreshOrderBadges() {
 
   var chat = null, chatUid = '', chatP = null, blockUntil = 0, timer = null;
   var gasTok = null, gasP = null;
-  var frameMode = '', schPushed = false, schScreen = '', frameReady = false, ldTimer = null, silentBack = false, preloaded = false;
+  var frameT0 = Date.now(), frameMode = '', schPushed = false, schScreen = '', frameReady = false, ldTimer = null, silentBack = false, preloaded = false;
 
   function $id(i) { return document.getElementById(i); }
   function isOpen() { var el = $id('sch-ov'); return !!(el && el.classList.contains('on')); }
@@ -13280,7 +13301,20 @@ function chatRefreshOrderBadges() {
   function uidNow() { try { return (typeof SESSION !== 'undefined' && SESSION && SESSION.uid) ? String(SESSION.uid).trim() : ''; } catch (e) { return ''; } }
   function hasSession() { return !!uidNow(); }
   function modeNow() { var u = uidNow(); return u ? 'm:' + u : 'visitor'; }
-  function schLoading(on) { var l = $id('sch-ld'); if (l) l.style.display = on ? 'flex' : 'none'; clearTimeout(ldTimer); if (on) ldTimer = setTimeout(function () { schLoading(false); }, 20000); }
+  function schLoading(on) {
+    var l = $id('sch-ld');
+    if (l) { if (on) l.innerHTML = '<div class="sch-sp"></div>'; l.style.display = on ? 'flex' : 'none'; }
+    clearTimeout(ldTimer);
+    if (on) ldTimer = setTimeout(function () {
+      var l2 = $id('sch-ld');
+      if (!frameReady && l2 && isOpen()) {   // ครบเวลาแล้วยังไม่พร้อม → แสดงปุ่มลองใหม่ แทนหน้าดำ
+        console.warn('[SCH] frame not ready after 15s — check SCH_CHAT_URL / line-chat-marketplace.html / chat token');
+        l2.style.display = 'flex';
+        l2.innerHTML = '<div style="text-align:center;color:var(--t2,#aaa);font-size:14px;padding:20px"><div style="margin-bottom:14px">' + window.tccT('mp_sch_0004') +
+          '</div><button class="btn btn-gold" onclick="schRetry()">' + window.tccT('mp_sch_0005') + '</button> <button class="btn btn-ghost" onclick="schClose()">' + window.tccT('mp_sch_0006') + '</button></div>';
+      } else schLoading(false);
+    }, 15000);
+  }
   function toast(m, t) { try { if (typeof showToast === 'function') showToast(m, t || 'warn'); } catch (e) {} }
 
   /* ── GAS session token (HMAC) — ขอจาก GAS_TCC_Main ด้วย uid + passHash แล้วแคชจนใกล้หมดอายุ ── */
@@ -13303,7 +13337,7 @@ function chatRefreshOrderBadges() {
     if (!ph || typeof GAS_MAIN_URL === 'undefined') return '';
     var remember = false; try { remember = localStorage.getItem('tcc_remember_me') === '1'; } catch (e) {}
     gasP = (async function () {
-      var ctrl = new AbortController(), tm = setTimeout(function () { ctrl.abort(); }, 20000);
+      var ctrl = new AbortController(), tm = setTimeout(function () { ctrl.abort(); }, 20000), t0 = Date.now();
       try {
         var r = await fetch(GAS_MAIN_URL, {
           method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, signal: ctrl.signal,
@@ -13316,6 +13350,7 @@ function chatRefreshOrderBadges() {
         if (uidNow() !== uid) return '';                                // สลับบัญชีระหว่างรอ
         gasTok = { uid: uid, token: j.data.token, exp_ms: Number(j.data.exp_ms) || (Date.now() + 2 * 3600 * 1000) };
         cacheWrite(gasTok);
+        console.log('[SCH] issueSession ' + (Date.now() - t0) + 'ms');
         return gasTok.token;
       } catch (e) { return ''; } finally { clearTimeout(tm); gasP = null; }
     })();
@@ -13329,6 +13364,7 @@ function chatRefreshOrderBadges() {
     if (chatP) return chatP;
     if (!user && Date.now() < blockUntil) throw new Error('blocked');   // พังติดกัน → พัก 5 นาที กันยิง GAS ซ้ำ
     chatP = (async function () {
+      var t1 = Date.now();
       try {
         var t = await gasToken();
         if (!t) throw new Error('no-token');
@@ -13339,6 +13375,7 @@ function chatRefreshOrderBadges() {
         if (!r.ok || !d.token) throw new Error(d.error || ('HTTP ' + r.status));
         if (uidNow() !== uid) throw new Error('uid-changed');
         chat = d; chatUid = uid; blockUntil = 0;
+        console.log('[SCH] chat token ready ' + (Date.now() - t1) + 'ms');
         return d;
       } catch (e) {
         chat = null; chatUid = ''; blockUntil = Date.now() + 5 * 60 * 1000;
@@ -13370,7 +13407,13 @@ function chatRefreshOrderBadges() {
   function startPoll() { if (timer) return; pollBadge(); timer = setInterval(pollBadge, SCH_POLL_MS); }
   function stopPoll() { if (timer) { clearInterval(timer); timer = null; } }
   document.addEventListener('visibilitychange', function () { if (document.hidden) stopPoll(); else startPoll(); });
-  setTimeout(function () { if (!document.hidden) startPoll(); }, 4000);   // รอให้แอปบูตเสร็จก่อน
+  setTimeout(function () { if (!document.hidden) startPoll(); }, 800);   // เริ่มเร็ว (เดิม 4 วิ) — pollBadge เช็ก session เอง · ไม่มี session = ไม่ยิงอะไร
+  window.mpGasToken = function () { return gasToken(); };                  // ให้ apiPostMain ใช้ token เดียวกัน (ไม่ขอซ้ำ)
+  window.schLang = function () {                                          // แอปเปลี่ยนภาษา → แจ้ง iframe (sc-lang) ให้เปลี่ยนสด
+    var f = $id('sch-frame');
+    if (!f || !f.getAttribute('data-sch') || !f.contentWindow || typeof window.tccGetLang !== 'function') return;
+    try { f.contentWindow.postMessage({ type: 'sc-lang', lang: window.tccGetLang() }, TGT); } catch (e) {}
+  };
   window.schRefresh = function () { pollBadge(); };                       // เรียกหลังโหลดหน้า/ล็อกอิน เพื่ออัปเดต badge
 
   /* ── สื่อสารกับ iframe ── */
@@ -13400,7 +13443,7 @@ function chatRefreshOrderBadges() {
     if (!d || typeof d.type !== 'string') return;
     if (d.type === 'sc-need-init') sendInit();
     else if (d.type === 'sc-close') window.schClose();
-    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); }
+    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); console.log('[SCH] frame ready ' + (Date.now() - frameT0) + 'ms'); }
     else if (d.type === 'sc-screen') schScreen = String(d.id || '');
     else if (d.type === 'sc-login') { schPushed = false; window.schClose(); try { if (typeof lgGoLogin === 'function') lgGoLogin(); } catch (e) {} }   // ไม่มี session (Visitor) กด "เข้าสู่ระบบ" ในแชท
     else if (d.type === 'sc-reset') { frameMode = ''; reloadFrame(); if (isOpen()) schLoading(true); }                          // เซสชันเปลี่ยนกลางทาง → โหลดแชทใหม่
@@ -13419,7 +13462,7 @@ function chatRefreshOrderBadges() {
   }
   function reloadFrame() {
     var f = $id('sch-frame'); if (!f) return;
-    frameMode = modeNow(); frameReady = false; schScreen = '';
+    frameMode = modeNow(); frameReady = false; schScreen = ''; frameT0 = Date.now();
     f.setAttribute('data-sch', '1');
     navFrame(f, 'about:blank');
     setTimeout(function () { navFrame(f, SCH_CHAT_URL); }, 30);
@@ -13438,7 +13481,16 @@ function chatRefreshOrderBadges() {
     setBadge(0);
     if (!f.getAttribute('data-sch') || frameMode !== modeNow()) {
       if (frameMode && frameMode !== modeNow()) { chat = null; chatUid = ''; }
-      reloadFrame();   // โหลดครั้งแรก / บัญชีเปลี่ยน
+      if (chat && chatUid === uidNow() && chat.exp_ms - 60000 > Date.now()) reloadFrame();   // token พร้อม → โหลดทันที
+      else {
+        // token ยังไม่พร้อม → รอแลก token ก่อนค่อยโหลด iframe (iframe รอ init แค่ 8 วิ · ถ้าโหลดก่อนแล้ว GAS ช้า = ขึ้น "authFail")
+        schLoading(true);
+        var uid0 = uidNow();
+        ensureChat(true).catch(function () {}).then(function () {
+          var f2 = $id('sch-frame');
+          if (f2 && isOpen() && uidNow() === uid0 && (!f2.getAttribute('data-sch') || frameMode !== modeNow())) reloadFrame();
+        });
+      }
     } else postVisible(true);
     schLoading(!frameReady);   // spinner จนกว่า iframe พร้อม (โหลดล่วงหน้าแล้ว = ไม่แสดง)
     ensureChat(true).catch(function () {});   // เตรียม chat token ไว้ให้ iframe
@@ -13474,6 +13526,11 @@ function chatRefreshOrderBadges() {
     var f = $id('sch-frame'); if (!f || f.getAttribute('data-sch') || !hasSession()) return;
     preloaded = true; reloadFrame();
   }
+  window.schRetry = function () {
+    chat = null; chatUid = ''; blockUntil = 0; gasTok = null; cacheWrite(null);
+    frameMode = ''; reloadFrame(); schLoading(true);
+    ensureChat(true).catch(function () {});
+  };
   window.schClose = function () {
     var ov = $id('sch-ov'); if (!ov) return;
     ov.classList.remove('on');
