@@ -8901,6 +8901,7 @@ async function loadSession(){
 function logout(){
   SESSION=null;
   try{
+    localStorage.removeItem('mp_sch_chat');   // [SCH] ล้าง chat token ที่แคชไว้
     localStorage.removeItem(LG_SESSION_KEY);
     localStorage.removeItem('tcc_uid');
     localStorage.removeItem(LG_REMEMBER_KEY);
@@ -13292,7 +13293,7 @@ function chatRefreshOrderBadges() {
 
   var chat = null, chatUid = '', chatP = null, blockUntil = 0, timer = null;
   var gasTok = null, gasP = null;
-  var frameT0 = Date.now(), frameMode = '', schPushed = false, schScreen = '', frameReady = false, ldTimer = null, silentBack = false, preloaded = false;
+  var frameT0 = Date.now(), frameMode = '', schPushed = false, schScreen = '', frameReady = false, ldTimer = null, silentBack = false, preloaded = false, selfBlank = false, initServed = 0;
 
   function $id(i) { return document.getElementById(i); }
   function isOpen() { var el = $id('sch-ov'); return !!(el && el.classList.contains('on')); }
@@ -13328,6 +13329,16 @@ function chatRefreshOrderBadges() {
   }
   function cacheRead() { try { return JSON.parse(sessionStorage.getItem('mp_sch_gas') || 'null'); } catch (e) { return null; } }
   function cacheWrite(o) { try { if (o) sessionStorage.setItem('mp_sch_gas', JSON.stringify(o)); else sessionStorage.removeItem('mp_sch_gas'); } catch (e) {} }
+  // [PERF] chat token ของ Worker แคชใน localStorage (ต่อ uid · จนใกล้หมดอายุ · ล้างตอน logout) → เปิดแอป/รีเฟรชครั้งถัดไปไม่ต้องรอ GAS issueSession + Worker /api/session (รวม ~3–10 วิ) ซ้ำอีก
+  function chatCacheRead(uid) {
+    try { var o = JSON.parse(localStorage.getItem('mp_sch_chat') || 'null'); return (o && o.uid === uid && o.c && o.c.token && o.c.exp_ms - 60000 > Date.now()) ? o.c : null; } catch (e) { return null; }
+  }
+  function chatCacheWrite(uid, c) { try { if (c) localStorage.setItem('mp_sch_chat', JSON.stringify({ uid: uid, c: c })); else localStorage.removeItem('mp_sch_chat'); } catch (e) {} }
+  function chatReady() {   // chat token ที่ใช้ได้ทันที (หน่วยความจำ หรือแคช) · ไม่มี = null
+    var uid = uidNow(); if (!uid) return null;
+    if (!(chat && chatUid === uid)) { var cc = chatCacheRead(uid); if (cc) { chat = cc; chatUid = uid; } }
+    return (chat && chatUid === uid && chat.exp_ms - 60000 > Date.now()) ? chat : null;
+  }
   async function gasToken() {
     var uid = uidNow(); if (!uid) return '';
     var c = gasTok || cacheRead();
@@ -13360,7 +13371,7 @@ function chatRefreshOrderBadges() {
   // chat token ของ Worker (แลกจาก GAS token — Worker ให้ GAS ตรวจครั้งเดียว) · แคชไว้จนใกล้หมดอายุ
   async function ensureChat(user) {
     var uid = uidNow();
-    if (chat && chatUid === uid && chat.exp_ms - 60000 > Date.now()) return chat;
+    var cr = chatReady(); if (cr) return cr;
     if (chatP) return chatP;
     if (!user && Date.now() < blockUntil) throw new Error('blocked');   // พังติดกัน → พัก 5 นาที กันยิง GAS ซ้ำ
     chatP = (async function () {
@@ -13374,7 +13385,7 @@ function chatRefreshOrderBadges() {
         var d = await r.json().catch(function () { return {}; });
         if (!r.ok || !d.token) throw new Error(d.error || ('HTTP ' + r.status));
         if (uidNow() !== uid) throw new Error('uid-changed');
-        chat = d; chatUid = uid; blockUntil = 0;
+        chat = d; chatUid = uid; blockUntil = 0; chatCacheWrite(uid, d);
         console.log('[SCH] chat token ready ' + (Date.now() - t1) + 'ms');
         return d;
       } catch (e) {
@@ -13398,7 +13409,7 @@ function chatRefreshOrderBadges() {
       var c = await ensureChat(false);
       schPreload();
       var r = await fetch(SCH_API_URL + '/api/unread', { headers: { Authorization: 'Bearer ' + c.token } });
-      if (r.status === 401) { chat = null; chatUid = ''; return; }
+      if (r.status === 401) { chat = null; chatUid = ''; chatCacheWrite(null); return; }
       var d = await r.json();
       var n = d && (typeof d.total === 'number' ? d.total : d.unread);
       setBadge(n || 0);
@@ -13429,8 +13440,10 @@ function chatRefreshOrderBadges() {
     if (!f || !f.contentWindow) return;
     var t = '', c = null;
     if (hasSession()) {
-      t = await gasToken();
-      if (chat && chatUid === uidNow() && chat.exp_ms - 60000 > Date.now()) c = chat;   // มีแคชก็ส่งให้เลย · ไม่มี → ให้ iframe แลก token เองแบบขนาน
+      if (initServed > 0) { chat = null; chatUid = ''; chatCacheWrite(null); }   // iframe ขอ init ซ้ำ = token เดิมถูกปฏิเสธ/หมดอายุ → ไม่ส่งตัวเดิมซ้ำ (กันวนลูป 401)
+      initServed++;
+      c = chatReady();
+      if (!c) t = await gasToken();   // มี chat token พร้อมแล้ว (หน่วยความจำ/แคช) → ไม่ต้องรอ GAS issueSession · ไม่มี → ให้ iframe แลก token เองแบบขนาน
     }
     var msg = { type: 'sc-init', token: t, api: SCH_API_URL, lang: (typeof window.tccGetLang === 'function' ? window.tccGetLang() : 'th'), avatar: '' };   // ภาษาตาม TCC i18n ของ MP
     if (c) msg.chat = c; else if (!t) msg.visitor = true;
@@ -13453,7 +13466,22 @@ function chatRefreshOrderBadges() {
   });
   (function () {
     var f = $id('sch-frame');
-    if (f) f.addEventListener('load', function () { if (f.getAttribute('data-sch')) postVisible(isOpen()); });
+    if (f) f.addEventListener('load', function () {
+      if (!f.getAttribute('data-sch')) return;
+      // [FIX-BLANK] iframe โหลดแชทหลังแอป pushState (เปิดแชทก่อนโหลดล่วงหน้าเสร็จ) → พอ history.back()/ปุ่ม Back ย้อน entry เดิม เบราว์เซอร์รีเซ็ต iframe เป็น about:blank = หน้าดำตอนเปิดซ้ำ
+      // ตรวจเจอ (และไม่ใช่ about:blank ของ reloadFrame เอง) → โหลดแชทใหม่ · ปิดอยู่ = โหลดเงียบ ๆ ที่ entry ปัจจุบัน (ให้ entry นี้เก็บแชทไว้ → เปิด/ปิดรอบต่อไปไม่ถูกรีเซ็ตอีก)
+      var blank = false;
+      try { var h = f.contentWindow.location.href; blank = !h || h === 'about:blank'; } catch (e) {}
+      if (blank) {
+        if (selfBlank) return;   // about:blank ของ reloadFrame เอง (ยังไม่ได้โหลดแชท) ไม่ใช่การรีเซ็ต
+        frameReady = false; frameMode = '';
+        if (isOpen()) { schLoading(true); reloadFrame(); }
+        else setTimeout(function () { if (!isOpen() && !frameReady && hasSession()) reloadFrame(); }, 150);
+        return;
+      }
+      selfBlank = false;   // หน้าแชทโหลดแล้ว · หลังจากนี้ about:blank ใด ๆ = ถูกรีเซ็ตจาก history
+      postVisible(isOpen());
+    });
   })();
 
   /* ── เปิด/ปิดหน้าแชท ── */
@@ -13466,6 +13494,8 @@ function chatRefreshOrderBadges() {
     var f = $id('sch-frame'); if (!f) return;
     frameMode = modeNow(); frameReady = false; schScreen = ''; frameT0 = Date.now();
     f.setAttribute('data-sch', '1');
+    initServed = 0;     // หน้าแชทใหม่กำลังจะโหลด → นับ init ใหม่ (ต้องรีเซ็ตตรงนี้ ไม่ใช่ตอน load เพราะหน้าแชทขอ init ก่อน load event)
+    selfBlank = true;   // about:blank ของตัวเองด้านล่าง ไม่ให้ตัวตรวจ [FIX-BLANK] นับเป็นการรีเซ็ต (เคลียร์เมื่อแชทโหลดเสร็จ)
     navFrame(f, 'about:blank');
     setTimeout(function () { navFrame(f, SCH_CHAT_URL); }, 30);
   }
@@ -13483,7 +13513,7 @@ function chatRefreshOrderBadges() {
     setBadge(0);
     if (!f.getAttribute('data-sch') || frameMode !== modeNow()) {
       if (frameMode && frameMode !== modeNow()) { chat = null; chatUid = ''; }
-      if (chat && chatUid === uidNow() && chat.exp_ms - 60000 > Date.now()) reloadFrame();   // token พร้อม → โหลดทันที
+      if (chatReady()) reloadFrame();   // token พร้อม (หน่วยความจำ/แคช) → โหลดทันที
       else {
         // token ยังไม่พร้อม → รอแลก token ก่อนค่อยโหลด iframe (iframe รอ init แค่ 8 วิ · ถ้าโหลดก่อนแล้ว GAS ช้า = ขึ้น "authFail")
         schLoading(true);
@@ -13529,7 +13559,7 @@ function chatRefreshOrderBadges() {
     preloaded = true; reloadFrame();
   }
   window.schRetry = function () {
-    chat = null; chatUid = ''; blockUntil = 0; gasTok = null; cacheWrite(null);
+    chat = null; chatUid = ''; blockUntil = 0; gasTok = null; cacheWrite(null); chatCacheWrite(null);
     frameMode = ''; reloadFrame(); schLoading(true);
     ensureChat(true).catch(function () {});
   };
