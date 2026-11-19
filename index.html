@@ -10631,8 +10631,13 @@ const GAS_MAIN_URL = 'https://script.google.com/macros/s/AKfycbwocCEr-mQu6esBJBR
 async function apiPostMain(body){
   // [AUTH FIX] GAS_TCC_Main ต้องมี session token (เดิมไม่ส่ง → UNAUTHORIZED ทุกครั้ง + เสีย roundtrip เปล่า)
   // ใช้ token เดียวกับแชทซัพพอร์ต (issueSession → แคชใน sessionStorage ~2 ชม.) · ไม่ได้ token → ส่งแบบเดิม
-  if(body && !body.token && typeof window.mpGasToken==='function'){
-    try{ const _t = await window.mpGasToken(); if(_t) body = Object.assign({}, body, {token:_t}); }catch(e){}
+  // [AUTH FIX v2] window.mpGasToken ถูกสร้างในสคริปต์ท้ายไฟล์ (SCH) แต่ loadMainBalance() ตอนโหลดหน้า (loadSession/updateAuthUI) รันก่อนสคริปต์นั้น
+  // → เดิมเจอว่ายังไม่มีฟังก์ชัน = ส่งไปไม่มี token → UNAUTHORIZED → ยอด TCC Main ไม่ขึ้น · ตอนนี้รอสั้น ๆ (≤3 วิ) ให้ฟังก์ชันพร้อมก่อน
+  if(body && !body.token){
+    for(let _i=0; _i<60 && typeof window.mpGasToken!=='function'; _i++) await new Promise(r=>setTimeout(r,50));
+    if(typeof window.mpGasToken==='function'){
+      try{ const _t = await window.mpGasToken(); if(_t) body = Object.assign({}, body, {token:_t}); }catch(e){}
+    }
   }
   const ctrl = new AbortController();
   const tid  = setTimeout(() => ctrl.abort(), 8000); // 8s timeout — แยกจาก chat
@@ -10660,18 +10665,23 @@ async function apiPostMain(body){
 //   loadSession (cache-hit) → loadMainBalance()   ... call #1
 //   loadSession → updateAuthUI() → loadMainBalance() ... call #2
 // ทั้งสองเรียกในช่วง <200ms เดียวกัน → guard ทิ้ง call ที่สองทันที
-let _loadMainBusy = false;
-async function loadMainBalance(){
-  if(!SESSION?.uid) return;
+let _loadMainBusy = false, _mainBalRetry = 0, _mainBalP = null;
+function loadMainBalance(){
+  if(!SESSION?.uid) return Promise.resolve();
   if(_loadMainBusy){
     console.log('[loadMainBalance] skipped — already in-flight');
-    return;
+    return _mainBalP;   // คืน promise ของรอบที่กำลังโหลด → ผู้เรียกที่ต้องการยอดจริง (เช่น ยืนยันโอน) await ได้
   }
   _loadMainBusy = true;
+  return (_mainBalP = _loadMainBalanceRun());
+}
+// [AUTH FIX v2] โหลดไม่สำเร็จ (GAS ช้า/timeout/token ยังไม่พร้อม) → ลองใหม่อัตโนมัติสูงสุด 2 ครั้ง (4 วิ, 8 วิ) แทนที่จะปล่อยให้ยอดว่างจนกว่าจะรีเฟรช
+function _mainBalRetryLater(){ if(_mainBalRetry < 2){ _mainBalRetry++; setTimeout(loadMainBalance, 4000 * _mainBalRetry); } }
+async function _loadMainBalanceRun(){
   try{
     const res = await apiPostMain({action:'getUser', data:{ uid: SESSION.uid }});
     // GAS_TCC_Main wrap ทุก response ใน {ok, data} → ต้องแกะ .data ก่อน
-    if(!res?.ok){ console.warn('[loadMainBalance] GAS error:', res?.error); return; }
+    if(!res?.ok){ console.warn('[loadMainBalance] GAS error:', res?.error); _mainBalRetryLater(); return; }
     const user = res.data;
     const bal = parseFloat(user?.main_balance ?? 0);
     SESSION.tcc_main_balance = bal;
@@ -10681,7 +10691,8 @@ async function loadMainBalance(){
     const avail = document.getElementById('bridge-topup-avail');
     if(avail) avail.textContent = bal.toLocaleString('th',{minimumFractionDigits:2});
     console.log('[loadMainBalance] uid:', SESSION.uid, 'main_balance:', bal);
-  }catch(e){ console.warn('[loadMainBalance]', e.message); }
+    _mainBalRetry = 0;
+  }catch(e){ console.warn('[loadMainBalance]', e.message); _mainBalRetryLater(); }
   finally{ _loadMainBusy = false; }
 }
 
@@ -11495,7 +11506,9 @@ function mpCommCloseDetail(){
 function openBridgeTopup(){
   if(!SESSION){ showToast(tccT('mp_js_0454'),'warn'); return; }
   const avail = document.getElementById('bridge-topup-avail');
-  if(avail) avail.textContent = Number(SESSION?.tcc_main_balance||0).toLocaleString('th',{minimumFractionDigits:2});
+  // [AUTH FIX v2] ยังไม่เคยโหลดยอดสำเร็จ → แสดง "—" (ไม่ใช่ 0.00 ที่ทำให้เข้าใจผิดว่าไม่มีเงิน) · และรีเฟรชยอดจริงจาก TCC Main ทุกครั้งที่เปิดโมดัล
+  if(avail) avail.textContent = (typeof SESSION?.tcc_main_balance==='number' && !isNaN(SESSION.tcc_main_balance)) ? SESSION.tcc_main_balance.toLocaleString('th',{minimumFractionDigits:2}) : '—';
+  if(typeof loadMainBalance==='function') loadMainBalance();
   const inp = document.getElementById('bridge-topup-amount');
   if(inp) inp.value = '';
   document.getElementById('m-bridge-topup')?.classList.add('active');
@@ -11515,6 +11528,8 @@ async function confirmBridgeTopup(){
   if(!SESSION?.uid){ showToast(tccT('mp_js_0454'),'warn'); return; }
   const amount = parseFloat(document.getElementById('bridge-topup-amount')?.value||0);
   if(!amount || amount < 1){ showToast(tccT('mp_js_0455'),'warn'); return; }
+  // [AUTH FIX v2] ยังไม่มียอดจริงจาก TCC Main (โหลดครั้งแรกพลาด/ยังไม่เสร็จ) → โหลดให้เสร็จก่อนตัดสินว่ายอดไม่พอ
+  if(typeof SESSION.tcc_main_balance!=='number'){ showLoad('...'); try{ await loadMainBalance(); }catch(e){} hideLoad(); }
   const mainBal = Number(SESSION?.tcc_main_balance||0);
   if(amount > mainBal){ showToast(tccTF('mp_js_0458',{p1:mainBal.toFixed(2)}),'err'); return; }
 
