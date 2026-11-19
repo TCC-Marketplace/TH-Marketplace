@@ -1530,8 +1530,8 @@ function renderMsgs(forceBottom) {
       if (m.type === "image") {
         bubble.classList.add("img");
         const url = m.src || m.content;   // src = ลิงก์ไฟล์จาก Worker · content แบบ data: = ข้อความรูปเก่า
-        const im = document.createElement("img"); im.src = url; im.alt = "";
-        im.onclick = () => { $("#vimg").src = url; $("#viewer").classList.add("on"); };
+        const im = document.createElement("img"); im.src = url; im.alt = ""; im.decoding = "async";
+        im.onclick = () => { $("#vimg").src = m.full || url; $("#viewer").classList.add("on"); };   // [PERF] ฟองใช้รูปย่อ · กดดูเต็มจอใช้ต้นฉบับ
         im.onload = () => { if (near || forceBottom) box.scrollTop = box.scrollHeight; };
         bubble.appendChild(im);
       } else if (m.type === "video") {
