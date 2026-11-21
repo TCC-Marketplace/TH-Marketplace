@@ -552,6 +552,34 @@ window.addEventListener("message", ev => {
   try { localStorage.setItem(LANG_KEY, d.lang); } catch (_) { }
   setLang(d.lang);
 });
+// [AI-FAB] ปุ่ม AI ลอยในแอป: sc-context {cat, qid?} → เปิดห้องซัพพอร์ต แล้วเปิดเมนูไกด์ไลน์ที่หมวดนั้น (มี qid = ส่งคำถามนั้นเลย ให้ Worker ตอบจาก FAQ)
+let ctxReq = null, ctxTimer = 0;
+window.addEventListener("message", ev => {
+  const d = ev.data;
+  if (!d || d.type !== "sc-context" || ev.source !== window.parent || IS_ADMIN || VISITOR) return;
+  ctxReq = { cat: String(d.cat || "").slice(0, 40), qid: String(d.qid || "").slice(0, 60) };
+  runCtx(0);
+});
+function runCtx(n) {
+  clearTimeout(ctxTimer);
+  const x = ctxReq; if (!x || IS_ADMIN || VISITOR) return;
+  const inSupport = !!(peer && peer.kind !== "room" && peer.id === SUPPORT_ID);
+  if (!inSupport) {
+    if (n === 0 || n === 10) { try { openChat({ id: SUPPORT_ID, name: T("support"), color: "#d9a400" }); } catch (_) { } }   // อยู่หน้ารายการ/ห้องอื่น → เข้าห้องซัพพอร์ตก่อน
+  } else if (guideReady && guideOn()) {   // guideStart() ทำงานแล้ว (ไม่ถูกทับค่าเปิด/ปิดตอนเริ่มห้อง)
+    ctxReq = null;
+    if (x.qid) {
+      let hit = null;
+      GUIDE.forEach(k => (k.children && k.children.length ? k.children : [k]).forEach(s => (s.items || []).forEach(it => { if (!hit && it.id === x.qid) hit = { c: s, it }; })));
+      if (hit) { sendGuide(hit.c, hit.it); return; }
+    }
+    if (GUIDE.some(k => k.id === x.cat)) { guideCat = x.cat; guideSub = ""; }
+    paintGuide(); setGuideOpen(true, false);
+    return;
+  }
+  if (n < 40) ctxTimer = setTimeout(() => runCtx(n + 1), 150);   // รอสูงสุดราว 6 วิ แล้วเลิก
+  else ctxReq = null;
+}
 function getInit() {
   return new Promise((res, rej) => {
     initResolve = res;
