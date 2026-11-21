@@ -13695,27 +13695,27 @@ function chatRefreshOrderBadges() {
   var CAI_THINK_MS = 2000;   // หน่วง "กำลังคิด..." อย่างน้อย 2 วิ — เหมือนแชท/ต้นแบบ
   // หน้า (id ของ .page ที่ active ไม่มีคำนำหน้า p-; แท็บใน Dashboard = d-<tab>) → หมวดคำถามของ kb.js · order = ลำดับคำถามแนะนำ 5 ข้อแรก
   var CAI_PAGES = {
-    'login':            { cats: ['login', 'kyc', 'about'],   order: ['login_how', 'login_2fa', 'mp_what'] },
-    'home':             { cats: ['about', 'shop'],           order: ['mp_what', 'mp_start', 'mp_support'] },
-    'marketplace':      { cats: ['shop'],                    order: ['shop_buy', 'shop_chat', 'shop_address'] },
-    'kyc-wizard':       { cats: ['kyc'],                     order: ['kyc_status', 'kyc_seller'] },
-    'seller-apply':     { cats: ['seller', 'kyc'],           order: ['seller_apply', 'kyc_seller', 'seller_product'] },
-    'seller-dashboard': { cats: ['seller', 'seller_pay'],    order: ['seller_dash', 'seller_product', 'seller_ship'] },
-    'seller-shop':      { cats: ['seller'],                  order: ['seller_dash', 'seller_product'] },
-    'seller-products':  { cats: ['seller', 'seller_pay'],    order: ['seller_product', 'payout_options', 'seller_ship'] },
-    'seller-orders':    { cats: ['seller'],                  order: ['seller_ship', 'seller_product', 'seller_dash'] },
-    'seller-analytics': { cats: ['seller'],                  order: ['seller_dash', 'seller_ship'] },
-    'seller-wallet':    { cats: ['seller_pay'],              order: ['seller_withdraw', 'payout_options'] },
-    'd-wallet':         { cats: ['wallet'],                  order: ['wallet_deposit', 'wallet_withdraw', 'wallet_transfer', 'wallet_types', 'wallet_lp', 'wallet_history'] },
-    'd-shop':           { cats: ['shop'],                    order: ['shop_buy', 'shop_address', 'shop_chat'] },
-    'd-orders':         { cats: ['orders'],                  order: ['order_status', 'order_track', 'order_cancel', 'order_change'] },
-    'd-address':        { cats: ['shop'],                    order: ['shop_address', 'shop_buy'] },
-    'd-funding':        { cats: ['funding'],                 order: ['ff_what', 'ff_plans', 'ff_rights', 'ff_where'] },
-    'd-referrals':      { cats: ['referral'],                order: ['ref_code', 'comm_rates', 'comm_where'] },
-    'd-commission':     { cats: ['referral'],                order: ['comm_rates', 'comm_where', 'ref_code'] },
-    'd-notifications':  { cats: ['notif', 'general'],        order: ['notif_where', 'sec_never'] },
-    'd-profile':        { cats: ['kyc', 'login', 'notif'],   order: ['kyc_status', 'login_2fa', 'notif_where'] },
-    'd-btcfund':        { cats: ['general'],                 order: ['btc_fund', 'no_advice', 'sec_never'] }
+    'login':            { cats: ['login', 'kyc', 'about'],            order: ['login_how', 'login_locked', 'login_2fa', 'mp_what'] },
+    'home':             { cats: ['about', 'general', 'shop'],         order: ['mp_what', 'mp_start', 'mp_support', 'chat_support', 'app_language'] },
+    'marketplace':      { cats: ['shop'],                             order: ['shop_buy', 'shop_cant_order', 'shop_chat', 'shop_address'] },
+    'kyc-wizard':       { cats: ['kyc'],                              order: ['kyc_docs', 'kyc_status', 'kyc_needed', 'kyc_seller'] },
+    'seller-apply':     { cats: ['seller', 'kyc'],                    order: ['seller_apply', 'kyc_seller', 'kyc_docs', 'seller_product'] },
+    'seller-dashboard': { cats: ['seller', 'seller_pay'],             order: ['seller_dash', 'seller_ship_payout', 'seller_product', 'seller_ship'] },
+    'seller-shop':      { cats: ['seller'],                           order: ['seller_dash', 'seller_product'] },
+    'seller-products':  { cats: ['seller', 'seller_pay'],             order: ['seller_product', 'payout_options', 'seller_ship_payout'] },
+    'seller-orders':    { cats: ['seller'],                           order: ['seller_ship_payout', 'seller_ship', 'seller_product', 'seller_dash'] },
+    'seller-analytics': { cats: ['seller'],                           order: ['seller_dash', 'seller_ship_payout'] },
+    'seller-wallet':    { cats: ['seller_pay'],                       order: ['seller_withdraw', 'payout_options'] },
+    'd-wallet':         { cats: ['wallet'],                           order: ['wallet_deposit', 'deposit_not_arrive', 'wallet_withdraw', 'withdraw_status', 'wallet_transfer', 'wallet_types', 'wallet_lp', 'wallet_history'] },
+    'd-shop':           { cats: ['shop'],                             order: ['shop_buy', 'shop_cant_order', 'shop_address', 'shop_chat'] },
+    'd-orders':         { cats: ['orders'],                           order: ['order_status', 'order_confirm_receipt', 'order_track', 'order_not_received', 'order_cancel', 'order_change'] },
+    'd-address':        { cats: ['shop'],                             order: ['shop_address', 'shop_buy'] },
+    'd-funding':        { cats: ['funding'],                          order: ['ff_what', 'ff_amount', 'ff_plans', 'ff_rights', 'ff_where'] },
+    'd-referrals':      { cats: ['referral'],                         order: ['ref_code', 'comm_rates', 'comm_where'] },
+    'd-commission':     { cats: ['referral'],                         order: ['comm_rates', 'comm_where', 'ref_code'] },
+    'd-notifications':  { cats: ['notif', 'general'],                 order: ['notif_where', 'app_language', 'sec_never'] },
+    'd-profile':        { cats: ['kyc', 'login', 'notif', 'general'], order: ['kyc_status', 'kyc_docs', 'login_2fa', 'app_language', 'notif_where'] },
+    'd-btcfund':        { cats: ['general'],                          order: ['btc_fund', 'no_advice', 'sec_never'] }
   };
   var CAI_PREF_KEY = 'mp_cai_pref';   // จำตำแหน่งปุ่ม + สถานะซ่อน (localStorage ต่อเครื่อง)
   var CAI = { pref: { side: 'r', yr: null, hidden: 0 }, dragAt: 0, guide: 1, page: '', tree: null, tipPages: {}, open: 0, menu: null, menuAt: 0, loading: 0, loadErr: 0, msgs: [], cache: {}, busy: 0, more: 0, built: 0 };
