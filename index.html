@@ -5134,6 +5134,13 @@ const TCC_I18N = {
   'mp_sch_0005':["ลองใหม่","Retry","Thử lại","ព្យាយាមម្តងទៀត","ထပ်စမ်းရန်","ລອງໃໝ່","Cuba lagi","Coba lagi","重试"],
   'mp_sch_0006':["ปิด","Close","Đóng","បិទ","ပိတ်ရန်","ປິດ","Tutup","Tutup","关闭"],
   'mp_sch_0003':["💬 ติดต่อซัพพอร์ต","💬 Contact support","💬 Liên hệ hỗ trợ","💬 ទាក់ទងផ្នែកជំនួយ","💬 ဆက်သွယ်ရေးအဖွဲ့ကို ဆက်သွယ်ရန်","💬 ຕິດຕໍ່ທີມຊ່ວຍເຫຼືອ","💬 Hubungi sokongan","💬 Hubungi dukungan","💬 联系客服"],
+  // ── [AI-FAB] ปุ่ม AI ลอย ──
+  'mp_sch_0007':["ผู้ช่วย AI","AI Assistant","Trợ lý AI","ជំនួយការ AI","AI လက်ထောက်","ຜູ້ຊ່ວຍ AI","Pembantu AI","Asisten AI","AI 助手"],
+  'mp_sch_0008':["ซ่อนปุ่ม AI","Hide AI button","Ẩn nút AI","លាក់ប៊ូតុង AI","AI ခလုတ်ကို ဝှက်ရန်","ເຊື່ອງປຸ່ມ AI","Sembunyikan butang AI","Sembunyikan tombol AI","隐藏 AI 按钮"],
+  'mp_sch_0009':["แสดงปุ่ม AI","Show AI button","Hiện nút AI","បង្ហាញប៊ូតុង AI","AI ခလုတ်ကို ပြရန်","ສະແດງປຸ່ມ AI","Tunjukkan butang AI","Tampilkan tombol AI","显示 AI 按钮"],
+  'mp_sch_0010':["ขยายเต็มจอ","Full screen","Toàn màn hình","ពេញអេក្រង់","မျက်နှာပြင်အပြည့်","ເຕັມຈໍ","Skrin penuh","Layar penuh","全屏"],
+  'mp_sch_0011':["แตะเพื่อถาม AI · ลากเพื่อย้าย","Tap to ask AI · drag to move","Chạm để hỏi AI · kéo để di chuyển","ចុចដើម្បីសួរ AI · អូសដើម្បីផ្លាស់ទី","AI ကိုမေးရန်နှိပ်ပါ · ရွှေ့ရန်ဆွဲပါ","ແຕະເພື່ອຖາມ AI · ລາກເພື່ອຍ້າຍ","Ketik untuk tanya AI · seret untuk alih","Ketuk untuk tanya AI · seret untuk memindah","点击向 AI 提问 · 拖动可移动"],
+  'mp_sch_0012':["ซ่อนปุ่ม AI แล้ว แตะแท็บ 🤖 ที่ขอบจอเพื่อเรียกกลับ","AI button hidden. Tap the 🤖 tab at the screen edge to bring it back","Đã ẩn nút AI. Chạm vào tab 🤖 ở mép màn hình để hiện lại","បានលាក់ប៊ូតុង AI។ ចុចផ្ទាំង 🤖 នៅគែមអេក្រង់ដើម្បីបង្ហាញវិញ","AI ခလုတ်ကို ဝှက်ပြီးပါပြီ။ ပြန်ပြရန် မျက်နှာပြင်အစွန်းရှိ 🤖 တက်ဘ်ကို နှိပ်ပါ","ເຊື່ອງປຸ່ມ AI ແລ້ວ. ແຕະແທັບ 🤖 ທີ່ຂອບຈໍເພື່ອເອີ້ນກັບຄືນ","Butang AI disembunyikan. Ketik tab 🤖 di tepi skrin untuk memaparkannya semula","Tombol AI disembunyikan. Ketuk tab 🤖 di tepi layar untuk menampilkannya lagi","已隐藏 AI 按钮。点击屏幕边缘的 🤖 标签可重新显示"],
 };
 const LANG_IDX={th:0,en:1,vi:2,kh:3,mm:4,la:5,ms:6,id:7,zh:8};
 let _L='th';
@@ -13361,10 +13368,20 @@ function chatRefreshOrderBadges() {
 .sch-ov.on{display:flex}
 .sch-ov iframe{flex:1;width:100%;height:100%;border:0;background:var(--bg)}
 .sch-ld{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:var(--bg);z-index:2}
+/* [AI-FAB] โหมดหน้าต่างลอย (ไม่เต็มจอ) ของแชทซัพพอร์ต · ตำแหน่ง/ขนาดตั้งจาก JS */
+.sch-fh{display:none;flex:0 0 30px;height:30px;align-items:center;justify-content:space-between;padding:0 4px 0 12px;background:#14181d;border-bottom:1px solid rgba(243,186,47,.2);color:#f3ba2f;font-size:12px;font-weight:700;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.sch-fh.dragging{cursor:grabbing}
+.sch-fh b{font-weight:700;pointer-events:none}
+.sch-fh span button{background:transparent;border:0;color:#f3ba2f;font-size:15px;line-height:1;width:30px;height:26px;cursor:pointer;border-radius:6px}
+.sch-fh span button:hover{background:rgba(243,186,47,.14)}
+.sch-ov.sch-fl{inset:auto;margin:0;max-width:none;border-radius:16px;overflow:hidden;border:1px solid rgba(243,186,47,.4);box-shadow:0 14px 44px rgba(0,0,0,.6)}
+.sch-ov.sch-fl .sch-fh{display:flex}
+.sch-ov.sch-fl .sch-ld{top:30px}
+.sch-ov iframe{min-height:0}
 .sch-sp{width:34px;height:34px;border-radius:50%;border:3px solid rgba(240,165,0,.25);border-top-color:#f0a500;animation:schspin .8s linear infinite}
 @keyframes schspin{to{transform:rotate(360deg)}}
 </style>
-<div class="sch-ov" id="sch-ov"><div class="sch-ld" id="sch-ld"><div class="sch-sp"></div></div><iframe id="sch-frame" title="Support chat" src="about:blank" allow="clipboard-write"></iframe></div>
+<div class="sch-ov" id="sch-ov"><div class="sch-fh" id="sch-fh"><b id="sch-fh-tt">🤖 AI</b><span><button type="button" id="sch-fh-ex">⤢</button><button type="button" id="sch-fh-cl">✕</button></span></div><div class="sch-ld" id="sch-ld"><div class="sch-sp"></div></div><iframe id="sch-frame" title="Support chat" src="about:blank" allow="clipboard-write"></iframe></div>
 <script>
 (function () {
   'use strict';
@@ -13384,6 +13401,7 @@ function chatRefreshOrderBadges() {
 
   var chat = null, chatUid = '', chatP = null, blockUntil = 0, timer = null;
   var gasTok = null, gasP = null;
+  var floatMode = false, floatPos = null, ctxPending = null;   // [AI-FAB] โหมดหน้าต่างลอย · ตำแหน่งที่ลากไว้ · หมวดที่ขอเปิด
   var frameT0 = Date.now(), frameMode = '', schPushed = false, schScreen = '', frameReady = false, ldTimer = null, silentBack = false, preloaded = false, selfBlank = false, initServed = 0;
 
   function $id(i) { return document.getElementById(i); }
@@ -13493,7 +13511,9 @@ function chatRefreshOrderBadges() {
     if (n > 0) { el.textContent = n > 9 ? '9+' : String(n); el.style.display = 'flex'; }
     else el.style.display = 'none';
   }
+  var unreadBackoffUntil = 0;   // [MP-CHAT-5XX]
   async function pollBadge() {
+    if (Date.now() < unreadBackoffUntil) return;   // [MP-CHAT-5XX]
     if (!SCH_API_URL || document.hidden || isOpen() || !$id('bn-chat-bdg')) return;   // ไม่มี badge element → ไม่ยิง GAS/Worker
     if (!hasSession()) { chat = null; chatUid = ''; setBadge(0); return; }
     try {
@@ -13501,6 +13521,7 @@ function chatRefreshOrderBadges() {
       schPreload();
       var r = await fetch(SCH_API_URL + '/api/unread', { headers: { Authorization: 'Bearer ' + c.token } });
       if (r.status === 401) { chat = null; chatUid = ''; chatCacheWrite(null); return; }
+      if (r.status >= 500) { unreadBackoffUntil = Date.now() + 5 * 60 * 1000; return; }   // [MP-CHAT-5XX] Worker แชทล้ม (500) → พัก 5 นาที ไม่ยิงซ้ำทุกรอบ (ไม่ได้แก้สาเหตุที่ Worker)
       var d = await r.json();
       var n = d && (typeof d.total === 'number' ? d.total : d.unread);
       setBadge(n || 0);
@@ -13549,7 +13570,7 @@ function chatRefreshOrderBadges() {
     if (!d || typeof d.type !== 'string') return;
     if (d.type === 'sc-need-init') sendInit();
     else if (d.type === 'sc-close') window.schClose();
-    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); console.log('[SCH] frame ready ' + (Date.now() - frameT0) + 'ms'); }
+    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); flushCtx(); console.log('[SCH] frame ready ' + (Date.now() - frameT0) + 'ms'); }
     else if (d.type === 'sc-screen') schScreen = String(d.id || '');
     else if (d.type === 'sc-login') { schPushed = false; window.schClose(); try { if (typeof lgGoLogin === 'function') lgGoLogin(); } catch (e) {} }   // ไม่มี session (Visitor) กด "เข้าสู่ระบบ" ในแชท
     else if (d.type === 'sc-reset') { frameMode = ''; reloadFrame(); if (isOpen()) schLoading(true); }                          // เซสชันเปลี่ยนกลางทาง → โหลดแชทใหม่
@@ -13600,7 +13621,9 @@ function chatRefreshOrderBadges() {
     var ov = $id('sch-ov'), f = $id('sch-frame');
     if (!ov || !f) return;
     ov.classList.add('on');
-    if (!schPushed) { schPushed = true; try { history.pushState({ sch: 1 }, '', location.href); } catch (e) {} }   // 1 entry ต่อการเปิดแชท → ปุ่ม Back ของเครื่องปิดแชทได้
+    ov.classList.toggle('sch-fl', floatMode);                 // [AI-FAB] หน้าต่างลอย = ไม่ push history (ปุ่ม Back ของเครื่องยังย้อนหน้าแอปตามเดิม)
+    if (floatMode) placeFloat(); else clearFloat();
+    if (!schPushed && !floatMode) { schPushed = true; try { history.pushState({ sch: 1 }, '', location.href); } catch (e) {} }   // 1 entry ต่อการเปิดแชท → ปุ่ม Back ของเครื่องปิดแชทได้
     setBadge(0);
     if (!f.getAttribute('data-sch') || frameMode !== modeNow()) {
       if (frameMode && frameMode !== modeNow()) { chat = null; chatUid = ''; }
@@ -13617,18 +13640,20 @@ function chatRefreshOrderBadges() {
     } else postVisible(true);
     schLoading(!frameReady);   // spinner จนกว่า iframe พร้อม (โหลดล่วงหน้าแล้ว = ไม่แสดง)
     ensureChat(true).catch(function () {});   // เตรียม chat token ไว้ให้ iframe
+    try { window.dispatchEvent(new Event('sch-state')); } catch (e) {}
   };
   // ทางเข้า: go('chat') ใน go() ของแอป
-  window.schGoFromNav = function () { window.schOpen(); };
+  window.schGoFromNav = function () { floatMode = false; window.schOpen(); };
   // ปุ่ม "ติดต่อซัพพอร์ต" ในหน้า Order — เปิดแชทซัพพอร์ต แล้วเตือนให้แจ้งเลข Order
   window.schOpenFromOrder = function (orderId) {
+    floatMode = false;
     if (!hasSession()) { window.schOpen(); return; }
     window.schOpen();
     if (orderId) toast(window.tccTF('mp_sch_0002', { p1: String(orderId) }), 'info');
   };
   // ย้อนกลับ (ปุ่ม Back ของเครื่อง): อยู่ในห้อง → ให้ iframe ย้อนไปหน้ารายการก่อน · อยู่หน้ารายการ → ปิดแชท · คืน true = จัดการแล้ว
   window.schHandleBack = function () {
-    if (!isOpen()) return false;
+    if (!isOpen() || floatMode) return false;   // [AI-FAB] หน้าต่างลอยไม่มี history entry
     var f = $id('sch-frame');
     if (schScreen === 'chat' && f && f.contentWindow) {
       try { f.contentWindow.postMessage({ type: 'sc-back' }, TGT); } catch (e) {}
@@ -13654,14 +13679,207 @@ function chatRefreshOrderBadges() {
     frameMode = ''; reloadFrame(); schLoading(true);
     ensureChat(true).catch(function () {});
   };
+
+  /* ═══ [AI-FAB] หน้าต่างแชทแบบลอย (ไม่เต็มจอ) + ส่งหมวดคำถามของหน้านั้นให้แชท ═══ */
+  function clearFloat() { var ov = $id('sch-ov'); if (ov) { ov.style.left = ov.style.top = ov.style.width = ov.style.height = ''; } }
+  function floatSize() { var vw = window.innerWidth, vh = window.innerHeight; return { w: Math.min(400, vw - 16), h: Math.min(620, vh - 90), vw: vw, vh: vh }; }
+  function clampF(l, t, s) { return { l: Math.max(8, Math.min(s.vw - s.w - 8, l)), t: Math.max(8, Math.min(s.vh - s.h - 8, t)) }; }
+  function floatLabels() {
+    var tt = $id('sch-fh-tt'), ex = $id('sch-fh-ex'), cl = $id('sch-fh-cl');
+    if (tt) tt.textContent = '🤖 ' + window.tccT('mp_sch_0007');
+    if (ex) { ex.title = window.tccT('mp_sch_0010'); ex.setAttribute('aria-label', ex.title); }
+    if (cl) { cl.title = window.tccT('mp_sch_0006'); cl.setAttribute('aria-label', cl.title); }
+  }
+  function placeFloat() {
+    var ov = $id('sch-ov'); if (!ov) return;
+    var s = floatSize(), p;
+    if (floatPos) p = clampF(floatPos.l, floatPos.t, s);                 // ตำแหน่งที่สมาชิกลากไว้ระหว่างเปิดอยู่
+    else {
+      var fab = $id('ai-fab'), r = (fab && fab.offsetWidth) ? fab.getBoundingClientRect() : null;
+      if (r) p = clampF((r.left + r.width / 2 > s.vw / 2) ? r.right - s.w : r.left, (r.top + r.height / 2 > s.vh / 2) ? r.top - s.h - 10 : r.bottom + 10, s);   // เปิดใกล้ปุ่ม: ครึ่งล่าง → เหนือปุ่ม · ครึ่งบน → ใต้ปุ่ม
+      else p = clampF(s.vw - s.w - 8, s.vh - s.h - 80, s);
+    }
+    ov.style.width = s.w + 'px'; ov.style.height = s.h + 'px'; ov.style.left = p.l + 'px'; ov.style.top = p.t + 'px';
+    floatLabels();
+  }
+  window.addEventListener('resize', function () { if (isOpen() && floatMode) placeFloat(); });
+  (function () {   // ลากหน้าต่างจากแถบหัว
+    var bar = $id('sch-fh'); if (!bar) return;
+    var down = false, pid = null, sx = 0, sy = 0, ox = 0, oy = 0;
+    bar.addEventListener('pointerdown', function (e) {
+      if (e.target.closest && e.target.closest('button')) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      var ov = $id('sch-ov'); if (!ov) return;
+      var r = ov.getBoundingClientRect(); down = true; pid = e.pointerId; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+      bar.classList.add('dragging'); try { bar.setPointerCapture(pid); } catch (_) {}
+    });
+    bar.addEventListener('pointermove', function (e) {
+      if (!down || e.pointerId !== pid) return;
+      var ov = $id('sch-ov'), s = floatSize(); if (!ov) return;
+      floatPos = clampF(ox + e.clientX - sx, oy + e.clientY - sy, s);
+      ov.style.left = floatPos.l + 'px'; ov.style.top = floatPos.t + 'px';
+      e.preventDefault();
+    });
+    function end(e) { if (!down || (e && e.pointerId !== pid)) return; down = false; bar.classList.remove('dragging'); try { bar.releasePointerCapture(pid); } catch (_) {} }
+    bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
+    var ex = $id('sch-fh-ex'), cl = $id('sch-fh-cl');
+    if (ex) ex.addEventListener('click', function () { window.schExpand(); });
+    if (cl) cl.addEventListener('click', function () { window.schClose(); });
+  })();
+  // ส่งหมวด (และคำถาม) ให้หน้าแชทเปิดเมนูไกด์ไลน์ตรงหัวข้อ · แชทยังไม่พร้อม = เก็บไว้ส่งตอน sc-ready
+  function flushCtx() {
+    if (!ctxPending || !frameReady) return;
+    var f = $id('sch-frame'); if (!f || !f.contentWindow) return;
+    try { f.contentWindow.postMessage({ type: 'sc-context', cat: ctxPending.cat, qid: ctxPending.qid }, TGT); ctxPending = null; } catch (e) {}
+  }
+  // เปิดแชทแบบหน้าต่างลอย · ctx = { cat: 'wallet', qid?: 'wallet_deposit' } (มี qid = ส่งคำถามนั้นให้ AI ตอบทันที)
+  window.schOpenFloat = function (ctx) {
+    floatMode = true; floatPos = null;
+    ctxPending = (ctx && ctx.cat) ? { cat: String(ctx.cat), qid: ctx.qid ? String(ctx.qid) : '' } : null;
+    window.schOpen();
+    if (!isOpen()) { floatMode = false; ctxPending = null; return; }   // schOpen ปฏิเสธ (ยังไม่ล็อกอิน)
+    flushCtx();
+  };
+  window.schAsk = function (cat, qid) { window.schOpenFloat({ cat: cat, qid: qid || '' }); };   // ปุ่ม "?" ตามจุดต่าง ๆ ในแอปเรียกใช้
+  window.schExpand = function () {   // หน้าต่างลอย → เต็มจอ (ใช้ history entry เหมือนเปิดจากแท็บแชท)
+    var ov = $id('sch-ov'); if (!ov || !isOpen()) return;
+    floatMode = false; ov.classList.remove('sch-fl'); clearFloat();
+    if (!schPushed) { schPushed = true; try { history.pushState({ sch: 1 }, '', location.href); } catch (e) {} }
+    try { window.dispatchEvent(new Event('sch-state')); } catch (e) {}
+  };
+  window.schIsOpen = isOpen;
+  window.schIsFloat = function () { return isOpen() && floatMode; };
   window.schClose = function () {
     var ov = $id('sch-ov'); if (!ov) return;
-    ov.classList.remove('on');
+    ov.classList.remove('on'); ov.classList.remove('sch-fl'); clearFloat();
+    floatMode = false; floatPos = null; ctxPending = null;
     schLoading(false);
     if (schPushed) { schPushed = false; silentBack = true; setTimeout(function () { silentBack = false; }, 800); try { history.back(); } catch (e) {} }   // คืน history entry ที่ push ตอนเปิด
     postVisible(false);
     setTimeout(pollBadge, 2500);   // รอ iframe ส่ง "อ่านแล้ว" ก่อนค่อยนับใหม่
+    try { window.dispatchEvent(new Event('sch-state')); } catch (e) {}
   };
+})();
+</script>
+<style>
+/* [AI-FAB] ปุ่ม AI ลอย — ลากย้ายได้ (ดูดเข้าขอบซ้าย/ขวาของแอป) · กด × ซ่อนเหลือแท็บเล็กที่ขอบจอ · แตะเปิดแชทแบบหน้าต่างลอย */
+.ai-fab{position:fixed;z-index:8000;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#f3ba2f,#c98a00);box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 0 2px rgba(11,14,17,.92);display:none;flex-direction:column;align-items:center;justify-content:center;color:#0b0e11;font-weight:800;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.ai-fab:active{transform:scale(.96)}
+.ai-fab.drag{cursor:grabbing;transition:none}
+.ai-fab.snap{transition:left .18s ease,top .18s ease}
+.ai-fab-ic{font-size:22px;line-height:1;pointer-events:none}
+.ai-fab-tx{font-size:9px;letter-spacing:.08em;margin-top:1px;pointer-events:none}
+.ai-fab-x{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:1px solid rgba(243,186,47,.55);background:#14181d;color:#f3ba2f;font-size:14px;line-height:19px;padding:0;cursor:pointer;text-align:center}
+.ai-tab{position:fixed;z-index:8000;width:24px;height:56px;display:none;align-items:center;justify-content:center;background:rgba(20,24,29,.92);border:1px solid rgba(243,186,47,.5);color:#f3ba2f;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.45);-webkit-tap-highlight-color:transparent}
+.ai-tab.l{border-radius:0 12px 12px 0;border-left:0}
+.ai-tab.r{border-radius:12px 0 0 12px;border-right:0}
+</style>
+<div class="ai-fab" id="ai-fab" role="button" tabindex="0"><span class="ai-fab-ic">🤖</span><span class="ai-fab-tx">AI</span><button type="button" class="ai-fab-x" id="ai-fab-x">×</button></div>
+<div class="ai-tab r" id="ai-tab" role="button" tabindex="0">🤖</div>
+<script>
+(function () {
+  'use strict';
+  var KEY_POS = 'mp_ai_fab', KEY_HIDE = 'mp_ai_fab_hide', SZ = 54, EDGE = 6, TOP_MIN = 58;
+  // หน้าใน MP → หมวดคำถามของแชท (รหัสหมวดตรงกับ CATS ใน kb.js) · หน้าที่ไม่อยู่ในรายการ (trade / login / shop-chat) = ไม่แสดงปุ่ม
+  var PG = { 'home': 'about', 'marketplace': 'shop', 'kyc-wizard': 'kyc', 'seller-apply': 'seller', 'seller-dashboard': 'seller', 'seller-shop': 'seller', 'seller-products': 'seller', 'seller-orders': 'seller', 'seller-analytics': 'seller', 'seller-wallet': 'seller_pay' };
+  var DT = { 'wallet': 'wallet', 'shop': 'shop', 'orders': 'orders', 'address': 'orders', 'funding': 'funding', 'referrals': 'referral', 'commission': 'referral', 'notifications': 'notif', 'profile': 'kyc', 'btcfund': 'general' };
+
+  function $(i) { return document.getElementById(i); }
+  function T(k) { try { return window.tccT(k); } catch (e) { return k; } }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function col() { var w = Math.min(480, window.innerWidth); return { l: (window.innerWidth - w) / 2, w: w }; }   // แอปกว้างสูงสุด 480px จัดกลางจอ → ปุ่มอยู่ในคอลัมน์ของแอป
+  function hasSession() { try { return !!(typeof SESSION !== 'undefined' && SESSION && SESSION.uid); } catch (e) { return false; } }
+  function ctxCat() {
+    var p; try { p = curPage; } catch (e) { return ''; }
+    if (p === 'dashboard') { var d = ''; try { d = curDTab; } catch (e) {} return DT[d] || 'wallet'; }
+    return PG[p] || '';
+  }
+
+  var pos = (function () { try { var o = JSON.parse(lsGet(KEY_POS) || 'null'); if (o && (o.side === 'l' || o.side === 'r') && typeof o.yr === 'number') return o; } catch (e) {} return { side: 'r', yr: null }; })();
+  function save() { lsSet(KEY_POS, JSON.stringify(pos)); }
+  function yPx() { var h = window.innerHeight, max = h - SZ - EDGE, y = (pos.yr == null) ? h - SZ - 150 : pos.yr * h; return Math.max(TOP_MIN, Math.min(max, y)); }
+  function xPx(side) { var c = col(); return side === 'l' ? c.l + EDGE : c.l + c.w - SZ - EDGE; }
+  function applyPos() {
+    var f = $('ai-fab'), t = $('ai-tab'), c = col(), y = yPx();
+    f.style.left = xPx(pos.side) + 'px'; f.style.top = y + 'px';
+    t.className = 'ai-tab ' + pos.side;
+    t.style.left = (pos.side === 'l' ? c.l : c.l + c.w - 24) + 'px'; t.style.top = y + 'px';
+  }
+  function labels() {
+    var f = $('ai-fab'), x = $('ai-fab-x'), t = $('ai-tab'); if (!f) return;
+    f.title = T('mp_sch_0011'); f.setAttribute('aria-label', T('mp_sch_0007'));
+    x.title = T('mp_sch_0008'); x.setAttribute('aria-label', T('mp_sch_0008'));
+    t.title = T('mp_sch_0009'); t.setAttribute('aria-label', T('mp_sch_0009'));
+  }
+
+  var last = '';
+  function refresh() {
+    var f = $('ai-fab'), t = $('ai-tab'); if (!f || !t) return;
+    var cat = ctxCat(), open = (typeof window.schIsOpen === 'function') && window.schIsOpen();
+    var hidden = lsGet(KEY_HIDE) === '1';
+    var show = !!cat && hasSession() && !open;                      // เปิดแชท (ลอย/เต็มจอ) อยู่ = ซ่อนปุ่มชั่วคราว
+    var st = (show ? (hidden ? 'tab' : 'fab') : 'none') + '|' + cat + '|' + pos.side;
+    if (st === last) return; last = st;
+    f.style.display = (show && !hidden) ? 'flex' : 'none';
+    t.style.display = (show && hidden) ? 'flex' : 'none';
+    if (show) { applyPos(); labels(); }
+  }
+  setInterval(refresh, 500);
+  window.addEventListener('sch-state', function () { last = ''; refresh(); });
+  window.addEventListener('resize', function () { last = ''; refresh(); });
+  var _sl = window.schLang;
+  window.schLang = function () { try { if (_sl) _sl.apply(this, arguments); } catch (e) {} labels(); };   // เปลี่ยนภาษา → อัปเดตข้อความของปุ่ม
+
+  function openAi() {
+    var cat = ctxCat();
+    if (typeof window.schOpenFloat === 'function') window.schOpenFloat({ cat: cat });
+  }
+
+  /* ── ลากปุ่ม: แตะ (ขยับ < 6px) = เปิดแชท · ลาก = ย้าย แล้วดูดเข้าขอบซ้าย/ขวา จำตำแหน่งไว้ ── */
+  (function () {
+    var f = $('ai-fab'), down = false, moved = false, pid = null, sx = 0, sy = 0, ox = 0, oy = 0;
+    f.addEventListener('pointerdown', function (e) {
+      if (e.target && e.target.id === 'ai-fab-x') return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      down = true; moved = false; pid = e.pointerId; sx = e.clientX; sy = e.clientY;
+      var r = f.getBoundingClientRect(); ox = r.left; oy = r.top;
+      try { f.setPointerCapture(pid); } catch (_) {}
+    });
+    f.addEventListener('pointermove', function (e) {
+      if (!down || e.pointerId !== pid) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!moved && Math.abs(dx) + Math.abs(dy) < 6) return;
+      if (!moved) { moved = true; f.classList.add('drag'); f.classList.remove('snap'); }
+      var c = col();
+      f.style.left = Math.max(c.l + EDGE, Math.min(c.l + c.w - SZ - EDGE, ox + dx)) + 'px';
+      f.style.top = Math.max(TOP_MIN, Math.min(window.innerHeight - SZ - EDGE, oy + dy)) + 'px';
+      e.preventDefault();
+    });
+    function end(e, cancel) {
+      if (!down || (e && e.pointerId !== pid)) return;
+      down = false; try { f.releasePointerCapture(pid); } catch (_) {}
+      f.classList.remove('drag');
+      if (moved) {
+        var r = f.getBoundingClientRect(), c = col();
+        pos.side = (r.left + SZ / 2 < c.l + c.w / 2) ? 'l' : 'r'; pos.yr = r.top / window.innerHeight; save();
+        f.classList.add('snap'); last = ''; applyPos(); setTimeout(function () { f.classList.remove('snap'); }, 240);
+      } else if (!cancel) openAi();
+    }
+    f.addEventListener('pointerup', function (e) { end(e, false); });
+    f.addEventListener('pointercancel', function (e) { end(e, true); });
+    f.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAi(); } });
+
+    $('ai-fab-x').addEventListener('click', function (e) {   // ซ่อนปุ่ม → เหลือแท็บเล็กที่ขอบจอให้เรียกกลับ
+      e.stopPropagation(); lsSet(KEY_HIDE, '1'); last = ''; refresh();
+      try { if (typeof showToast === 'function') showToast(T('mp_sch_0012'), 'info'); } catch (_) {}
+    });
+    var tab = $('ai-tab');
+    function showBack() { lsSet(KEY_HIDE, '0'); last = ''; refresh(); }
+    tab.addEventListener('click', showBack);
+    tab.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showBack(); } });
+  })();
+  labels();
 })();
 </script>
 </body>
