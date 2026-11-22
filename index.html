@@ -2407,6 +2407,9 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 .tcc-lang-sel:hover,.tcc-lang-sel:focus{outline:none;border-color:var(--bdg);}
 .tcc-lang-sel option{background:var(--card);color:var(--t1);}
 @media(max-width:768px){.tcc-lang-sel{font-size:11px;max-width:64px;padding:5px 2px;}}
+/* [P4] ตัวเลือกประเทศตลาด (ถัดจากตัวเลือกภาษา) */
+.tcc-lang-sel.mp-country-sel{max-width:124px;}
+@media(max-width:768px){.tcc-lang-sel.mp-country-sel{max-width:92px;}}
 .tcc-lang-section{padding:2px 0 0;}
 .tcc-lang-title{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase;}
 .tcc-lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
@@ -2440,6 +2443,10 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <option value="ms">🇲🇾 MS</option>
       <option value="id">🇮🇩 ID</option>
       <option value="zh">🇨🇳 ZH</option>
+    </select>
+    <!-- [P4] Country (ตลาด) — แยกจากภาษา -->
+    <select id="mp-country-sel" class="tcc-lang-sel mp-country-sel" aria-label="Country" title="Country" onchange="mpcSet(this.value)">
+      <option value="TH">🇹🇭 TH</option>
     </select>
     <!-- Bell -->
     <div class="bell-wrap">
@@ -3373,6 +3380,9 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         <div class="fg"><label class="fl" data-i18n="mp_ui_0117">ชื่อร้านค้า *</label><input class="fi" placeholder="ชื่อร้านของคุณ" data-i18n-placeholder="mp_ui_0118"></div>
         <div class="fg"><label class="fl" data-i18n="mp_ui_0119">หมวดหมู่ *</label>
           <select class="fi" id="sa-cat-inp"><option value="" data-i18n="mp_ui_0059">⏳ กำลังโหลด...</option></select></div>
+        <div class="fg"><label class="fl">🌏 ประเทศร้านค้า *</label>
+          <select class="fi" id="sa-country-inp"><option value="">⏳ ...</option></select>
+          <div class="tsm tm mt2">1 ร้านต่อ 1 ประเทศ — ขายและจัดส่งในประเทศนี้ และเปลี่ยนภายหลังไม่ได้</div></div>
         <div class="fg"><label class="fl" data-i18n="mp_ui_0120">คำอธิบายร้าน</label><textarea class="fi" rows="3" placeholder="บอกเล่าเกี่ยวกับร้านของคุณ..." data-i18n-placeholder="mp_ui_0121"></textarea></div>
         <div class="fg"><label class="fl" data-i18n="mp_ui_0122">โลโก้ร้านค้า</label>
           <div class="uarea" onclick="document.getElementById('sa-logo-input').click()">
@@ -3490,7 +3500,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 </nav>
   <div class="fc btwn mb4">
     <div class="stitle" style="margin:0;" data-i18n-html="mp_ui_0149">📦 จัดการ <span>สินค้า</span></div>
-    <button class="btn btn-gold btn-sm" onclick="_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}setEmoji('📦');openM('m-addprod')" data-i18n="mp_ui_0150">+ เพิ่มสินค้าใหม่</button>
+    <button class="btn btn-gold btn-sm" onclick="_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}setEmoji('📦');prodPrepCarriers([]);openM('m-addprod')" data-i18n="mp_ui_0150">+ เพิ่มสินค้าใหม่</button>
   </div>
   <div class="tbl ox tbl-card-mode"><table><thead><tr><th data-i18n="mp_ui_0049">สินค้า</th><th data-i18n="mp_ui_0151">ราคา (USDT)</th><th>Payout Option</th><th>Stock</th><th data-i18n="mp_ui_0035">สถานะ</th><th data-i18n="mp_ui_0152">ยอดขาย</th><th data-i18n="mp_ui_0053">จัดการ</th></tr></thead><tbody id="spr-b"></tbody></table></div>
   <div id="spr-b-cards"></div>
@@ -3770,6 +3780,18 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         </div>
       </div>
     </div>
+    <!-- [P4] เลือกขนส่ง (ตามประเทศสินค้า + ที่ร้านรองรับ) -->
+    <div style="margin:12px 0 4px;" id="buy-ship-wrap">
+      <div class="clbl" style="margin-bottom:6px;" data-i18n="mp_ui_0342">🚚 เลือกขนส่ง</div>
+      <div id="buy-ship-list"></div>
+    </div>
+    <!-- [P4] ยอดรวม = ราคาสินค้า + ค่าส่ง -->
+    <div id="buy-total-box" style="margin:12px 0;padding:10px 14px;border:1px solid var(--bdr);border-radius:8px;font-size:13px;">
+      <div class="fc btwn"><span data-i18n="mp_ui_0343">ราคาสินค้า</span><span class="mono" id="bt-price">—</span></div>
+      <div class="fc btwn mt2"><span data-i18n="mp_ui_0344">ค่าจัดส่ง</span><span class="mono" id="bt-ship">—</span></div>
+      <div class="fc btwn mt2" style="border-top:1px solid var(--bdr);padding-top:8px;font-weight:700;"><span data-i18n="mp_ui_0345">ยอดรวมที่ต้องชำระ</span><span class="mono tg" id="bt-total">—</span></div>
+      <div class="tsm tm mt2" id="bt-local" style="text-align:right;"></div>
+    </div>
     <div class="alrt alrt-w tsm" id="buy-rw" style="display:none;"></div>
     <button class="btn btn-gold w100" id="btn-confirm-buy" onclick="confirmBuy()" data-i18n="mp_ui_0188">✅ ยืนยันสั่งซื้อ — Plan A</button>
   </div>
@@ -3855,6 +3877,12 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <div class="fg"><label class="fl">Stock</label><input type="number" class="fi" id="prod-stock" value="1"></div>
       <div class="fg"><label class="fl" data-i18n="mp_ui_0226">เวลาจัดส่ง</label><select class="fi" id="prod-delivery"><option data-i18n="mp_ui_0227" value="1-3 วัน">1-3 วัน</option><option selected data-i18n="mp_ui_0228" value="3-7 วัน">3-7 วัน</option><option data-i18n="mp_ui_0229" value="7-14 วัน">7-14 วัน</option><option data-i18n="mp_ui_0230" value="14-30 วัน">14-30 วัน</option></select></div>
     </div>
+    <div class="fg"><label class="fl">🌏 ประเทศตลาด</label>
+      <div id="prod-country-lbl" class="fi" style="opacity:.85;cursor:not-allowed;">—</div>
+      <div class="tsm tm mt2">ล็อกตามประเทศร้านของคุณ — ผู้ซื้อในประเทศนี้เท่านั้นที่เห็นสินค้า</div></div>
+    <div class="fg"><label class="fl">🚚 ขนส่งที่ร้านรองรับ</label>
+      <div id="prod-carriers-box" style="display:flex;flex-wrap:wrap;gap:8px;"><span class="tsm tm">⏳ ...</span></div>
+      <div class="tsm tm mt2">ไม่เลือกเลย = รองรับทุกขนส่งของประเทศ</div></div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0231">คำอธิบายสินค้า</label><textarea class="fi" rows="3" placeholder="อธิบายสินค้าของคุณ..." data-i18n-placeholder="mp_ui_0232"></textarea></div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0233">รูปภาพสินค้า (สูงสุด 10 รูป)</label>
       <div class="uarea" id="prod-img-area" onclick="document.getElementById('prod-img-input').click()" ondragover="event.preventDefault();this.classList.add('uarea-active')" ondragleave="this.classList.remove('uarea-active')" ondrop="handleImgDrop(event,'prod-img-input','prod-img-preview')">
@@ -4001,6 +4029,10 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <label class="fl" data-i18n="mp_ui_0275">เบอร์โทรศัพท์ *</label>
       <input class="fi" id="addr-phone" placeholder="0xx-xxx-xxxx" type="tel" maxlength="15">
     </div>
+    <div class="fg">
+      <label class="fl" data-i18n="mp_ui_0346">ประเทศ *</label>
+      <select class="fi" id="addr-country" onchange="mpcAddrCountryChanged()"><option value="TH">🇹🇭 TH</option></select>
+    </div>
 
     <div class="fg">
       <label class="fl" data-i18n="mp_ui_0276">🔍 ค้นหาสถานที่ (OpenStreetMap)</label>
@@ -4020,11 +4052,11 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <input class="fi" id="addr-line" placeholder="บ้านเลขที่ ถนน ซอย หมู่บ้าน" data-i18n-placeholder="mp_ui_0280">
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="fg"><label class="fl" data-i18n="mp_ui_0281">แขวง/ตำบล</label><input class="fi" id="addr-subdistrict" placeholder="แขวง/ตำบล" data-i18n-placeholder="mp_ui_0281"></div>
-      <div class="fg"><label class="fl" data-i18n="mp_ui_0282">เขต/อำเภอ</label><input class="fi" id="addr-district" placeholder="เขต/อำเภอ" data-i18n-placeholder="mp_ui_0282"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-subdistrict">แขวง/ตำบล</label><input class="fi" id="addr-subdistrict" placeholder="แขวง/ตำบล"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-district">เขต/อำเภอ</label><input class="fi" id="addr-district" placeholder="เขต/อำเภอ"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="fg"><label class="fl" data-i18n="mp_ui_0283">จังหวัด *</label><input class="fi" id="addr-province" placeholder="จังหวัด" data-i18n-placeholder="mp_ui_0284"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-province">จังหวัด *</label><input class="fi" id="addr-province" placeholder="จังหวัด"></div>
       <div class="fg"><label class="fl" data-i18n="mp_ui_0285">รหัสไปรษณีย์</label><input class="fi" id="addr-postal" placeholder="10xxx" maxlength="5"></div>
     </div>
 
@@ -5131,6 +5163,47 @@ const TCC_I18N = {
   'gerr_e102':["ยอด seller wallet ไม่พอ: {p1} < {p2}","Insufficient seller wallet balance: {p1} < {p2}","Số dư seller wallet không đủ: {p1} < {p2}","សមតុល្យ seller wallet មិនគ្រប់គ្រាន់៖ {p1} < {p2}","seller wallet လက်ကျန်မလုံလောက်ပါ - {p1} < {p2}","ຍອດ seller wallet ບໍ່ພໍ: {p1} < {p2}","Baki seller wallet tidak mencukupi: {p1} < {p2}","Saldo seller wallet tidak cukup: {p1} < {p2}","seller wallet 余额不足：{p1} < {p2}"],
   'gerr_e103':["uid={p1} ไม่มีและ delta ติดลบ","uid={p1} does not exist and the delta is negative","uid={p1} không tồn tại và delta âm","uid={p1} មិនមាន ហើយ delta អវិជ្ជមាន","uid={p1} မရှိဘဲ delta အနှုတ်ဖြစ်နေသည်","uid={p1} ບໍ່ມີ ແລະ delta ຕິດລົບ","uid={p1} tidak wujud dan delta negatif","uid={p1} tidak ada dan delta negatif","uid={p1} 不存在且 delta 为负"],
   'gerr_e104':["ยอดติดลบ: {p1}={p2} delta={p3}","Negative balance: {p1}={p2} delta={p3}","Số dư âm: {p1}={p2} delta={p3}","សមតុល្យអវិជ្ជមាន៖ {p1}={p2} delta={p3}","လက်ကျန်အနုတ်ဖြစ်နေသည် - {p1}={p2} delta={p3}","ຍອດຕິດລົບ: {p1}={p2} delta={p3}","Baki negatif: {p1}={p2} delta={p3}","Saldo negatif: {p1}={p2} delta={p3}","余额为负：{p1}={p2} delta={p3}"],
+  // ── [P4 Multi-Country] ตลาด/ขนส่ง/ค่าส่ง/ที่อยู่ตามประเทศ ──
+  'mp_ui_0341':["ประเทศตลาด","Market country","Quốc gia thị trường","ប្រទេសទីផ្សារ","ဈေးကွက်နိုင်ငံ","ປະເທດຕະຫຼາດ","Negara pasaran","Negara pasar","市场国家"],
+  'mp_ui_0342':["🚚 เลือกขนส่ง","🚚 Choose shipping","🚚 Chọn đơn vị vận chuyển","🚚 ជ្រើសរើសការដឹកជញ្ជូន","🚚 ပို့ဆောင်ရေးရွေးချယ်ပါ","🚚 ເລືອກຂົນສົ່ງ","🚚 Pilih penghantaran","🚚 Pilih pengiriman","🚚 选择物流"],
+  'mp_ui_0343':["ราคาสินค้า","Item price","Giá sản phẩm","តម្លៃទំនិញ","ကုန်ပစ္စည်းဈေး","ລາຄາສິນຄ້າ","Harga barang","Harga barang","商品价格"],
+  'mp_ui_0344':["ค่าจัดส่ง","Shipping fee","Phí vận chuyển","ថ្លៃដឹកជញ្ជូន","ပို့ဆောင်ခ","ຄ່າຈັດສົ່ງ","Yuran penghantaran","Ongkos kirim","运费"],
+  'mp_ui_0345':["ยอดรวมที่ต้องชำระ","Total to pay","Tổng cần thanh toán","សរុបត្រូវបង់","ပေးချေရမည့်စုစုပေါင်း","ລວມທີ່ຕ້ອງຈ່າຍ","Jumlah perlu dibayar","Total yang harus dibayar","应付总额"],
+  'mp_ui_0346':["ประเทศ *","Country *","Quốc gia *","ប្រទេស *","နိုင်ငံ *","ປະເທດ *","Negara *","Negara *","国家 *"],
+  'mp_js_0601':["🌍 เปลี่ยนตลาดเป็น {p1}","🌍 Market changed to {p1}","🌍 Đã đổi thị trường sang {p1}","🌍 បានប្តូរទីផ្សារទៅ {p1}","🌍 ဈေးကွက်ကို {p1} သို့ ပြောင်းပြီးပါပြီ","🌍 ປ່ຽນຕະຫຼາດເປັນ {p1}","🌍 Pasaran ditukar kepada {p1}","🌍 Pasar diubah ke {p1}","🌍 已切换市场至 {p1}"],
+  'mp_js_0602':["โหลดรายการขนส่งไม่สำเร็จ กรุณาลองใหม่","Could not load shipping options. Please try again.","Không tải được danh sách vận chuyển. Vui lòng thử lại.","មិនអាចផ្ទុកជម្រើសដឹកជញ្ជូនបានទេ សូមព្យាយាមម្តងទៀត","ပို့ဆောင်ရေးရွေးချယ်စရာများ မရယူနိုင်ပါ။ ထပ်ကြိုးစားပါ။","ໂຫຼດລາຍການຂົນສົ່ງບໍ່ສຳເລັດ ກະລຸນາລອງໃໝ່","Gagal memuatkan pilihan penghantaran. Sila cuba lagi.","Gagal memuat opsi pengiriman. Silakan coba lagi.","无法加载物流选项，请重试"],
+  'mp_js_0603':["กรุณาเลือกขนส่ง","Please choose a shipping method","Vui lòng chọn đơn vị vận chuyển","សូមជ្រើសរើសការដឹកជញ្ជូន","ပို့ဆောင်ရေးနည်းလမ်း ရွေးချယ်ပါ","ກະລຸນາເລືອກຂົນສົ່ງ","Sila pilih kaedah penghantaran","Silakan pilih metode pengiriman","请选择物流方式"],
+  'mp_js_0604':["❌ ยอดกระเป๋าไม่พอ — ต้องการ {p1} USDT (สินค้า + ค่าส่ง) แต่มี {p2} USDT","❌ Insufficient balance — need {p1} USDT (item + shipping) but you have {p2} USDT","❌ Số dư không đủ — cần {p1} USDT (hàng + vận chuyển) nhưng bạn có {p2} USDT","❌ សមតុល្យមិនគ្រប់ — ត្រូវការ {p1} USDT (ទំនិញ + ដឹកជញ្ជូន) ប៉ុន្តែមាន {p2} USDT","❌ လက်ကျန်မလုံလောက်ပါ — {p1} USDT (ကုန်ပစ္စည်း + ပို့ဆောင်ခ) လိုအပ်သော်လည်း {p2} USDT သာရှိသည်","❌ ຍອດເງິນບໍ່ພໍ — ຕ້ອງການ {p1} USDT (ສິນຄ້າ + ຄ່າສົ່ງ) ແຕ່ມີ {p2} USDT","❌ Baki tidak mencukupi — perlukan {p1} USDT (barang + penghantaran) tetapi anda ada {p2} USDT","❌ Saldo tidak cukup — butuh {p1} USDT (barang + ongkir) tetapi Anda punya {p2} USDT","❌ 余额不足——需要 {p1} USDT（商品+运费），当前仅有 {p2} USDT"],
+  'mp_js_0605':["ยังไม่มีที่อยู่ในประเทศ {p1} — กรุณาเพิ่มที่อยู่ก่อนสั่งซื้อ","No address in {p1} yet — please add one before ordering","Chưa có địa chỉ ở {p1} — vui lòng thêm địa chỉ trước khi đặt hàng","មិនទាន់មានអាសយដ្ឋានក្នុង {p1} — សូមបន្ថែមមុនបញ្ជាទិញ","{p1} တွင် လိပ်စာမရှိသေးပါ — မမှာယူမီ လိပ်စာထည့်ပါ","ຍັງບໍ່ມີທີ່ຢູ່ໃນ {p1} — ກະລຸນາເພີ່ມທີ່ຢູ່ກ່ອນສັ່ງຊື້","Belum ada alamat di {p1} — sila tambah alamat sebelum membuat pesanan","Belum ada alamat di {p1} — tambahkan alamat sebelum memesan","尚无 {p1} 的收货地址——请先添加地址再下单"],
+  'mp_js_0606':["สินค้านี้ขายในประเทศ {p1} ซึ่งไม่ตรงกับตลาดที่เลือก","This item is sold in {p1}, which is not your selected market","Sản phẩm này bán ở {p1}, không khớp với thị trường đã chọn","ទំនិញនេះលក់ក្នុង {p1} ដែលមិនត្រូវនឹងទីផ្សារដែលបានជ្រើស","ဤကုန်ပစ္စည်းကို {p1} တွင်ရောင်းပြီး သင်ရွေးထားသောဈေးကွက်နှင့် မကိုက်ညီပါ","ສິນຄ້ານີ້ຂາຍໃນ {p1} ເຊິ່ງບໍ່ກົງກັບຕະຫຼາດທີ່ເລືອກ","Barang ini dijual di {p1}, tidak sepadan dengan pasaran dipilih","Barang ini dijual di {p1}, tidak sesuai dengan pasar yang dipilih","该商品在 {p1} 销售，与所选市场不符"],
+  'mp_js_0607':["ฟรี","Free","Miễn phí","ឥតគិតថ្លៃ","အခမဲ့","ຟຣີ","Percuma","Gratis","免费"],
+  'mp_js_0608':["{p1} วัน","{p1} days","{p1} ngày","{p1} ថ្ងៃ","{p1} ရက်","{p1} ວັນ","{p1} hari","{p1} hari","{p1} 天"],
+  'mp_js_0609':["ใช้ได้เฉพาะที่อยู่ในประเทศ {p1}","Only addresses in {p1} can be used","Chỉ dùng được địa chỉ ở {p1}","ប្រើបានតែអាសយដ្ឋានក្នុង {p1}","{p1} ရှိ လိပ်စာများသာ အသုံးပြုနိုင်သည်","ໃຊ້ໄດ້ສະເພາະທີ່ຢູ່ໃນ {p1}","Hanya alamat di {p1} boleh digunakan","Hanya alamat di {p1} yang dapat digunakan","仅可使用 {p1} 的地址"],
+  'mp_js_0610':["รหัสไปรษณีย์ไม่ถูกต้องสำหรับประเทศ {p1}","Invalid postal code for {p1}","Mã bưu chính không hợp lệ cho {p1}","លេខកូដប្រៃសណីយ៍មិនត្រឹមត្រូវសម្រាប់ {p1}","{p1} အတွက် စာတိုက်ကုဒ် မမှန်ကန်ပါ","ລະຫັດໄປສະນີບໍ່ຖືກຕ້ອງສຳລັບ {p1}","Poskod tidak sah untuk {p1}","Kode pos tidak valid untuk {p1}","{p1} 的邮政编码无效"],
+  'mp_js_0611':["ที่อยู่ในประเทศอื่น","Address in another country","Địa chỉ ở quốc gia khác","អាសយដ្ឋានក្នុងប្រទេសផ្សេង","အခြားနိုင်ငံရှိ လိပ်စာ","ທີ່ຢູ່ໃນປະເທດອື່ນ","Alamat di negara lain","Alamat di negara lain","其他国家的地址"],
+  'mp_js_0612':["ยืนยันสั่งซื้อ {p1} รายการ รวมค่าส่ง {p2} USDT (ยอดรวม {p3} USDT)?","Confirm {p1} item(s) with {p2} USDT shipping (total {p3} USDT)?","Xác nhận mua {p1} sản phẩm, phí vận chuyển {p2} USDT (tổng {p3} USDT)?","បញ្ជាក់ទិញ {p1} ទំនិញ ថ្លៃដឹក {p2} USDT (សរុប {p3} USDT)?","{p1} ခု၊ ပို့ဆောင်ခ {p2} USDT (စုစုပေါင်း {p3} USDT) ကို အတည်ပြုမလား?","ຢືນຢັນຊື້ {p1} ລາຍການ ຄ່າສົ່ງ {p2} USDT (ລວມ {p3} USDT)?","Sahkan {p1} item dengan penghantaran {p2} USDT (jumlah {p3} USDT)?","Konfirmasi {p1} barang dengan ongkir {p2} USDT (total {p3} USDT)?","确认购买 {p1} 件商品，运费 {p2} USDT（合计 {p3} USDT）？"],
+  'mp_js_0613':["ตำบล/ชุมชน/ย่าน","Ward / Commune / Neighbourhood","Phường / Xã","សង្កាត់ / ឃុំ","ရပ်ကွက် / ကျေးရွာ","ຮ່ອມ / ບ້ານ","Wad / Mukim / Kawasan","Kelurahan / Desa","街道 / 社区"],
+  'mp_js_0614':["อำเภอ/เขต/เมือง","District / City","Quận / Huyện","ខណ្ឌ / ស្រុក","မြို့နယ်","ເມືອງ","Daerah / Bandar","Kecamatan / Kota","区 / 县"],
+  'mp_js_0615':["จังหวัด/รัฐ/แคว้น *","Province / State *","Tỉnh / Thành phố *","ខេត្ត / រាជធានី *","ပြည်နယ် / တိုင်းဒေသကြီး *","ແຂວງ / ນະຄອນຫຼວງ *","Negeri / Wilayah *","Provinsi / Negara bagian *","省 / 州 *"],
+  'gerr_e110':["ไม่พบประเทศ {p1}","Country {p1} not found","Không tìm thấy quốc gia {p1}","រកមិនឃើញប្រទេស {p1}","နိုင်ငံ {p1} ကို မတွေ့ပါ","ບໍ່ພົບປະເທດ {p1}","Negara {p1} tidak ditemui","Negara {p1} tidak ditemukan","未找到国家 {p1}"],
+  'gerr_e111':["ประเทศ {p1} ยังไม่เปิดให้บริการ","Country {p1} is not open yet","Quốc gia {p1} chưa mở dịch vụ","ប្រទេស {p1} មិនទាន់បើកសេវា","နိုင်ငံ {p1} ကို မဖွင့်သေးပါ","ປະເທດ {p1} ຍັງບໍ່ເປີດໃຫ້ບໍລິການ","Negara {p1} belum dibuka","Negara {p1} belum dibuka","国家 {p1} 尚未开放"],
+  'gerr_e112':["รหัสไปรษณีย์ไม่ถูกต้องสำหรับประเทศ {p1}","Invalid postal code for {p1}","Mã bưu chính không hợp lệ cho {p1}","លេខកូដប្រៃសណីយ៍មិនត្រឹមត្រូវសម្រាប់ {p1}","{p1} အတွက် စာတိုက်ကုဒ် မမှန်ကန်ပါ","ລະຫັດໄປສະນີບໍ່ຖືກຕ້ອງສຳລັບ {p1}","Poskod tidak sah untuk {p1}","Kode pos tidak valid untuk {p1}","{p1} 的邮政编码无效"],
+  'gerr_e113':["ไม่พบสินค้า {p1}","Product {p1} not found","Không tìm thấy sản phẩm {p1}","រកមិនឃើញទំនិញ {p1}","ကုန်ပစ္စည်း {p1} ကို မတွေ့ပါ","ບໍ່ພົບສິນຄ້າ {p1}","Produk {p1} tidak ditemui","Produk {p1} tidak ditemukan","未找到商品 {p1}"],
+  'gerr_e114':["กรุณาเลือกที่อยู่จัดส่ง","Please choose a shipping address","Vui lòng chọn địa chỉ giao hàng","សូមជ្រើសរើសអាសយដ្ឋានដឹកជញ្ជូន","ပို့ဆောင်ရန်လိပ်စာ ရွေးချယ်ပါ","ກະລຸນາເລືອກທີ່ຢູ່ຈັດສົ່ງ","Sila pilih alamat penghantaran","Silakan pilih alamat pengiriman","请选择收货地址"],
+  'gerr_e115':["สินค้า ที่อยู่จัดส่ง และตลาดต้องอยู่ประเทศเดียวกัน (สินค้า: {p1}, ที่อยู่: {p2})","Item, address and market must be in the same country (item: {p1}, address: {p2})","Sản phẩm, địa chỉ và thị trường phải cùng quốc gia (sản phẩm: {p1}, địa chỉ: {p2})","ទំនិញ អាសយដ្ឋាន និងទីផ្សារ ត្រូវនៅប្រទេសតែមួយ (ទំនិញ៖ {p1}, អាសយដ្ឋាន៖ {p2})","ကုန်ပစ္စည်း၊ လိပ်စာနှင့် ဈေးကွက်သည် နိုင်ငံတူရမည် (ကုန်ပစ္စည်း - {p1}, လိပ်စာ - {p2})","ສິນຄ້າ ທີ່ຢູ່ ແລະຕະຫຼາດ ຕ້ອງຢູ່ປະເທດດຽວກັນ (ສິນຄ້າ: {p1}, ທີ່ຢູ່: {p2})","Barang, alamat dan pasaran mesti dalam negara yang sama (barang: {p1}, alamat: {p2})","Barang, alamat, dan pasar harus di negara yang sama (barang: {p1}, alamat: {p2})","商品、地址和市场必须在同一国家（商品：{p1}，地址：{p2}）"],
+  'gerr_e116':["กรุณาเลือกขนส่ง","Please choose a shipping method","Vui lòng chọn đơn vị vận chuyển","សូមជ្រើសរើសការដឹកជញ្ជូន","ပို့ဆောင်ရေးနည်းလမ်း ရွေးချယ်ပါ","ກະລຸນາເລືອກຂົນສົ່ງ","Sila pilih kaedah penghantaran","Silakan pilih metode pengiriman","请选择物流方式"],
+  'gerr_e117':["ขนส่ง {p1} ไม่รองรับในประเทศ {p2}","Carrier {p1} is not available in {p2}","Đơn vị vận chuyển {p1} không hỗ trợ tại {p2}","ក្រុមហ៊ុនដឹកជញ្ជូន {p1} មិនគាំទ្រក្នុង {p2}","ပို့ဆောင်ရေး {p1} ကို {p2} တွင် မထောက်ပံ့ပါ","ຂົນສົ່ງ {p1} ບໍ່ຮອງຮັບໃນ {p2}","Pembawa {p1} tidak tersedia di {p2}","Kurir {p1} tidak tersedia di {p2}","物流 {p1} 不支持 {p2}"],
+  'gerr_e118':["ร้านนี้ไม่รองรับขนส่ง {p1}","This shop does not support carrier {p1}","Cửa hàng này không hỗ trợ {p1}","ហាងនេះមិនគាំទ្រការដឹកជញ្ជូន {p1}","ဤဆိုင်သည် {p1} ကို မထောက်ပံ့ပါ","ຮ້ານນີ້ບໍ່ຮອງຮັບຂົນສົ່ງ {p1}","Kedai ini tidak menyokong {p1}","Toko ini tidak mendukung kurir {p1}","该店铺不支持物流 {p1}"],
+  // ── [P5] error code ใหม่ฝั่งผู้ขาย + ข้อความ P3/P4 ที่เคยฝังภาษาไทย ──
+  'gerr_e119':["ประเทศสินค้า ({p1}) ต้องตรงกับประเทศร้าน ({p2})","Item country ({p1}) must match the shop country ({p2})","Quốc gia sản phẩm ({p1}) phải trùng với quốc gia cửa hàng ({p2})","ប្រទេសទំនិញ ({p1}) ត្រូវតែដូចប្រទេសរបស់ហាង ({p2})","ကုန်ပစ္စည်းနိုင်ငံ ({p1}) သည် ဆိုင်နိုင်ငံ ({p2}) နှင့် တူရမည်","ປະເທດຂອງສິນຄ້າ ({p1}) ຕ້ອງກົງກັບປະເທດຂອງຮ້ານ ({p2})","Negara barang ({p1}) mesti sama dengan negara kedai ({p2})","Negara barang ({p1}) harus sama dengan negara toko ({p2})","商品所属国家（{p1}）必须与店铺所在国家（{p2}）一致"],
+  'gerr_e120':["ไม่สามารถเปลี่ยนประเทศของสินค้าได้","The item's country cannot be changed","Không thể thay đổi quốc gia của sản phẩm","មិនអាចប្តូរប្រទេសរបស់ទំនិញបានទេ","ကုန်ပစ္စည်း၏ နိုင်ငံကို မပြောင်းနိုင်ပါ","ບໍ່ສາມາດປ່ຽນປະເທດຂອງສິນຄ້າໄດ້","Negara barang tidak boleh diubah","Negara barang tidak dapat diubah","无法更改商品所属国家"],
+  'gerr_e121':["ขนส่ง {p1} ไม่อยู่ในประเทศของออเดอร์ ({p2})","Carrier {p1} is not available in the order's country ({p2})","Đơn vị vận chuyển {p1} không thuộc quốc gia của đơn hàng ({p2})","ក្រុមហ៊ុនដឹកជញ្ជូន {p1} មិនមែនក្នុងប្រទេសនៃការបញ្ជាទិញ ({p2})","ပို့ဆောင်ရေး {p1} သည် အော်ဒါ၏ နိုင်ငံ ({p2}) တွင် မရှိပါ","ຂົນສົ່ງ {p1} ບໍ່ຢູ່ໃນປະເທດຂອງອໍເດີ ({p2})","Pembawa {p1} tiada di negara pesanan ({p2})","Kurir {p1} tidak tersedia di negara pesanan ({p2})","物流 {p1} 不在订单所属国家（{p2}）"],
+  'gerr_e122':["รูปแบบรายการขนส่งไม่ถูกต้อง","Invalid shipping carrier list format","Định dạng danh sách vận chuyển không hợp lệ","ទម្រង់បញ្ជីការដឹកជញ្ជូនមិនត្រឹមត្រូវ","ပို့ဆောင်ရေးစာရင်း ပုံစံ မမှန်ကန်ပါ","ຮູບແບບລາຍການຂົນສົ່ງບໍ່ຖືກຕ້ອງ","Format senarai pembawa tidak sah","Format daftar kurir tidak valid","物流列表格式无效"],
+  'gerr_e123':["ค่าส่งของ {p1} ไม่ถูกต้อง","Invalid shipping fee for {p1}","Phí vận chuyển của {p1} không hợp lệ","ថ្លៃដឹកជញ្ជូនរបស់ {p1} មិនត្រឹមត្រូវ","{p1} ၏ ပို့ဆောင်ခ မမှန်ကန်ပါ","ຄ່າຈັດສົ່ງຂອງ {p1} ບໍ່ຖືກຕ້ອງ","Yuran penghantaran {p1} tidak sah","Ongkos kirim {p1} tidak valid","{p1} 的运费无效"],
+  'mp_js_0616':["-- เลือกประเทศ --","-- Select country --","-- Chọn quốc gia --","-- ជ្រើសរើសប្រទេស --","-- နိုင်ငံရွေးပါ --","-- ເລືອກປະເທດ --","-- Pilih negara --","-- Pilih negara --","-- 选择国家 --"],
+  'mp_js_0617':["-- เลือกบริษัทขนส่ง --","-- Select carrier --","-- Chọn đơn vị vận chuyển --","-- ជ្រើសរើសក្រុមហ៊ុនដឹកជញ្ជូន --","-- ပို့ဆောင်ရေးကုမ္ပဏီရွေးပါ --","-- ເລືອກບໍລິສັດຂົນສົ່ງ --","-- Pilih pembawa --","-- Pilih kurir --","-- 选择物流公司 --"],
+  'mp_js_0618':["ยังไม่มีขนส่งสำหรับประเทศนี้ — ติดต่อแอดมิน","No carriers for this country yet — please contact admin","Chưa có đơn vị vận chuyển cho quốc gia này — vui lòng liên hệ admin","មិនទាន់មានការដឹកជញ្ជូនសម្រាប់ប្រទេសនេះ — សូមទាក់ទង admin","ဤနိုင်ငံအတွက် ပို့ဆောင်ရေး မရှိသေးပါ — admin ကို ဆက်သွယ်ပါ","ຍັງບໍ່ມີຂົນສົ່ງສຳລັບປະເທດນີ້ — ຕິດຕໍ່ admin","Belum ada pembawa untuk negara ini — sila hubungi admin","Belum ada kurir untuk negara ini — hubungi admin","该国家暂无物流 — 请联系管理员"],
+  'mp_js_0619':["โหลดรายการขนส่งไม่สำเร็จ — ค่าเดิมจะไม่ถูกแก้ไข","Could not load carriers — existing values will not be changed","Không tải được danh sách vận chuyển — giá trị cũ sẽ không bị thay đổi","មិនអាចផ្ទុកបញ្ជីការដឹកជញ្ជូនបាន — តម្លៃចាស់នឹងមិនត្រូវបានកែប្រែ","ပို့ဆောင်ရေးစာရင်း မဖွင့်နိုင်ပါ — လက်ရှိတန်ဖိုးများ မပြောင်းလဲပါ","ໂຫຼດລາຍການຂົນສົ່ງບໍ່ສຳເລັດ — ຄ່າເດີມຈະບໍ່ຖືກແກ້ໄຂ","Gagal memuatkan senarai pembawa — nilai sedia ada tidak akan diubah","Gagal memuat daftar kurir — nilai lama tidak akan diubah","无法加载物流列表 — 原有设置不会被修改"],
   // ── [SCH v1] Support Chat (แชทซัพพอร์ต) — mp_sch_NNNN ──
   'mp_sch_0001':["⚠️ กรุณาเข้าสู่ระบบก่อนใช้แชท","⚠️ Please log in before using chat","⚠️ Vui lòng đăng nhập trước khi dùng chat","⚠️ សូមចូលគណនីមុនពេលប្រើការជជែក","⚠️ ချက်တင်မသုံးမီ ကျေးဇူးပြု၍ လော့ဂ်အင်ဝင်ပါ","⚠️ ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນໃຊ້ແຊັດ","⚠️ Sila log masuk sebelum menggunakan sembang","⚠️ Silakan masuk terlebih dahulu sebelum menggunakan chat","⚠️ 使用聊天前请先登录"],
   'mp_sch_0002':["💬 แจ้งเลข Order {p1} ในแชทกับซัพพอร์ตได้เลย","💬 Just tell support your Order {p1} in the chat","💬 Hãy báo mã Order {p1} cho bộ phận hỗ trợ trong chat","💬 សូមប្រាប់លេខ Order {p1} ទៅក្រុមគាំទ្រក្នុងការជជែក","💬 ချက်တင်ထဲတွင် Order {p1} ကို ဆက်သွယ်ရေးအဖွဲ့သို့ ပြောပြနိုင်ပါသည်","💬 ແຈ້ງເລກ Order {p1} ໃຫ້ທີມຊ່ວຍເຫຼືອໃນແຊັດໄດ້ເລີຍ","💬 Sila maklumkan nombor Order {p1} kepada sokongan dalam sembang","💬 Sampaikan nomor Order {p1} ke tim dukungan melalui chat","💬 请在聊天中向客服提供订单号 {p1}"],
@@ -5503,6 +5576,8 @@ window.tccMpRerender=function(){
   try{ if(typeof renderNav==='function') renderNav(); }catch(e){ console.warn('i18n renderNav',e); }
   try{ if(typeof renderBell==='function') renderBell(); }catch(e){ console.warn('i18n renderBell',e); }
   try{ if(typeof tccRefreshProfileI18n==='function') tccRefreshProfileI18n(); }catch(e){}
+  try{ if(typeof mpcRenderSelect==='function') mpcRenderSelect(); }catch(e){}   // [P4] ชื่อประเทศตามภาษา
+      try{ if(typeof mpcfgFillSACountry==='function' && document.getElementById('sa-country-inp') && document.getElementById('sa-country-inp').options.length>1) mpcfgFillSACountry(); }catch(e){}   // [P5]
   const pg=(typeof curPage!=='undefined')?curPage:'';
   if(!pg||pg==='shop-chat'||pg==='kyc-wizard') return;
   try{
@@ -6426,6 +6501,8 @@ function pdAddToCart(pid){
 let buyProd=null;
 function openBuy(pid){
   buyProd=D.products.find(x=>x.id===pid);if(!buyProd)return;
+  // [P4] สินค้าต้องอยู่ประเทศเดียวกับตลาดที่เลือก (server ตรวจซ้ำใน placeOrder)
+  if(buyProd.cc && buyProd.cc!==mpcCur()){ showToast(tccTF('mp_js_0606',{p1:buyProd.cc}),'warn'); buyProd=null; return; }
   // [v11 FIX] ปิด product detail modal ก่อน — ป้องกัน EXECUTE TRANSACTION button โผล่ใต้ m-buy
   closeM('m-pd');
   // [FIX] อ่าน ff_rights จาก SESSION โดยตรง — D.rights อาจ stale จาก localStorage session เก่า
@@ -6483,6 +6560,7 @@ function openBuy(pid){
   });
   selPlan_='A';
   openM('m-buy');
+  mpcBuyInit();   // [P4] ขนส่ง + ยอดรวม
   // [v_addr] โหลดที่อยู่จัดส่งสำหรับ checkout
   if (SESSION) loadBuyerAddresses();
   else {
@@ -7870,7 +7948,7 @@ async function saveShop() {
     if (res.success) {
       closeM('m-editshop');
       clearImgStore('shop-logo-preview');
-      SELLER_DATA = null; delete _apiCache['products']; // force reload
+      SELLER_DATA = null; mpcDropProdCache(); // force reload
       showToast(tccT('mp_js_0193'));
       initSShop();
     } else { showToast(res.error||tccT('mp_js_0194'), 'err'); }
@@ -8061,6 +8139,8 @@ function openEditProd(prodId) {
   // [v34 FIX] prefill emoji_icon
   const _emojiIn = document.getElementById('prod-emoji');
   if(_emojiIn){ _emojiIn.value = p.emoji_icon || '📦'; document.getElementById('prod-emoji-preview').textContent = p.emoji_icon || '📦'; }
+  // [P3] prefill ขนส่งที่ร้านรองรับ
+  prodPrepCarriers((() => { const a = tryParseJSON(p.carriers_json || '[]'); return Array.isArray(a) ? a.map(x => (x && x.carrier_code) || x) : []; })());
   // prefill video_url
   const vidInput = document.getElementById('prod-video-url');
   if(vidInput){ vidInput.value = p.video_url||''; updateVideoPreview(); }
@@ -8138,6 +8218,8 @@ async function submitProd() {
   const _delivery     = document.getElementById('prod-delivery')?.value || '3-7 วัน';
   const _variants     = document.getElementById('prod-variants')?.value.trim() || '';
   const _emojiIcon    = document.getElementById('prod-emoji')?.value.trim() || '📦';
+  const _carrBox      = document.getElementById('prod-carriers-box');   // [P3]
+  const _carriers     = (_carrBox && _carrBox.dataset.ready === '1') ? Array.from(document.querySelectorAll('.prod-carr-cb:checked')).map(c => c.value) : undefined;
   const _shopName     = (() => { const raw=SELLER_DATA?.shop?.shop_name||''; return isImgUrl(raw)?(SELLER_DATA?.shop?.owner_name||''):raw; })();
 
   // [v29 FIX] กรอง imgUrls ให้มีแค่ image URL จริง — ตัด video URL ที่หลุดเข้ามาออก
@@ -8170,7 +8252,9 @@ async function submitProd() {
       ff_plan_config:   JSON.stringify((FF_CONFIG_FE[selPO_]||FF_CONFIG_FE[45]).plans),
       shop_name:     _shopName,
       delivery_days: _delivery,
-      emoji_icon:    _emojiIcon
+      emoji_icon:    _emojiIcon,
+      country_code:  (SELLER_DATA?.shop?.country_code || 'TH'),   // [P3] server ล็อกตามร้านอีกชั้น
+      carriers_json: _carriers                                      // [P3] undefined = ไม่แก้
     };
     const res = await apiPost(body);
     hideLoad();
@@ -8202,7 +8286,7 @@ function deleteProd(prodId) {
         const res = await apiPost({ action: 'deleteProduct', product_id: prodId, seller_id: SESSION.member_id });
         hideLoad();
         if (res.success) {
-          SELLER_DATA = null; delete _apiCache['products'];
+          SELLER_DATA = null; mpcDropProdCache();
           showToast(tccT('mp_js_0214'));
           initSProds();
         } else showToast(res.error||tccT('mp_js_0194'), 'err');
@@ -8344,6 +8428,314 @@ async function filterSOrd(st, btn) {
 }
 
 // ─── [v_tracking] Carrier Config — URL Pattern ต่อแต่ละขนส่ง ─────────────
+// ═══════════════════════════════════════════════════════════════════════
+// [P3 Multi-Country] Seller: config ประเทศ/ขนส่ง, สมัครร้าน, ติ๊กขนส่งสินค้า, ส่งของตามประเทศ
+// ═══════════════════════════════════════════════════════════════════════
+var MPCFG = { countries: [], carriers: [], loaded: false, _p: null };
+function mpcfgLoad() {
+  if (MPCFG._p) return MPCFG._p;
+  MPCFG._p = apiGet({ action: 'getCountryConfig' }).then(r => {
+    if (r && r.success) {
+      MPCFG.countries = r.countries || []; MPCFG.carriers = r.carriers || []; MPCFG.loaded = true;
+      // เติมขนส่งต่างประเทศเข้า CARRIER_CONFIG (ถ้ายังไม่มี) ให้ป้ายชื่อ/ลิงก์ติดตามเดิมใช้ได้ทุกจุด
+      MPCFG.carriers.forEach(k => { if (!CARRIER_CONFIG[k.carrier_code]) CARRIER_CONFIG[k.carrier_code] = { label: k.label, url: k.tracking_url_tpl || null }; });
+    } else MPCFG._p = null;
+    return MPCFG;
+  }).catch(() => { MPCFG._p = null; return MPCFG; });
+  return MPCFG._p;
+}
+function mpcfgFlag(cc) {
+  cc = String(cc || '').toUpperCase();
+  return /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🏳️';
+}
+function mpcfgEsc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function mpcfgShopCC() { return String(SELLER_DATA?.shop?.country_code || 'TH').toUpperCase(); }
+
+// หน้าสมัครร้าน — เติมประเทศที่เปิดตลาด
+async function mpcfgFillSACountry() {
+  const sel = document.getElementById('sa-country-inp'); if (!sel) return;
+  await mpcfgLoad();
+  const list = MPCFG.countries.length ? MPCFG.countries : [{ country_code: 'TH', name_th: 'ไทย', name_en: 'Thailand' }];
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">' + mpcfgEsc(tccT('mp_js_0616')) + '</option>' + list.map(c =>
+    `<option value="${mpcfgEsc(c.country_code)}">${mpcfgFlag(c.country_code)} ${mpcfgEsc(mpcName(c))}</option>`).join('');   // [P5] ชื่อประเทศตามภาษา
+  sel.value = cur || (list.length === 1 ? list[0].country_code : '');
+}
+(function () {
+  const _go0 = go;
+  go = function (page) { const r = _go0.apply(this, arguments); if (page === 'seller-apply') mpcfgFillSACountry(); return r; };
+})();
+
+// Modal เพิ่ม/แก้ไขสินค้า — ประเทศล็อกตามร้าน + เช็คบ็อกซ์ขนส่งของประเทศนั้น
+async function prodPrepCarriers(selected) {
+  const box = document.getElementById('prod-carriers-box'), lbl = document.getElementById('prod-country-lbl');
+  if (!box) return;
+  const cc = mpcfgShopCC();
+  const c = MPCFG.countries.find(x => x.country_code === cc);
+  if (lbl) lbl.textContent = mpcfgFlag(cc) + ' ' + cc + (c ? ' — ' + mpcName(c) : '');   // [P5]
+  box.dataset.ready = '0'; box.innerHTML = '<span class="tsm tm">⏳ ...</span>';
+  await mpcfgLoad();
+  if (!MPCFG.loaded) { box.innerHTML = '<span class="tsm tm">' + mpcfgEsc(tccT('mp_js_0619')) + '</span>'; return; }   // [P5]
+  const c2 = MPCFG.countries.find(x => x.country_code === cc);
+  if (lbl && c2) lbl.textContent = mpcfgFlag(cc) + ' ' + cc + ' — ' + mpcName(c2);   // [P5]
+  const list = MPCFG.carriers.filter(k => k.country_code === cc);
+  const sel = new Set((selected || []).map(x => String(x).toUpperCase()));
+  box.innerHTML = list.length ? list.map(k => `<label class="tsm" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--bdr);border-radius:20px;cursor:pointer;">
+      <input type="checkbox" class="prod-carr-cb" value="${mpcfgEsc(k.carrier_code)}" ${sel.has(k.carrier_code) ? 'checked' : ''}> ${mpcfgEsc(k.label)}${k.fee_usdt > 0 ? ' · ' + k.fee_usdt + ' USDT' : ''}</label>`).join('')
+    : '<span class="tsm tm">' + mpcfgEsc(tccT('mp_js_0618')) + '</span>';   // [P5]
+  box.dataset.ready = '1';
+}
+
+// Modal จัดส่ง — แสดงเฉพาะขนส่งของประเทศออเดอร์ (ไม่มี config → ใช้รายการไทยเดิมใน HTML)
+async function shipPrepCarriers(orderId) {
+  const sel = document.getElementById('ship-carrier'); if (!sel) return;
+  const o = (SELLER_DATA?.orders || []).find(x => String(x.order_id) === String(orderId));
+  const cc = String(o?.country_code || 'TH').toUpperCase();
+  window._shipCountry = cc;
+  if (!sel.dataset.orig) sel.dataset.orig = sel.innerHTML;
+  await mpcfgLoad();
+  const list = MPCFG.carriers.filter(k => k.country_code === cc);
+  if (!list.length) { sel.innerHTML = sel.dataset.orig; return; }
+  sel.innerHTML = '<option value="">' + mpcfgEsc(tccT('mp_js_0617')) + '</option>' + list.map(k => `<option value="${mpcfgEsc(k.carrier_code)}">${mpcfgEsc(k.label)}</option>`).join('');
+  sel.value = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// [P4 Multi-Country] Buyer: ตัวเลือกประเทศ · กรองสินค้า · ที่อยู่ตามประเทศ · เลือกขนส่ง · ค่าส่งในยอดรวม
+//   ลำดับเลือกประเทศ: ?country= → ค่าที่จำไว้ → Members.country_code → map จากภาษา → TH
+//   ประเทศ ≠ ภาษา: เปลี่ยนแยกกันได้ · server ตรวจซ้ำทั้งหมดใน placeOrder (ไม่เชื่อค่าจาก FE)
+// ═══════════════════════════════════════════════════════════════════════
+var MPC = { cc: '' };
+const MPC_LANG2CC = { th:'TH', en:'TH', vi:'VN', kh:'KH', mm:'MM', la:'LA', ms:'MY', id:'ID', zh:'CN' };
+function mpcLsGet() { try { return String(localStorage.getItem('mp_country') || '').toUpperCase(); } catch (e) { return ''; } }
+function mpcLsSet(cc) { try { localStorage.setItem('mp_country', cc); } catch (e) {} }
+function mpcQuery() { try { return String(new URLSearchParams(location.search).get('country') || '').toUpperCase(); } catch (e) { return ''; } }
+function mpcCountry(cc) { cc = String(cc || '').toUpperCase(); return (MPCFG.countries || []).find(c => c.country_code === cc) || null; }
+function mpcValid(cc) {
+  cc = String(cc || '').toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return '';
+  if (MPCFG.loaded && MPCFG.countries.length && !mpcCountry(cc)) return '';   // ประเทศปิดตลาด/ไม่มี
+  return cc;
+}
+function mpcResolve() {
+  const lang = (typeof tccGetLang === 'function') ? tccGetLang() : 'th';
+  const cands = [mpcQuery(), mpcLsGet(), (typeof SESSION !== 'undefined' && SESSION) ? SESSION.country_code : '', MPC_LANG2CC[lang], 'TH'];
+  for (const c of cands) { const v = mpcValid(c); if (v) return v; }
+  return 'TH';
+}
+function mpcCur() { if (!MPC.cc) MPC.cc = mpcResolve(); return MPC.cc; }
+// [P5] ชื่อประเทศตามภาษาที่เลือก (th/en ใช้ชื่อในชีต · ภาษาอื่นใช้ Intl.DisplayNames แล้ว fallback เป็นอังกฤษ)
+const MPC_INTL = { th:'th', en:'en', vi:'vi', kh:'km', mm:'my', la:'lo', ms:'ms', id:'id', zh:'zh' };
+function mpcName(c) {
+  const lang = (typeof tccGetLang === 'function') ? tccGetLang() : 'th';
+  if (lang !== 'th' && lang !== 'en') {
+    try {
+      if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
+        const n = new Intl.DisplayNames([MPC_INTL[lang] || 'en'], { type: 'region' }).of(String(c.country_code || '').toUpperCase());
+        if (n && n !== String(c.country_code).toUpperCase()) return n;
+      }
+    } catch (e) {}
+  }
+  return (lang === 'th' ? (c.name_th || c.name_en) : (c.name_en || c.name_th)) || c.country_code;
+}
+function mpcRenderSelect() {
+  const sel = document.getElementById('mp-country-sel'); if (!sel) return;
+  const list = MPCFG.countries.length ? MPCFG.countries : [{ country_code: 'TH', name_th: 'ไทย', name_en: 'Thailand' }];
+  sel.innerHTML = list.map(c => `<option value="${mpcfgEsc(c.country_code)}">${mpcfgFlag(c.country_code)} ${mpcfgEsc(mpcName(c))}</option>`).join('');
+  sel.value = mpcCur();
+  const t = tccT('mp_ui_0341'); sel.title = t; sel.setAttribute('aria-label', t);
+}
+function mpcSyncUrl() {
+  try { const u = new URL(location.href); if (u.searchParams.get('country') === MPC.cc) return;
+    u.searchParams.set('country', MPC.cc); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch (e) {}
+}
+// ล้างแคชสินค้าทุกประเทศ (หลังผู้ขายเพิ่ม/แก้สินค้า)
+function mpcDropProdCache() {
+  try { delete _apiCache['products']; (MPCFG.countries || []).forEach(c => { delete _apiCache['products_' + c.country_code]; }); delete _apiCache['products_' + mpcCur()]; } catch (e) {}
+}
+// ไม่ให้เห็นสินค้า/ตะกร้าค้างจากประเทศเดิม
+function mpcResetProducts() {
+  D.products = [];
+  try { shopAllProds = []; shopLoaded = false; } catch (e) {}
+  try {
+    const cc = mpcCur();
+    if (Array.isArray(shopCart)) {
+      const keep = shopCart.filter(c => String((c.prod && c.prod.cc) || 'TH').toUpperCase() === cc);
+      if (keep.length !== shopCart.length) { shopCart = keep; if (typeof shopUpdateCartBadge === 'function') shopUpdateCartBadge(); }
+    }
+  } catch (e) {}
+}
+function mpcRefreshPage() {
+  try { initHomeProducts(); } catch (e) {}
+  try { if (curPage === 'marketplace') initMP(); } catch (e) {}
+  try { if (curPage === 'shop') initShop(); } catch (e) {}
+  try { if (curPage === 'dashboard' && curDTab === 'address') initAddressBook(); } catch (e) {}
+}
+function mpcSet(cc, opts) {
+  opts = opts || {};
+  cc = mpcValid(cc);
+  if (!cc || cc === MPC.cc) { mpcRenderSelect(); return; }
+  MPC.cc = cc;
+  if (!opts.noRemember) { mpcLsSet(cc); mpcSyncUrl(); }
+  mpcResetProducts();
+  mpcRenderSelect();
+  if (!opts.silent) { const c = mpcCountry(cc); showToast(tccTF('mp_js_0601', { p1: mpcfgFlag(cc) + ' ' + (c ? mpcName(c) : cc) })); }
+  if (SESSION && !opts.noSave) {   // จำเป็นตลาดตั้งต้นของสมาชิก (Members.country_code)
+    apiPost({ action: 'setMemberCountry', member_id: SESSION.member_id, country_code: cc })
+      .then(r => { if (r && r.success) { SESSION.country_code = cc; try { saveSession(SESSION); } catch (e) {} } })
+      .catch(() => {});
+  }
+  mpcRefreshPage();
+}
+// สมาชิก login/restore → ถ้ายังไม่เคยเลือกเอง ใช้ Members.country_code เป็นตลาดตั้งต้น
+function mpcOnSession() {
+  try {
+    if (!SESSION || !SESSION.country_code) return;
+    if (mpcQuery() || mpcLsGet()) return;
+    const v = mpcValid(SESSION.country_code);
+    if (v && v !== mpcCur()) mpcSet(v, { silent: true, noSave: true, noRemember: true });
+  } catch (e) {}
+}
+async function mpcEnsure() {
+  try { await mpcfgLoad(); } catch (e) {}
+  if (!MPCFG.loaded) { mpcRenderSelect(); return; }
+  if (!mpcValid(mpcCur())) { MPC.cc = ''; MPC.cc = mpcResolve(); mpcResetProducts(); mpcRefreshPage(); }   // ประเทศที่ถืออยู่ปิดตลาดแล้ว
+  mpcRenderSelect();
+}
+(function () {
+  const go0 = () => { mpcRenderSelect(); mpcEnsure(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go0); else setTimeout(go0, 0);
+})();
+
+// ── ขนส่งของสินค้า: Carriers(ประเทศสินค้า) ∩ carriers_json ของร้าน · ค่าส่งรายเจ้าของร้านทับค่ากลางได้ ──
+function mpcCarriersFor(prod) {
+  const cc = String((prod && prod.cc) || mpcCur()).toUpperCase();
+  let allow = [];
+  try {
+    let a = prod && prod.carriers_json;
+    if (typeof a === 'string') a = a ? JSON.parse(a) : [];
+    if (Array.isArray(a)) allow = a.map(it => (it && typeof it === 'object')
+      ? { code: String(it.carrier_code || '').toUpperCase(), fee: (it.fee_usdt !== undefined && it.fee_usdt !== '' && Number(it.fee_usdt) >= 0) ? Number(it.fee_usdt) : null }
+      : { code: String(it || '').toUpperCase(), fee: null }).filter(x => x.code);
+  } catch (e) { allow = []; }
+  const list = (MPCFG.carriers || []).filter(k => k.country_code === cc).map(k => {
+    const code = String(k.carrier_code).toUpperCase();
+    const al = allow.find(x => x.code === code);
+    return { code: k.carrier_code, label: k.label, eta: k.eta_days, fee: (al && al.fee !== null) ? al.fee : (Number(k.fee_usdt) || 0), allowed: !allow.length || !!al, explicit: !!al };
+  }).filter(x => x.allowed && (x.code !== 'OTHER' || x.explicit));   // "อื่นๆ (ระบุเอง)" ไว้ให้ผู้ขายกรอกตอนส่ง ไม่ใช่ตัวเลือกผู้ซื้อ
+  list.sort((a, b) => a.fee - b.fee);
+  return list;
+}
+
+var _buyShip = { code: '', fee: 0 };
+var _buyCarriers = [];
+function mpcFmtUsdt(n) { return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT'; }
+function mpcBuyTotal() { return Math.round((Number((buyProd && buyProd.price) || 0) + Number(_buyShip.fee || 0)) * 1e6) / 1e6; }
+function mpcFmtLocal(usdt) {   // สกุลท้องถิ่นแสดงโดยประมาณ (USDT × fx) — ชำระจริงเป็น USDT เสมอ
+  const c = mpcCountry(buyProd && buyProd.cc); if (!c || !(Number(c.fx_to_usdt) > 0) || !c.currency_code) return '';
+  const v = usdt * Number(c.fx_to_usdt);
+  try { return '≈ ' + new Intl.NumberFormat(undefined, { maximumFractionDigits: v < 100 ? 2 : 0 }).format(v) + ' ' + c.currency_code; }
+  catch (e) { return '≈ ' + Math.round(v) + ' ' + c.currency_code; }
+}
+function mpcRenderTotal() {
+  if (!buyProd) return;
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('bt-price', mpcFmtUsdt(buyProd.price));
+  set('bt-ship', Number(_buyShip.fee) > 0 ? mpcFmtUsdt(_buyShip.fee) : tccT('mp_js_0607'));
+  set('bt-total', mpcFmtUsdt(mpcBuyTotal()));
+  set('bt-local', mpcFmtLocal(mpcBuyTotal()));
+}
+function mpcRenderShip() {
+  const box = document.getElementById('buy-ship-list'), wrap = document.getElementById('buy-ship-wrap');
+  if (!box || !wrap || !buyProd) return;
+  if (!MPCFG.loaded) { wrap.style.display = ''; box.innerHTML = '<div class="tsm terr">' + tccT('mp_js_0602') + '</div>'; return; }
+  if (!_buyCarriers.length) { wrap.style.display = 'none'; return; }   // ประเทศนี้ยังไม่มีขนส่ง → ไม่มีค่าส่ง
+  wrap.style.display = '';
+  box.innerHTML = _buyCarriers.map(k => {
+    const on = k.code === _buyShip.code;
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid ${on ? 'var(--bdg)' : 'var(--bdr)'};border-radius:8px;margin-bottom:6px;cursor:pointer;">
+      <input type="radio" name="buy-ship" value="${mpcfgEsc(k.code)}" ${on ? 'checked' : ''} onchange="mpcPickShip('${mpcfgEsc(k.code)}')">
+      <span style="flex:1;">${mpcfgEsc(k.label)}${k.eta ? `<br><span class="tsm tm">${tccTF('mp_js_0608', { p1: mpcfgEsc(k.eta) })}</span>` : ''}</span>
+      <span class="mono" style="color:var(--gold);">${k.fee > 0 ? mpcFmtUsdt(k.fee) : tccT('mp_js_0607')}</span></label>`;
+  }).join('');
+}
+function mpcPickShip(code) {
+  const k = _buyCarriers.find(x => x.code === code); if (!k) return;
+  _buyShip = { code: k.code, fee: k.fee };
+  mpcRenderShip(); mpcRenderTotal();
+}
+async function mpcBuyInit() {
+  const bp = buyProd;
+  _buyShip = { code: '', fee: 0 }; _buyCarriers = [];
+  mpcRenderTotal();
+  const wrap = document.getElementById('buy-ship-wrap'); if (wrap) wrap.style.display = '';
+  const box = document.getElementById('buy-ship-list'); if (box) box.innerHTML = '<div class="tsm tm">⏳ ...</div>';
+  try { await mpcfgLoad(); } catch (e) {}
+  if (buyProd !== bp) return;   // เปลี่ยนสินค้าระหว่างรอ
+  _buyCarriers = MPCFG.loaded ? mpcCarriersFor(bp) : [];
+  if (_buyCarriers.length) _buyShip = { code: _buyCarriers[0].code, fee: _buyCarriers[0].fee };   // เลือกเจ้าถูกสุดไว้ให้ — เปลี่ยนได้
+  mpcRenderShip(); mpcRenderTotal();
+}
+
+// ── ฟอร์มที่อยู่ตามประเทศ (address_schema / postal_regex / phone_prefix จากชีต Countries) ──
+function mpcFillAddrCountry(want) {
+  const sel = document.getElementById('addr-country'); if (!sel) return;
+  const list = MPCFG.countries.length ? MPCFG.countries : [{ country_code: 'TH', name_th: 'ไทย', name_en: 'Thailand' }];
+  const val = String(want || sel.value || mpcCur()).toUpperCase();
+  sel.innerHTML = list.map(c => `<option value="${mpcfgEsc(c.country_code)}">${mpcfgFlag(c.country_code)} ${mpcfgEsc(mpcName(c))}</option>`).join('');
+  if (!list.some(c => c.country_code === val)) sel.insertAdjacentHTML('beforeend', `<option value="${mpcfgEsc(val)}">${mpcfgFlag(val)} ${mpcfgEsc(val)}</option>`);   // ที่อยู่เก่าของประเทศที่ปิดตลาด
+  sel.value = val;
+}
+function mpcPostalMax(c) {
+  const m = c && c.postal_regex ? String(c.postal_regex).match(/\{(\d+)(?:,(\d+))?\}/) : null;
+  return m ? Number(m[2] || m[1]) : 10;
+}
+function mpcAddrApplySchema(cc) {
+  cc = String(cc || mpcCur()).toUpperCase();
+  const c = mpcCountry(cc);
+  const th = !c || c.address_schema === 'th_5level';   // ยังไม่มี config → โครงสร้างไทยเดิม
+  const L = th ? [tccT('mp_ui_0281'), tccT('mp_ui_0282'), tccT('mp_ui_0283')] : [tccT('mp_js_0613'), tccT('mp_js_0614'), tccT('mp_js_0615')];
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  const ph = (id, v) => { const e = document.getElementById(id); if (e) e.placeholder = String(v).replace(/\s*\*$/, ''); };
+  set('addr-lbl-subdistrict', L[0]); set('addr-lbl-district', L[1]); set('addr-lbl-province', L[2]);
+  ph('addr-subdistrict', L[0]); ph('addr-district', L[1]); ph('addr-province', L[2]);
+  const pc = document.getElementById('addr-postal');
+  if (pc) { pc.maxLength = mpcPostalMax(c); pc.placeholder = th ? '10xxx' : 'x'.repeat(Math.min(mpcPostalMax(c), 6)); }
+  const pe = document.getElementById('addr-phone');
+  if (pe) pe.placeholder = th ? '0xx-xxx-xxxx' : ((c && c.phone_prefix ? c.phone_prefix : '+') + ' xxx xxx xxx');
+}
+function mpcAddrCountryChanged() {
+  const cc = document.getElementById('addr-country').value;
+  mpcAddrApplySchema(cc);
+  // ตำแหน่ง/ผลค้นหาแผนที่เป็นของประเทศเดิม → ล้าง
+  ['addr-lat', 'addr-lng'].forEach(id => { const e = document.getElementById(id); if (e) e.value = '0'; });
+  const q = document.getElementById('addr-search'); if (q) q.value = '';
+  const ac = document.getElementById('addr-autocomplete-list'); if (ac) ac.style.display = 'none';
+  if (_leafMap) { try { _leafMap.remove(); } catch (e) {} _leafMap = null; _leafMarker = null; }
+  const mp = document.getElementById('addr-map-preview');
+  if (mp) mp.innerHTML = ('<div class="addr-map-placeholder"><span style="font-size:2rem;">🗺️</span><span>' + tccT('mp_js_0314') + '</span></div>');
+}
+
+// ── ตะกร้า (shopCheckout): ใช้ที่อยู่หลักของตลาดปัจจุบัน + ขนส่งที่ถูกที่สุดของแต่ละสินค้า ──
+async function mpcShopPlan() {
+  try { await mpcfgLoad(); } catch (e) {}
+  if (!MPCFG.loaded) { showToast(tccT('mp_js_0602'), 'err'); return null; }
+  const cc = mpcCur();
+  try {
+    const r = await apiCached('addr_' + SESSION.member_id, { action: 'getShippingAddresses', member_id: SESSION.member_id }, 60000);
+    if (r && r.addresses) _addrBook = r.addresses;
+  } catch (e) {}
+  const ok = _addrBook.filter(a => String(a.country_code || 'TH').toUpperCase() === cc);
+  const addr = ok.find(a => a.is_default) || ok[0];
+  if (!addr) { showToast(tccTF('mp_js_0605', { p1: cc }), 'warn'); try { closeShopCart(); openEditAddr(null); } catch (e) {} return null; }
+  const ships = {}; let shipTotal = 0;
+  shopCart.forEach(c => {
+    const list = mpcCarriersFor(c.prod);
+    if (list.length) { ships[c.prod.id] = { code: list[0].code, fee: list[0].fee }; shipTotal += list[0].fee * c.qty; }
+  });
+  return { cc: cc, addr: addr, ships: ships, shipTotal: Math.round(shipTotal * 1e6) / 1e6 };
+}
+
 const CARRIER_CONFIG = {
   THPOST:   { label: '📮 Thailand Post / EMS', url: 'https://track.thailandpost.co.th/?barcode={t}' },
   KERRY:    { label: '🟠 Kerry Express',        url: 'https://th.kerryexpress.com/th/track/?track={t}' },
@@ -8356,8 +8748,12 @@ const CARRIER_CONFIG = {
   OTHER:    { get label(){return tccT('mp_js_0221');},               url: null },
 };
 
-function getTrackingUrl(carrierCode, trackingNumber) {
-  const cfg = CARRIER_CONFIG[String(carrierCode || '').toUpperCase()];
+function getTrackingUrl(carrierCode, trackingNumber, country) {
+  // [P3] ลองใช้ค่าจากชีต Carriers ก่อน (ตรงประเทศถ้าระบุ) แล้วค่อย fallback CARRIER_CONFIG ไทยเดิม
+  const _code = String(carrierCode || '').toUpperCase();
+  const _k = (MPCFG.carriers || []).find(k => k.carrier_code === _code && (!country || k.country_code === String(country).toUpperCase()));
+  if (_k && _k.tracking_url_tpl && trackingNumber) return _k.tracking_url_tpl.replace('{t}', encodeURIComponent(String(trackingNumber).trim()));
+  const cfg = CARRIER_CONFIG[_code];
   if (!cfg || !cfg.url || !trackingNumber) return null;
   return cfg.url.replace('{t}', encodeURIComponent(String(trackingNumber).trim()));
 }
@@ -8368,7 +8764,7 @@ function updateTrackPreview() {
   const preview  = document.getElementById('ship-track-preview');
   const link     = document.getElementById('ship-track-link');
   if (!preview || !link) return;
-  const url = (carrier && tracking.length >= 5) ? getTrackingUrl(carrier, tracking) : null;
+  const url = (carrier && tracking.length >= 5) ? getTrackingUrl(carrier, tracking, window._shipCountry) : null;
   if (url) {
     link.href = url;
     link.textContent = url.length > 70 ? url.slice(0, 70) + '…' : url;
@@ -8380,6 +8776,7 @@ function updateTrackPreview() {
 
 function openShipModal(orderId, isExchange) {
   document.getElementById('ship-order-id').value    = orderId;
+  shipPrepCarriers(orderId);   // [P3] ขนส่งตามประเทศของออเดอร์
   document.getElementById('ship-carrier').value     = '';
   document.getElementById('ship-tracking-no').value = '';
   document.getElementById('ship-track-preview').style.display = 'none';
@@ -8633,7 +9030,9 @@ async function submitSA() {
   const shopName = document.querySelector('#p-seller-apply input.fi')?.value.trim();
   const category = document.getElementById('sa-cat-inp')?.value; // [v2-cat] อ่านจาก id โดยตรง
   const desc     = document.querySelector('#p-seller-apply textarea.fi')?.value.trim();
+  const countryCode = document.getElementById('sa-country-inp')?.value || '';   // [P3]
   if (!shopName) { showToast(tccT('mp_js_0243'), 'warn'); return; }
+  if (!countryCode) { showToast('กรุณาเลือกประเทศร้านค้า', 'warn'); return; }
   const pending = (_imgStore['sa-logo-preview']||[]).filter(i=>i.uploading);
   if (pending.length) { showToast(tccT('mp_js_0244'), 'warn'); return; }
   const logoUrl = getImgUrls('sa-logo-preview')[0] || '';
@@ -8645,6 +9044,7 @@ async function submitSA() {
       shop_name:    shopName,
       owner_name:   desc,
       category,
+      country_code: countryCode,   // [P3]
       logo_url:     logoUrl,
       kyc_verified: SESSION.kyc_status === 'verified'  // [FIX v4] แก้จาก 'approved' → 'verified' ตรงกับ GAS schema
     });
@@ -9001,11 +9401,13 @@ async function loadSession(){
       if(m.full_name)    SESSION.full_name     = m.full_name;
       if(m.id_number)    SESSION.id_number     = m.id_number;
       if(m.nationality)  SESSION.nationality   = m.nationality;
+      if(m.country_code) SESSION.country_code  = String(m.country_code).toUpperCase();   // [P4] ตลาดตั้งต้น (ไม่ใช่ nationality)
       D.rights        = Number(SESSION.ff_rights || 0);
       D.rights_status = SESSION.ff_rights_status || 'active';
       D.balance       = Number(SESSION.customer_wallet_usdt || 0);
       SESSION._synced_this_session = true;
       SESSION._lastSyncAt = Date.now(); // [v40] บันทึกเวลา sync
+      mpcOnSession();   // [P4]
       updateAuthUI();
       try{ localStorage.setItem(LG_SESSION_KEY, JSON.stringify(SESSION)); }catch(_){}
       loadWishlist(); // [v47] restore wishlist จาก server
@@ -9534,6 +9936,7 @@ async function lgS3go(){
       if(syncRes.kyc_status)     SESSION.kyc_status     = syncRes.kyc_status;
       if(syncRes.account_status) SESSION.memberStatus   = syncRes.account_status;
       if(syncRes.referral_code)  SESSION.referral_code  = syncRes.referral_code;
+      if(syncRes.country_code){ SESSION.country_code = String(syncRes.country_code).toUpperCase(); mpcOnSession(); }   // [P4]
       // ✅ [v8 FIX] รับ ff_rights จาก GAS v8 (แก้ปัญหา FF RIGHTS: 0/5)
       if(syncRes.ff_rights != null)            SESSION.ff_rights             = Number(syncRes.ff_rights);
       if(syncRes.ff_rights_status)             SESSION.ff_rights_status      = syncRes.ff_rights_status;
@@ -9567,16 +9970,19 @@ async function lgS3go(){
 async function confirmBuy(){
   if(!SESSION){showToast(tccT('mp_js_0076'),'warn');closeM('m-buy');lgGoLogin();return;}
   if(!buyProd)return;
-  // [FIX v4] ตรวจ wallet ก่อน
-  if(Number(SESSION.customer_wallet_usdt||0) < Number(buyProd.price||0)){
-    showToast(tccT('mp_js_0296'),'err'); return;
+  // [P4] ต้องโหลด config ขนส่งได้ + เลือกขนส่งแล้ว (ถ้าประเทศนี้มีขนส่ง) · ตรวจยอดกระเป๋าเทียบ "สินค้า + ค่าส่ง"
+  if(!MPCFG.loaded){ showToast(tccT('mp_js_0602'),'err'); mpcBuyInit(); return; }
+  if(_buyCarriers.length && !_buyShip.code){ showToast(tccT('mp_js_0603'),'warn'); return; }
+  const _buyTotal = mpcBuyTotal();
+  if(Number(SESSION.customer_wallet_usdt||0) < _buyTotal){
+    showToast(tccTF('mp_js_0604',{p1:_buyTotal.toFixed(2),p2:Number(SESSION.customer_wallet_usdt||0).toFixed(2)}),'err'); return;
   }
   // [FIX] ตรวจ ff_rights จาก SESSION โดยตรง ก่อนส่ง GAS
   if(Number(SESSION.ff_rights ?? 0) < 1){
     showToast(tccT('mp_js_0297'),'err'); return;
   }
   showConfirm(
-    `${tccT('mp_js_0298')} <strong>${buyProd.name||''}</strong>?<br><small class="tm">${tccTF('mp_js_0299',{p1:selPlan_,p2:Number(buyProd.price||0).toLocaleString()})}</small>`,
+    `${tccT('mp_js_0298')} <strong>${buyProd.name||''}</strong>?<br><small class="tm">${tccTF('mp_js_0299',{p1:selPlan_,p2:Number(buyProd.price||0).toLocaleString()})}</small><br><small class="tm">${tccT('mp_ui_0344')}: ${mpcFmtUsdt(_buyShip.fee)} · ${tccT('mp_ui_0345')}: ${mpcFmtUsdt(_buyTotal)}</small>`,
     async () => {
       showLoad(tccT('mp_js_0300'));
       // [v14 FIX] ไม่เรียก syncMember ที่นี่อีก — loadSession() เป็น async await แล้ว
@@ -9603,11 +10009,13 @@ async function confirmBuy(){
           ff_plan:      selPlan_,
           payout_option: String(buyProd.po || buyProd.payout_option || '45'),  // [FIX v4] ใช้ String() ป้องกัน number
           addr_id: _selectedAddrId,  // [v_addr] snapshot ที่อยู่จัดส่ง
+          country_code: buyProd.cc || mpcCur(),   // [P4] server ตรวจ สินค้า/ที่อยู่/ตลาด ต้องประเทศเดียวกัน
+          ship_method_code: _buyShip.code || '',  // [P4] server ตรวจขนส่ง + คำนวณค่าส่งเองจากชีต Carriers
         });
         hideLoad();
         if(res.success){
           // [FIX v4] อัปเดต session และ D ให้ตรงกัน
-          const newWallet = Number(SESSION.customer_wallet_usdt||0) - Number(buyProd.price||0);
+          const newWallet = Number(SESSION.customer_wallet_usdt||0) - Number(res.total_debit != null ? res.total_debit : _buyTotal);   // [P4] สินค้า + ค่าส่ง
           const newRights = Math.max(0, Number(SESSION.ff_rights||0) - 1);
           SESSION.customer_wallet_usdt = newWallet;
           SESSION.ff_rights = newRights;
@@ -9667,7 +10075,7 @@ function renderAddrList() {
   }
   el.innerHTML = _addrBook.map(a => `
     <div class="addr-card ${a.is_default ? 'is-default' : ''}">
-      <div class="addr-label">${a.label || tccT('mp_js_0085')} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0309')+'</span>') : ''}</div>
+      <div class="addr-label">${mpcfgFlag(a.country_code||'TH')} ${a.label || tccT('mp_js_0085')} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0309')+'</span>') : ''}</div>
       <div class="addr-name">${a.recipient_name} · ${a.phone}</div>
       <div class="addr-line">${[a.address_line, a.subdistrict, a.district, a.province, a.postal_code].filter(Boolean).join(' ')}</div>
       ${a.lat && a.lng ? `<a href="https://www.openstreetmap.org/?mlat=${a.lat}&mlon=${a.lng}#map=16/${a.lat}/${a.lng}" target="_blank" rel="noopener" class="tsm" style="color:var(--gold);text-decoration:none;">${tccT('mp_js_0310')}</a>` : ''}
@@ -9703,6 +10111,10 @@ function openEditAddr(addrId) {
     document.getElementById('addr-province').value    = '';
     document.getElementById('addr-postal').value      = '';
     document.getElementById('addr-is-default').checked = !_addrBook.length;
+    // [P4] ประเทศเริ่มต้น = ประเทศสินค้าที่กำลังซื้อ (ถ้าเปิดจาก checkout) ไม่งั้นตลาดปัจจุบัน
+    const _defCC = ((document.getElementById('m-buy')||{}).classList && document.getElementById('m-buy').classList.contains('open') && buyProd && buyProd.cc) || mpcCur();
+    mpcFillAddrCountry(_defCC); mpcAddrApplySchema(_defCC);
+    mpcfgLoad().then(() => { const e = document.getElementById('addr-country'); if (e) { mpcFillAddrCountry(e.value); mpcAddrApplySchema(e.value); } });
     document.querySelectorAll('.addr-lbl-btn').forEach(b => b.classList.remove('btn-gold'));
   } else {
     const a = _addrBook.find(x => x.addr_id === addrId);
@@ -9718,6 +10130,9 @@ function openEditAddr(addrId) {
     document.getElementById('addr-lat').value         = a.lat || '0';
     document.getElementById('addr-lng').value         = a.lng || '0';
     document.getElementById('addr-is-default').checked = !!a.is_default;
+    const _aCC = String(a.country_code || 'TH').toUpperCase();
+    mpcFillAddrCountry(_aCC); mpcAddrApplySchema(_aCC);
+    mpcfgLoad().then(() => { const e = document.getElementById('addr-country'); if (e) { mpcFillAddrCountry(e.value); mpcAddrApplySchema(e.value); } });
     // แสดงแผนที่เดิมถ้ามี lat/lng
     if (a.lat && a.lng) showMapAt(a.lat, a.lng);
   }
@@ -9749,10 +10164,13 @@ function initAddrAutocomplete() {
 
     _autocompleteTimer = setTimeout(async () => {
       try {
+        // [P4] ค้นหาแผนที่ตามประเทศที่เลือกในฟอร์ม (เดิมล็อก countrycodes=th) · ภาษาผลลัพธ์ = default_lang ของประเทศ
+        const _acc = String((document.getElementById('addr-country') || {}).value || mpcCur()).toUpperCase();
+        const _al  = ((mpcCountry(_acc) || {}).default_lang) || 'en';
         const url = 'https://nominatim.openstreetmap.org/search?q='
           + encodeURIComponent(val)
-          + '&format=json&addressdetails=1&limit=5&countrycodes=th&accept-language=th';
-        const res  = await fetch(url, { headers: { 'Accept-Language': 'th' } });
+          + '&format=json&addressdetails=1&limit=5&countrycodes=' + _acc.toLowerCase() + '&accept-language=' + encodeURIComponent(_al);
+        const res  = await fetch(url, { headers: { 'Accept-Language': _al } });
         const data = await res.json();
         const listEl2 = document.getElementById('addr-autocomplete-list');
         if (!data.length) { listEl2.style.display = 'none'; return; }
@@ -9844,6 +10262,14 @@ async function submitSaveAddress() {
   if (!phone)     { showToast(tccT('mp_js_0155'), 'warn'); return; }
   if (!addrLine)  { showToast(tccT('mp_js_0317'), 'warn'); return; }
   if (!province)  { showToast(tccT('mp_js_0318'), 'warn'); return; }
+  // [P4] ประเทศ + รหัสไปรษณีย์ตาม postal_regex ของประเทศ (server ตรวจซ้ำ)
+  const _addrCC = String((document.getElementById('addr-country') || {}).value || mpcCur()).toUpperCase();
+  const _postal = document.getElementById('addr-postal').value.trim();
+  const _cRow   = mpcCountry(_addrCC);
+  if (_postal && _cRow && _cRow.postal_regex) {
+    let _re = null; try { _re = new RegExp(_cRow.postal_regex); } catch (e) {}
+    if (_re && !_re.test(_postal)) { showToast(tccTF('mp_js_0610', { p1: _addrCC }), 'warn'); return; }
+  }
 
   showLoad(tccT('mp_js_0192'));
   try {
@@ -9862,6 +10288,7 @@ async function submitSaveAddress() {
       lat:             Number(document.getElementById('addr-lat').value) || 0,
       lng:             Number(document.getElementById('addr-lng').value) || 0,
       is_default:      document.getElementById('addr-is-default').checked,
+      country_code:    _addrCC,   // [P4]
     });
     hideLoad();
     if (res.success) {
@@ -9917,14 +10344,17 @@ async function loadBuyerAddresses() {
     _addrBook = (res && res.addresses) ? res.addresses : [];
   } catch(e) { _addrBook = []; }
 
-  const def = _addrBook.find(a => a.is_default) || _addrBook[0];
+  // [P4] ที่อยู่ต้องเป็นประเทศเดียวกับสินค้า — เลือกหลัก/ตัวแรกของประเทศนั้นให้เอง
+  const _cc  = String((buyProd && buyProd.cc) || mpcCur()).toUpperCase();
+  const _ok  = _addrBook.filter(a => String(a.country_code || 'TH').toUpperCase() === _cc);
+  const def  = _ok.find(a => a.is_default) || _ok[0];
   if (def) {
     _selectedAddrId = def.addr_id;
     renderBuyAddrPreview(def);
   } else {
     _selectedAddrId = '';
     const preview = document.getElementById('buy-addr-preview');
-    if (preview) preview.innerHTML = `<div class="ba-name" style="color:var(--warn);">${tccT('mp_js_0329')}</div>`;
+    if (preview) preview.innerHTML = `<div class="ba-name" style="color:var(--warn);">${tccTF('mp_js_0605', { p1: _cc })}</div>`;
   }
 }
 
@@ -9932,30 +10362,37 @@ function renderBuyAddrPreview(a) {
   const preview = document.getElementById('buy-addr-preview');
   if (!preview || !a) return;
   preview.innerHTML = `
-    <div class="ba-label">${a.label || '📍'}</div>
+    <div class="ba-label">${mpcfgFlag(a.country_code || 'TH')} ${a.label || '📍'}</div>
     <div class="ba-name">${a.recipient_name} · ${a.phone}</div>
-    <div class="ba-line">${[a.address_line, a.district, a.province, a.postal_code].filter(Boolean).join(' ')}</div>`;
+    <div class="ba-line">${[a.address_line, a.subdistrict, a.district, a.province, a.postal_code].filter(Boolean).join(' ')}</div>`;
 }
 
 function openBuyAddrPicker() {
   const listEl = document.getElementById('addr-picker-list');
   if (!listEl) return;
+  const _cc = String((buyProd && buyProd.cc) || mpcCur()).toUpperCase();
   if (!_addrBook.length) {
     listEl.innerHTML = ('<div class="tsm tm" style="padding:16px;text-align:center;">'+tccT('mp_js_0330')+'</div>');
   } else {
-    listEl.innerHTML = _addrBook.map(a => `
-      <div class="addr-card ${a.addr_id === _selectedAddrId ? 'is-default' : ''}" style="cursor:pointer;" onclick="selectBuyAddr('${a.addr_id}')">
-        <div class="addr-label">${a.label || '📍'} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0331')+'</span>') : ''}</div>
+    // [P4] ที่อยู่ประเทศอื่นแสดงไว้แต่เลือกไม่ได้
+    listEl.innerHTML = `<div class="tsm tm" style="padding:4px 2px 10px;">${tccTF('mp_js_0609', { p1: mpcfgFlag(_cc) + ' ' + _cc })}</div>` + _addrBook.map(a => {
+      const ok = String(a.country_code || 'TH').toUpperCase() === _cc;
+      return `
+      <div class="addr-card ${a.addr_id === _selectedAddrId ? 'is-default' : ''}" style="${ok ? 'cursor:pointer;' : 'opacity:.45;cursor:not-allowed;'}" ${ok ? `onclick="selectBuyAddr('${a.addr_id}')"` : ''}>
+        <div class="addr-label">${mpcfgFlag(a.country_code || 'TH')} ${a.label || '📍'} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0331')+'</span>') : ''}${ok ? '' : ` <span class="tsm tm">· ${tccT('mp_js_0611')}</span>`}</div>
         <div class="addr-name">${a.recipient_name} · ${a.phone}</div>
         <div class="addr-line">${[a.address_line, a.district, a.province, a.postal_code].filter(Boolean).join(' ')}</div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
   openM('m-addr-picker');
 }
 
 function selectBuyAddr(addrId) {
-  _selectedAddrId = addrId;
   const a = _addrBook.find(x => x.addr_id === addrId);
+  const _cc = String((buyProd && buyProd.cc) || mpcCur()).toUpperCase();
+  if (a && String(a.country_code || 'TH').toUpperCase() !== _cc) return;   // [P4] ประเทศไม่ตรงกับสินค้า
+  _selectedAddrId = addrId;
   if (a) renderBuyAddrPreview(a);
   closeM('m-addr-picker');
 }
@@ -10501,7 +10938,8 @@ function toggleHomeSections(){
 
 // [v50 PERF] สินค้าหน้าแรก — ไม่ขึ้นกับ session และไม่รอ stats (ตัด action=stats ออกแล้ว: แถบ stats ซ่อนอยู่ ไม่ได้ใช้)
 function _mapApprovedProducts(prods){
-  return prods.filter(p=>p.approval_status==='approved').map(p=>{
+  const _cc=mpcCur();   // [P4] กรองซ้ำฝั่ง FE เผื่อ GAS เวอร์ชันเก่าคืนทุกประเทศ
+  return prods.filter(p=>p.approval_status==='approved' && String(p.country_code||'TH').toUpperCase()===_cc).map(p=>{
     let imgs=[];
     try{ imgs=JSON.parse(p.images_json||'[]'); }catch(e){}
     imgs=Array.isArray(imgs)?imgs.filter(Boolean):[];
@@ -10514,7 +10952,8 @@ function _mapApprovedProducts(prods){
       sold:Number(p.total_sales||0), total_reviews:Number(p.total_reviews||0),
       images_json:p.images_json||'[]',
       description:p.description||'',
-      video_url:p.video_url||''
+      video_url:p.video_url||'',
+      cc:String(p.country_code||'TH').toUpperCase(), carriers_json:p.carriers_json||''   // [P4]
     };
   });
 }
@@ -10526,16 +10965,16 @@ async function initHomeProducts(){
   } else if(hp && D.products.length>0){
     hp.innerHTML=D.products.slice(0,4).map(pcard).join('');
   }
+  const _cc=mpcCur();
   try{
-    // getPublicProducts: server กรองเฉพาะ approved · มีข้อมูลเก่าใน localStorage → วาดทันที
-    const prods=await apiCached('products',{action:'getPublicProducts'});
+    // [P4] getPublicProducts?country=XX — server กรองเฉพาะ approved ของประเทศนั้น · แคช/SWR แยก key ตามประเทศ
+    const prods=await apiCached('products_'+_cc,{action:'getPublicProducts',country:_cc});
+    if(_cc!==mpcCur()) return;   // ผู้ใช้สลับประเทศระหว่างรอ → ทิ้งผลของประเทศเก่า
     if(Array.isArray(prods)){
       const approved=_mapApprovedProducts(prods);
-      if(approved.length>0){
-        D.products=approved;
-        const hp2=document.getElementById('h-products');
-        if(hp2) hp2.innerHTML=D.products.slice(0,4).map(pcard).join('');
-      }
+      D.products=approved;   // ประเทศที่ยังไม่มีสินค้า → ว่างจริง (ไม่ค้างของประเทศเดิม)
+      const hp2=document.getElementById('h-products');
+      if(hp2) hp2.innerHTML=approved.length ? approved.slice(0,4).map(pcard).join('') : ('<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🔍</div><p>'+tccT('mp_js_0004')+'</p></div>');
     }
   }catch(e){}
 }
@@ -10554,7 +10993,7 @@ async function initHome(){
 }
 
 // ─── [v50] listeners: ข้อมูลสดมาถึงหลังวาดจากข้อมูลเก่าแล้ว → วาดซ้ำเฉพาะหน้าที่เปิดอยู่ ───
-swrOn(/^products$/, ()=>{
+swrOn(/^products_/, ()=>{
   try{ initHomeProducts(); }catch(e){}
   try{ if(curPage==='marketplace') initMP(); }catch(e){}
   try{ shopLoaded=false; if(curPage==='shop') initShop(); }catch(e){}
@@ -10588,27 +11027,18 @@ async function initMP(){
   const cats=[...new Set(D.products.map(p=>p.cat))];
   document.getElementById('scat').innerHTML=('<option value="">'+tccT('mp_js_0003')+'</option>')+cats.map(c=>`<option>${c}</option>`).join('');
   filterP();
+  const _cc=mpcCur();
   try{
-    // ✅ ใช้ cache เดียวกับ initHome — ไม่ดึง Products ซ้ำถ้าเพิ่งโหลดไป
-    const prods=await apiCached('products',{action:'getPublicProducts'});
+    // ✅ ใช้ cache เดียวกับ initHome (key แยกตามประเทศ) — ไม่ดึง Products ซ้ำถ้าเพิ่งโหลดไป
+    const prods=await apiCached('products_'+_cc,{action:'getPublicProducts',country:_cc});
+    if(_cc!==mpcCur()) return;
     if(Array.isArray(prods)){
-      const approved=prods.filter(p=>p.approval_status==='approved').map(p=>{
-        let imgs=[];
-        try{ imgs=JSON.parse(p.images_json||'[]'); }catch(e){}
-        imgs=Array.isArray(imgs)?imgs.filter(Boolean):[];
-        return {
-          id:p.product_id, name:p.product_name, price:Number(p.price_usdt),
-          cat:p.category, seller:p.shop_name||p.seller_member_id,
-          rating:Number(p.rating_avg)||0, ff:true, ico:p.emoji_icon||'📦',
-          img:imgs[0]||null, imgs,
-          po:Number(p.payout_option)||45, seller_id:p.seller_member_id,
-          sold:Number(p.total_sales||0), total_reviews:Number(p.total_reviews||0),
-          images_json:p.images_json||'[]',
-          description:p.description||'',
-          video_url:p.video_url||''
-        };
-      });
-      if(approved.length>0){ D.products=approved; filterP(); }
+      D.products=_mapApprovedProducts(prods);
+      const cats2=[...new Set(D.products.map(p=>p.cat))];
+      const sc=document.getElementById('scat'); const keep=sc.value;
+      sc.innerHTML=('<option value="">'+tccT('mp_js_0003')+'</option>')+cats2.map(c=>`<option>${c}</option>`).join('');
+      if(keep && cats2.includes(keep)) sc.value=keep;
+      filterP();
     }
   }catch(e){}
 }
@@ -11985,10 +12415,12 @@ async function initShop(){
 
   document.getElementById('shop-grid').innerHTML = ('<div class="empty" style="grid-column:1/-1"><div class="empty-ico">⏳</div><p>'+tccT('mp_js_0466')+'</p></div>');
   try{
-    const prods = await apiCached('products', {action:'getPublicProducts'}, 60000);
+    const _cc = mpcCur();
+    const prods = await apiCached('products_'+_cc, {action:'getPublicProducts', country:_cc}, 60000);
+    if(_cc !== mpcCur()) return;   // [P4] สลับประเทศระหว่างรอ
     if(Array.isArray(prods)){
       shopAllProds = prods
-        .filter(p => p.approval_status === 'approved' || p.status === 'approved')
+        .filter(p => (p.approval_status === 'approved' || p.status === 'approved') && String(p.country_code||'TH').toUpperCase() === _cc)
         .map(p => {
           let imgs = [];
           try{ imgs = JSON.parse(p.images_json||'[]'); }catch(e){}
@@ -12012,6 +12444,8 @@ async function initShop(){
             ff_rate:   _ffRate,
             ff_amount: _ffAmt,
             ff_plan:   p.ff_selected_plan || 'A',
+            cc:        String(p.country_code||'TH').toUpperCase(),   // [P4]
+            carriers_json: p.carriers_json || '',
           };
         });
       shopLoaded = true;
@@ -12191,13 +12625,22 @@ async function shopCheckout(){
   if(!SESSION){ showToast(tccT('mp_js_0454'),'warn'); return; }
   if(!shopCart.length){ showToast(tccT('mp_js_0468'),'warn'); return; }
 
-  const total = shopCart.reduce((s,c)=>s+c.prod.price*c.qty, 0);
+  // [P4] ที่อยู่หลักของตลาดปัจจุบัน + ขนส่งที่ถูกที่สุดต่อสินค้า → ยอดรวมรวมค่าส่ง → ยืนยันก่อนซื้อ
+  const plan = await mpcShopPlan();
+  if(!plan) return;
+  const itemsTotal = shopCart.reduce((s,c)=>s+c.prod.price*c.qty, 0);
+  const total = Math.round((itemsTotal + plan.shipTotal) * 1e6) / 1e6;
   const mpBal = Number(SESSION?.customer_wallet_usdt||0);
   if(total > mpBal){
-    showToast(tccTF('mp_js_0471',{p1:mpBal.toFixed(2),p2:total.toFixed(2)}),'err');
+    showToast(tccTF('mp_js_0604',{p1:total.toFixed(2),p2:mpBal.toFixed(2)}),'err');
     return;
   }
+  const nItems = shopCart.reduce((s,c)=>s+c.qty, 0);
+  showConfirm(tccTF('mp_js_0612',{p1:nItems,p2:plan.shipTotal.toFixed(2),p3:total.toFixed(2)}),
+    () => _shopCheckoutRun(plan, total, mpBal), '🛒', tccT('mp_js_0298'));
+}
 
+async function _shopCheckoutRun(plan, total, mpBal){
   closeShopCart();
   showLoad(tccT('mp_js_0469'));
 
@@ -12223,6 +12666,9 @@ async function shopCheckout(){
           amount_usdt:   item.prod.price,
           amount:        item.prod.price,
           payout_option: String(item.prod.po || 45),
+          addr_id:       plan.addr.addr_id,                          // [P4]
+          country_code:  plan.cc,
+          ship_method_code: (plan.ships[item.prod.id] || {}).code || '',
         });
         if(res?.success || res?.order_id){ successCount++; }
         else {
