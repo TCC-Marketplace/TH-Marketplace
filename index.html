@@ -10545,7 +10545,12 @@ async function initHome(){
   if(nb) nb.textContent = SESSION ? D.balance.toLocaleString() : '—';
   initHomeProducts();            // ไม่ await — ไม่บล็อก deposit address / notifications
   loadDepositAddresses();
-  if(SESSION){ loadNotifications(); chatCheckUnread(); }
+  if(SESSION){
+    loadNotifications();
+    // [FIX-CHATUNREAD] chatCheckUnread ประกาศอยู่ใน <script> บล็อกหลัง initApp → ถ้ายังไม่พร้อม (session cache hit) ให้รอ load
+    if(typeof chatCheckUnread==='function') chatCheckUnread();
+    else window.addEventListener('load', ()=>{ try{ if(typeof chatCheckUnread==='function') chatCheckUnread(); }catch(e){} }, {once:true});
+  }
 }
 
 // ─── [v50] listeners: ข้อมูลสดมาถึงหลังวาดจากข้อมูลเก่าแล้ว → วาดซ้ำเฉพาะหน้าที่เปิดอยู่ ───
