@@ -251,6 +251,10 @@ body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:15px;l
 .ff-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(240,185,11,.12);color:var(--gold);font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:50px;border:1px solid rgba(240,185,11,.25);margin-top:5px;width:fit-content;}
 /* [v8] Skeleton loader สำหรับ product cards ก่อน API โหลดเสร็จ */
 @keyframes skeletonShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+/* [v50 PERF] non-blocking busy bar + skeleton rows (แทน overlay เต็มจอสำหรับการอ่านข้อมูล) */
+.busy-bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:9999;display:none;pointer-events:none;background-image:linear-gradient(90deg,transparent,var(--gold,#f0b90b),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:busyMove 1s linear infinite;}
+@keyframes busyMove{0%{background-position:-40% 0}100%{background-position:140% 0}}
+.sk-row{height:54px;border-radius:10px;margin:6px 0;border:1px solid var(--bdr);background-image:linear-gradient(90deg,var(--sur) 25%,var(--card) 50%,var(--sur) 75%);background-size:800px 100%;animation:skeletonShimmer 1.4s infinite linear;}
 .pc-skeleton{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;aspect-ratio:.75;background-image:linear-gradient(90deg,var(--sur) 25%,var(--card) 50%,var(--sur) 75%);background-size:800px 100%;animation:skeletonShimmer 1.4s infinite linear;}
 
 /* ══════════════════════════════════════════
@@ -5805,7 +5809,13 @@ async function openPD(pid){
   const rvAge = Date.now() - (_reviewsTs[pid] || 0);
   if (rvAge < 300000) return;
   try{
-    const rvData=await apiCached('reviews_all', {action:'read',sheet:'Reviews'}, 300000);
+    let rvData, _lkPre=null;
+    try{
+      // [v50 PERF] getProductReviews = รีวิวของสินค้านี้ + likes ของสมาชิก ใน 1 call (เดิม read Reviews ทั้งชีต แล้วค่อย getReviewLikes)
+      const pb=await apiGet({action:'getProductReviews', product_id:pid, member_id:SESSION?.member_id||''});
+      if(pb && Array.isArray(pb.reviews)){ rvData=pb.reviews; _lkPre=Array.isArray(pb.likes)?pb.likes:[]; }
+    }catch(_){}
+    if(!rvData) rvData=await apiCached('reviews_all', {action:'read',sheet:'Reviews'}, 300000);   // fallback: GAS v49
     if(Array.isArray(rvData)){
       const prodRvs=rvData.filter(r=>r.product_id===pid&&!r.is_reported).map(r=>({
         id:r.review_id,user:r.username||tccT('mp_js_0010'),av:(r.username||'U')[0],
@@ -5822,7 +5832,7 @@ async function openPD(pid){
       // [v47] restore liked state จาก Review_Likes sheet
       if(SESSION?.member_id){
         try{
-          const lkRes = await apiGet({action:'getReviewLikes', member_id: SESSION.member_id});
+          const lkRes = _lkPre ? {likes:_lkPre} : await apiGet({action:'getReviewLikes', member_id: SESSION.member_id});
           if(Array.isArray(lkRes?.likes)){
             const likedSet = new Set(lkRes.likes.map(String));
             (_reviews[pid]||[]).forEach(r => { r.liked = likedSet.has(String(r.id)); });
@@ -7198,13 +7208,21 @@ async function initRef() {
   if (linkEl) linkEl.textContent = getBrochureShareUrl();
 
   // โหลดข้อมูลจริงจาก API — ใช้ cache ร่วมกับ initWallet (key เดียวกัน)
-  showLoad(tccT('mp_js_0129'));
+  showBusy();   // [v50]
   try {
-    const memberKey = 'member_' + SESSION.member_id;
-    const [refs, members] = await Promise.all([
-      apiCached('refs_' + SESSION.member_id, { action: 'read', sheet: 'Referrals' }, 120000),
-      apiCached(memberKey,                   { action: 'read', sheet: 'Members'   }, 30000)
-    ]);
+    // [v50 PERF] getMyReferrals: server กรอง referrals + สมาชิกที่ถูกแนะนำให้ (ไม่ส่ง Members ทั้งชีตลงเบราว์เซอร์)
+    let refs, members;
+    const rb = await apiCached('refsb_' + SESSION.member_id, { action: 'getMyReferrals', member_id: SESSION.member_id }, 120000);
+    if(rb && Array.isArray(rb.referrals)){
+      refs = rb.referrals; members = rb.referredMembers || [];
+    } else {
+      delete _apiCache['refsb_' + SESSION.member_id];
+      const memberKey = 'member_' + SESSION.member_id;
+      [refs, members] = await Promise.all([
+        apiCached('refs_' + SESSION.member_id, { action: 'read', sheet: 'Referrals' }, 120000),
+        apiCached(memberKey,                   { action: 'read', sheet: 'Members'   }, 30000)
+      ]);
+    }
     hideLoad();
 
     // Commission history จาก Referrals sheet
@@ -7685,12 +7703,14 @@ async function initSD() {
   if (SELLER_DATA && Date.now()-_sellerDataTs < 60000) {
     renderSDStats(); renderSDChart(); renderSDPayouts(); return;
   }
-  showLoad(tccT('mp_js_0170'));
+  showBusy();   // [v50] อ่านข้อมูล → ไม่บล็อกเต็มจอ
   try {
-    // ✅ timeout 15s — ป้องกัน loading ค้างตลอด
+    // [v50 PERF] โหลดครั้งแรกวาดจากข้อมูลเก่าใน localStorage ได้ทันที · หลังมีการเขียนข้อมูล (SELLER_DATA=null) บังคับดึงสด
+    const _sdKey = 'sd_' + SESSION.member_id;
+    if (_sellerDataTs > 0) delete _apiCache[_sdKey];
     const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),15000));
     SELLER_DATA = await Promise.race([
-      apiGet({ action: 'sellerData', member_id: SESSION.member_id }),
+      apiCached(_sdKey, { action: 'sellerData', member_id: SESSION.member_id }, 60000),
       timeout
     ]);
     _sellerDataTs = Date.now();
@@ -7850,7 +7870,7 @@ async function saveShop() {
     if (res.success) {
       closeM('m-editshop');
       clearImgStore('shop-logo-preview');
-      SELLER_DATA = null; // force reload
+      SELLER_DATA = null; delete _apiCache['products']; // force reload
       showToast(tccT('mp_js_0193'));
       initSShop();
     } else { showToast(res.error||tccT('mp_js_0194'), 'err'); }
@@ -7990,7 +8010,7 @@ function _populateCategorySelect(cats) {
 
 async function loadCategories() {
   try {
-    const res = await apiGet({ action: 'getCategories' });
+    const res = await apiCached('cats', { action: 'getCategories' }, 600000);
     if (res.success && Array.isArray(res.categories) && res.categories.length) {
       _populateCategorySelect(res.categories);
       console.log('[v35] loadCategories: loaded', res.categories.length, 'categories from GAS');
@@ -8182,7 +8202,7 @@ function deleteProd(prodId) {
         const res = await apiPost({ action: 'deleteProduct', product_id: prodId, seller_id: SESSION.member_id });
         hideLoad();
         if (res.success) {
-          SELLER_DATA = null;
+          SELLER_DATA = null; delete _apiCache['products'];
           showToast(tccT('mp_js_0214'));
           initSProds();
         } else showToast(res.error||tccT('mp_js_0194'), 'err');
@@ -8209,16 +8229,9 @@ async function filterSOrd(st, btn) {
     if (lbl) lbl.textContent = tccT('mp_js_0216');
   }
   if (!SELLER_DATA) await initSD();
-  // [v47 FIX] ดึง orders จาก getSellerOrders โดยตรง — ship_* fields ครบกว่า SELLER_DATA.orders (cache 3 นาที)
+  // [v50 PERF] ใช้ orders จาก sellerData เลย (GAS v50 ใส่ ship_* + buyer_full_name ครบ และ cache ผูก version ล้างทันทีเมื่อมีการเขียน)
+  //            เดิมเรียก getSellerOrders ซ้ำทุกครั้งที่กดกรอง → ตัด waterfall
   let ords = SELLER_DATA?.orders || [];
-  try {
-    const freshOrds = await apiGet({ action:'getSellerOrders', member_id: SESSION.member_id });
-    if(Array.isArray(freshOrds) && freshOrds.length >= ords.length){
-      ords = freshOrds;
-      // sync ใน SELLER_DATA ด้วย ถ้ามี
-      if(SELLER_DATA) SELLER_DATA.orders = freshOrds;
-    }
-  } catch(_) { /* ใช้ SELLER_DATA.orders แทน */ }
   // [v49] sort ใหม่ → เก่า (created_at DESC)
   const _sortDescS = (a, b) => (b.created_at || '').localeCompare(a.created_at || '');
   const rows = (st==='all' ? [...ords] : ords.filter(o=>o.order_status===st)).sort(_sortDescS);
@@ -9027,6 +9040,7 @@ async function loadSession(){
 }
 function logout(){
   SESSION=null;
+  try{ _swrPurge(); }catch(e){}   // [v50] ล้างข้อมูลที่แคชไว้ใน localStorage
   try{
     localStorage.removeItem('mp_sch_chat');   // [SCH] ล้าง chat token ที่แคชไว้
     localStorage.removeItem(LG_SESSION_KEY);
@@ -9278,7 +9292,20 @@ function showLoad(msg){
   document.getElementById('_load_msg').textContent=msg||tccT('mp_js_0260');
   el.style.display='flex';
 }
-function hideLoad(){const el=document.getElementById('_load');if(el)el.style.display='none';}
+function hideLoad(){const el=document.getElementById('_load');if(el)el.style.display='none'; hideBusy();}
+// [v50 PERF] showBusy — แถบบางๆ ด้านบน ไม่บล็อกหน้าจอ ใช้กับการ "อ่าน" ข้อมูล (เขียนข้อมูลยังใช้ showLoad เต็มจอ)
+function showBusy(){
+  let el=document.getElementById('_busy');
+  if(!el){el=document.createElement('div');el.id='_busy';el.className='busy-bar';document.body.appendChild(el);}
+  el.style.display='block';
+}
+function hideBusy(){const el=document.getElementById('_busy');if(el)el.style.display='none';}
+function _skelRows(tbodyId, cardsId, n){
+  const bar='<div class="sk-row"></div>';
+  const tb=document.getElementById(tbodyId), cd=cardsId?document.getElementById(cardsId):null;
+  if(tb) tb.innerHTML=Array(n||3).fill('<tr><td colspan="12" style="padding:6px 10px">'+bar+'</td></tr>').join('');
+  if(cd) cd.innerHTML=Array(n||3).fill(bar).join('');
+}
 
 // ═══════════════════════════════════════
 // AUTH — TCC_Main 3-Step Login Engine
@@ -10063,15 +10090,25 @@ async function initWallet(){
     return;
   }
 
-  showLoad(tccT('mp_js_0345'));
+  showBusy();   // [v50] อ่านข้อมูล → แถบบางๆ ไม่บล็อกหน้าจอ
   console.log('[initWallet v21] uid:', _uid, 'member_id:', SESSION.member_id);
   try{
     // fetch ทั้ง 3 พร้อมกัน — MP Transactions ใช้ uid (BNB_ID) ตรงกับที่ GAS บันทึก
-    const [txs, mpWalRes, mpTxs] = await Promise.all([
-      apiCached(walletKey, {action:'read', sheet:'Transactions'}, 30000),
-      apiPost({action:'getMpWallet',        uid: _uid}),
-      apiPost({action:'getMpTransactions',  uid: _uid, limit: 200})
-    ]);
+    // [v50 PERF] getWalletBundle = Transactions(เฉพาะของ uid) + getMpWallet + getMpTransactions ใน 1 call
+    let txs, mpWalRes, mpTxs;
+    const wb = await apiCached('walletb_'+_uid, {action:'getWalletBundle', uid:_uid, limit:200}, 30000);
+    if(wb && wb.success && Array.isArray(wb.transactions)){
+      txs=wb.transactions; mpWalRes=wb.mpWallet; mpTxs=wb.mpTransactions;
+      _apiCache[walletKey] = { data: txs, ts: Date.now() };
+    } else {
+      // GAS ยังเป็น v49 → ใช้ 3 call เดิม
+      delete _apiCache['walletb_'+_uid];
+      [txs, mpWalRes, mpTxs] = await Promise.all([
+        apiCached(walletKey, {action:'read', sheet:'Transactions'}, 30000),
+        apiPost({action:'getMpWallet',        uid: _uid}),
+        apiPost({action:'getMpTransactions',  uid: _uid, limit: 200})
+      ]);
+    }
     console.log('[initWallet v21] txs:', Array.isArray(txs) ? txs.length + ' rows' : txs,
                 'mpWal:', mpWalRes,
                 'mpTxs:', Array.isArray(mpTxs) ? mpTxs.length + ' rows' : mpTxs);
@@ -10248,7 +10285,8 @@ async function initOrders(opts){
   }
   initOrders._loading = true;
   filterOrd('all', document.querySelector('#ord-fbar .fbtn'));
-  showLoad(tccT('mp_js_0350'));
+  if(!D.orders.length) _skelRows('ordb','ordb-cards',3);   // [v50] skeleton แทน overlay เต็มจอ
+  showBusy();
   try{
     console.log('[initOrders v29] fetching uid=', SESSION.uid, 'member_id=', SESSION.member_id,
       'force=', !!_force);
@@ -10334,7 +10372,7 @@ async function initFF(){
   if(!SESSION) return;
   try{
     const ffKey = 'ff_' + SESSION.member_id;
-    const ffs=await apiCached(ffKey, {action:'read',sheet:'FundingFree'}, 60000);
+    const ffs=await apiCached(ffKey, {action:'getMyFF', member_id:SESSION.member_id}, 60000);
     if(Array.isArray(ffs)){
       const myFF=ffs.filter(f=>f.member_id===SESSION.member_id);
       const grouped={};
@@ -10364,16 +10402,93 @@ async function submitRefresh(){
 
 // ─── REAL HOME STATS ───
 // Simple in-memory cache to avoid duplicate API calls
-const _apiCache = {};
+// ═══════════════════════════════════════════════════════════════
+// [v50 PERF] apiCached + persistent stale-while-revalidate (localStorage)
+//  • memory cache (TTL) เหมือนเดิม
+//  • key ที่อยู่ใน _SWR_KEYS ถูกเก็บลง localStorage → รีเฟรชหน้า/เปิดใหม่ วาดจากข้อมูลเก่าทันที แล้วรีเฟรชเบื้องหลัง
+//    ถ้าข้อมูลสดต่างจากเก่า จะเรียก listener (swrOn) เพื่อวาดซ้ำ
+//  • `delete _apiCache[key]` (ที่โค้ดเดิมเรียกหลังเขียนข้อมูล) ล้าง localStorage ด้วยอัตโนมัติผ่าน Proxy
+//  • ถ้า GAS ยังไม่ deploy v50 → fallback ไป endpoint เดิมเอง
+// ═══════════════════════════════════════════════════════════════
+const _SWR_NS = 'mp_swr1:';
+const _SWR_MAX_AGE = 24*3600*1000;      // ข้อมูลเก่าเกิน 24 ชม. ไม่ใช้
+const _SWR_MAX_BYTES = 1500000;         // ก้อนใหญ่เกินนี้ไม่เก็บ
+const _SWR_KEYS = /^(products$|cats$|config_pub$|notifs_|orders_|walletb_|ff_|refsb_|sd_)/;
+function _swrRead(key){
+  if(!_SWR_KEYS.test(key)) return null;
+  try{
+    const raw=localStorage.getItem(_SWR_NS+key); if(!raw) return null;
+    const o=JSON.parse(raw);
+    if(!o || Date.now()-o.t>_SWR_MAX_AGE) { localStorage.removeItem(_SWR_NS+key); return null; }
+    return {data:o.d, json:JSON.stringify(o.d)};
+  }catch(e){ return null; }
+}
+function _swrWrite(key,d){
+  if(!_SWR_KEYS.test(key)) return;
+  try{
+    if(d==null || (typeof d==='object' && !Array.isArray(d) && d.error)) return;   // ไม่เก็บ error
+    const s=JSON.stringify({t:Date.now(),d});
+    if(s.length>_SWR_MAX_BYTES){ localStorage.removeItem(_SWR_NS+key); return; }
+    localStorage.setItem(_SWR_NS+key,s);
+  }catch(e){}
+}
+function _swrDrop(key){ try{ if(typeof key==='string') localStorage.removeItem(_SWR_NS+key); }catch(e){} }
+function _swrPurge(){   // เรียกตอน logout
+  try{
+    const del=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf(_SWR_NS)===0) del.push(k); }
+    del.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
+const _swrListeners=[];
+function swrOn(re,fn){ _swrListeners.push([re,fn]); }
+function _swrNotify(key,d){ _swrListeners.forEach(l=>{ if(l[0].test(key)){ try{ l[1](key,d); }catch(e){ console.warn('[swr]',e); } } }); }
+
+// endpoint ใหม่ที่คืน object ห่อ → แกะเป็น array ให้โค้ดเดิมใช้ได้ทันที / fallback ถ้า GAS ยังเป็น v49
+const _API_UNWRAP   = { getPublicProducts:'products', getMyFF:'ff' };
+const _API_FALLBACK = { getPublicProducts:{action:'read',sheet:'Products'}, getMyFF:{action:'read',sheet:'FundingFree'} };
+async function _apiFetchNorm(params){
+  const d=await apiGet(params);
+  const k=_API_UNWRAP[params.action];
+  if(k){
+    if(d && !Array.isArray(d) && Array.isArray(d[k])) return d[k];
+    if(d && d.error && _API_FALLBACK[params.action]){
+      const old=await apiGet(_API_FALLBACK[params.action]);
+      if(params.action==='getMyFF' && Array.isArray(old)){ const me=params.member_id; return old.filter(f=>f.member_id===me); }
+      return old;
+    }
+  }
+  return d;
+}
+
+const _apiCache = new Proxy({}, {
+  deleteProperty(t,k){
+    _swrDrop(k);
+    if(typeof k==='string'){   // ล้างทุกอย่างของ wallet พร้อมกัน เมื่อโค้ดเดิมล้าง txs_/mpwal_/mptxs_
+      const m=/^(mpwal_|mptxs_|txs_)(.+)$/.exec(k);
+      if(m){ delete t['walletb_'+m[2]]; _swrDrop('walletb_'+m[2]); }
+    }
+    delete t[k]; return true;
+  }
+});
 const _apiInflight={};
+const _apiStaleServed={};
 function apiCached(key, params, ttl=60000){
   const now=Date.now();
   if(_apiCache[key]&&now-_apiCache[key].ts<ttl) return Promise.resolve(_apiCache[key].data);
-  // [PERF] request เดียวกันที่กำลังโหลดอยู่ → ใช้ promise เดิม ไม่ยิง GAS ซ้ำ (ทำให้ prefetch ตอนบูตใช้ร่วมกับ initHome ได้)
-  if(_apiInflight[key]) return _apiInflight[key];
-  return _apiInflight[key]=apiGet(params)
-    .then(d=>{ _apiCache[key]={data:d,ts:Date.now()}; return d; })
-    .finally(()=>{ delete _apiInflight[key]; });
+  // [PERF] request เดียวกันที่กำลังโหลดอยู่ → ใช้ promise เดิม ไม่ยิง GAS ซ้ำ
+  if(_apiInflight[key]) return (_apiStaleServed[key]!==undefined) ? Promise.resolve(_apiStaleServed[key]) : _apiInflight[key];
+  const stale=_swrRead(key);
+  const fresh=_apiFetchNorm(params).then(d=>{ _apiCache[key]={data:d,ts:Date.now()}; _swrWrite(key,d); return d; });
+  if(stale){
+    // ส่งข้อมูลเก่าให้ทันที แล้วรีเฟรชเบื้องหลัง — ถ้าต่างจากเดิมแจ้ง listener ให้วาดซ้ำ
+    _apiStaleServed[key]=stale.data;
+    _apiInflight[key]=fresh
+      .then(d=>{ if(d && !(typeof d==='object' && !Array.isArray(d) && d.error) && JSON.stringify(d)!==stale.json) _swrNotify(key,d); return d; })
+      .catch(()=>{})
+      .finally(()=>{ delete _apiInflight[key]; delete _apiStaleServed[key]; });
+    return Promise.resolve(stale.data);
+  }
+  return _apiInflight[key]=fresh.finally(()=>{ delete _apiInflight[key]; });
 }
 
 // ─── toggle home sections ───
@@ -10384,72 +10499,84 @@ function toggleHomeSections(){
   if(prodSec) prodSec.style.display='';
 }
 
-async function initHome(){
-  const nb = document.getElementById('nb');
-  if(nb) nb.textContent = SESSION ? D.balance.toLocaleString() : '—';
+// [v50 PERF] สินค้าหน้าแรก — ไม่ขึ้นกับ session และไม่รอ stats (ตัด action=stats ออกแล้ว: แถบ stats ซ่อนอยู่ ไม่ได้ใช้)
+function _mapApprovedProducts(prods){
+  return prods.filter(p=>p.approval_status==='approved').map(p=>{
+    let imgs=[];
+    try{ imgs=JSON.parse(p.images_json||'[]'); }catch(e){}
+    imgs=Array.isArray(imgs)?imgs.filter(Boolean):[];
+    return {
+      id:p.product_id, name:p.product_name, price:Number(p.price_usdt),
+      cat:p.category, seller:p.shop_name||p.seller_member_id,
+      rating:Number(p.rating_avg)||0, ff:true, ico:p.emoji_icon||'📦',
+      img:imgs[0]||null, imgs,
+      po:Number(p.payout_option)||45, seller_id:p.seller_member_id,
+      sold:Number(p.total_sales||0), total_reviews:Number(p.total_reviews||0),
+      images_json:p.images_json||'[]',
+      description:p.description||'',
+      video_url:p.video_url||''
+    };
+  });
+}
+async function initHomeProducts(){
   // [v8 FIX] แสดง skeleton loader แทนสินค้าเดโม — ไม่แสดงข้อมูลปลอม
   const hp = document.getElementById('h-products');
   if(hp && D.products.length===0){
     hp.innerHTML=`<div class="pc-skeleton"></div><div class="pc-skeleton"></div><div class="pc-skeleton"></div><div class="pc-skeleton"></div>`;
   } else if(hp && D.products.length>0){
-    // มีข้อมูลจริงใน cache แล้ว (จากการโหลดก่อนหน้า) — render ทันที
     hp.innerHTML=D.products.slice(0,4).map(pcard).join('');
   }
   try{
-    // ✅ โหลดพร้อมกัน (parallel) — สินค้าแสดงให้ทุกคนไม่ขึ้นกับ login
-    const [stats,prods]=await Promise.all([
-      apiCached('stats',{action:'stats'}),
-      apiCached('products',{action:'read',sheet:'Products'})
-    ]);
-    // stats bar ซ่อนไว้ — ไม่แสดงตัวเลขเพราะแพลตฟอร์มเพิ่งเริ่ม
-    // (uncomment ด้านล่างเมื่อข้อมูลในระบบพร้อม)
-    /*
-    if(stats&&!stats.error){
-      const vals=[stats.todayVolume?.toFixed(0)||'0',stats.pendingProds||'0',stats.sellers||'0',stats.totalMembers||'0'];
-      const ids=['hs-vol','hs-prod','hs-shop','hs-mem'];
-      ids.forEach((id,i)=>{
-        const el=document.getElementById(id);
-        if(el){
-          const target=Number(vals[i]);
-          if(target>0){
-            let start=0;const dur=1200;const step=16;const inc=Math.ceil(target/(dur/step));
-            const timer=setInterval(()=>{start=Math.min(start+inc,target);el.textContent=start.toLocaleString();if(start>=target)clearInterval(timer);},step);
-          }else{el.textContent=Number(vals[i]).toLocaleString();}
-        }
-      });
-      const hsBar=document.getElementById('hero-stats-bar');
-      if(hsBar) hsBar.style.display='';
-    }
-    */
+    // getPublicProducts: server กรองเฉพาะ approved · มีข้อมูลเก่าใน localStorage → วาดทันที
+    const prods=await apiCached('products',{action:'getPublicProducts'});
     if(Array.isArray(prods)){
-      const approved=prods.filter(p=>p.approval_status==='approved').map(p=>{
-        let imgs=[];
-        try{ imgs=JSON.parse(p.images_json||'[]'); }catch(e){}
-        imgs=Array.isArray(imgs)?imgs.filter(Boolean):[];
-        return {
-          id:p.product_id, name:p.product_name, price:Number(p.price_usdt),
-          cat:p.category, seller:p.shop_name||p.seller_member_id,
-          rating:Number(p.rating_avg)||0, ff:true, ico:p.emoji_icon||'📦',
-          img:imgs[0]||null, imgs,
-          po:Number(p.payout_option)||45, seller_id:p.seller_member_id,
-          sold:Number(p.total_sales||0), total_reviews:Number(p.total_reviews||0),
-          images_json:p.images_json||'[]',
-          description:p.description||'',
-          video_url:p.video_url||''
-        };
-      });
-      // แสดงสินค้าให้ทุกคน — ไม่ขึ้นกับ SESSION
+      const approved=_mapApprovedProducts(prods);
       if(approved.length>0){
         D.products=approved;
-        const hp=document.getElementById('h-products');
-        if(hp) hp.innerHTML=D.products.slice(0,4).map(pcard).join('');
+        const hp2=document.getElementById('h-products');
+        if(hp2) hp2.innerHTML=D.products.slice(0,4).map(pcard).join('');
       }
     }
   }catch(e){}
-  // ✅ โหลด Deposit Addresses จาก Config + Notifications (login เท่านั้น)
+}
+
+async function initHome(){
+  const nb = document.getElementById('nb');
+  if(nb) nb.textContent = SESSION ? D.balance.toLocaleString() : '—';
+  initHomeProducts();            // ไม่ await — ไม่บล็อก deposit address / notifications
   loadDepositAddresses();
   if(SESSION){ loadNotifications(); chatCheckUnread(); }
 }
+
+// ─── [v50] listeners: ข้อมูลสดมาถึงหลังวาดจากข้อมูลเก่าแล้ว → วาดซ้ำเฉพาะหน้าที่เปิดอยู่ ───
+swrOn(/^products$/, ()=>{
+  try{ initHomeProducts(); }catch(e){}
+  try{ if(curPage==='marketplace') initMP(); }catch(e){}
+  try{ shopLoaded=false; if(curPage==='shop') initShop(); }catch(e){}
+});
+swrOn(/^notifs_/,   ()=>{ try{ loadNotifications(); }catch(e){} });
+swrOn(/^config_pub$/,()=>{ try{ loadDepositAddresses(); }catch(e){} });
+swrOn(/^cats$/,     ()=>{ try{ loadCategories(); }catch(e){} });
+swrOn(/^orders_/,   ()=>{ try{ if(curPage==='dashboard'&&curDTab==='orders') initOrders(); }catch(e){} });
+swrOn(/^ff_/,       ()=>{ try{ if(curPage==='dashboard'&&curDTab==='funding') initFF(); }catch(e){} });
+swrOn(/^refsb_/,    ()=>{ try{ if(curPage==='dashboard'&&curDTab==='referrals') initRef(); }catch(e){} });
+swrOn(/^walletb_/,  (key,d)=>{
+  try{
+    if(!d||!d.success) return;
+    const uid=key.slice('walletb_'.length), now=Date.now();
+    _apiCache['txs_'+uid]  ={data:d.transactions,   ts:now};
+    _apiCache['mpwal_'+uid]={data:d.mpWallet,       ts:now};
+    _apiCache['mptxs_'+uid]={data:d.mpTransactions, ts:now};
+    if(curPage==='dashboard'&&curDTab==='wallet') initWallet();
+  }catch(e){}
+});
+swrOn(/^sd_/, (key,d)=>{
+  try{
+    if(!d||d.error) return;
+    SELLER_DATA=d; _sellerDataTs=Date.now();
+    if(curPage==='seller-dashboard'){ renderSDStats(); renderSDChart(); renderSDPayouts(); }
+  }catch(e){}
+});
 
 // ─── REAL MARKETPLACE ───
 async function initMP(){
@@ -10458,7 +10585,7 @@ async function initMP(){
   filterP();
   try{
     // ✅ ใช้ cache เดียวกับ initHome — ไม่ดึง Products ซ้ำถ้าเพิ่งโหลดไป
-    const prods=await apiCached('products',{action:'read',sheet:'Products'});
+    const prods=await apiCached('products',{action:'getPublicProducts'});
     if(Array.isArray(prods)){
       const approved=prods.filter(p=>p.approval_status==='approved').map(p=>{
         let imgs=[];
@@ -10844,14 +10971,12 @@ async function _loadMainBalanceRun(){
 (async function initApp(){
   renderNav();
   renderBell();
-  // [PERF] ข้อมูลสาธารณะไม่ขึ้นกับ session → ยิงพร้อมกับ loadSession เลย (เดิมต้องรอ getMemberData เสร็จก่อนถึงเริ่มโหลดสินค้า)
-  try{
-    apiCached('products',{action:'read',sheet:'Products'}).catch(()=>{});
-    apiCached('stats',{action:'stats'}).catch(()=>{});
-  }catch(e){}
+  // [v50 PERF] สินค้า/หมวดหมู่ไม่ขึ้นกับ session → วาดทันที (จากข้อมูลเก่าใน localStorage ถ้ามี) โดยไม่รอ loadSession
+  //            ตัด action=stats ออก (อ่าน 6 ชีต แต่แถบ stats ซ่อนอยู่)
   loadCategories();      // [v35] ดึง Categories จาก GAS → populate #prod-category (async, ไม่บล็อก)
+  initHomeProducts();
   await loadSession();   // [v14] await — บล็อกจนกว่า getMemberData/syncMember เสร็จ
-  if(SESSION && typeof schRefresh==='function') schRefresh();   // [PERF] เตรียม token/แชทซัพพอร์ตตั้งแต่ต้น (เดิมรอสินค้าโหลดเสร็จก่อน)
+  if(SESSION && typeof schRefresh==='function') schRefresh();   // [PERF] เตรียม token/แชทซัพพอร์ตตั้งแต่ต้น
   initHome();
 })();
 // ถ้าไม่มี session และ URL มี ?ref= → ไปหน้า login อัตโนมัติเพื่อ register
@@ -11855,7 +11980,7 @@ async function initShop(){
 
   document.getElementById('shop-grid').innerHTML = ('<div class="empty" style="grid-column:1/-1"><div class="empty-ico">⏳</div><p>'+tccT('mp_js_0466')+'</p></div>');
   try{
-    const prods = await apiCached('products', {action:'read', sheet:'Products'}, 60000);
+    const prods = await apiCached('products', {action:'getPublicProducts'}, 60000);
     if(Array.isArray(prods)){
       shopAllProds = prods
         .filter(p => p.approval_status === 'approved' || p.status === 'approved')
