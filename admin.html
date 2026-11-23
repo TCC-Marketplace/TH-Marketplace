@@ -1249,6 +1249,7 @@ textarea.fi{resize:vertical;min-height:70px;}
     <div class="fc gap8"><button class="btn btn-ghost btn-sm" onclick="initCountries()">🔄 รีเฟรช</button>
     <button class="btn btn-ok btn-sm" onclick="openCountryModal('')">＋ เพิ่มประเทศ</button></div></div>
   <div class="alrt alrt-w tsm mb4" style="margin-bottom:12px;">อัตราแลกเปลี่ยน = จำนวนสกุลท้องถิ่นต่อ 1 USDT (ใช้แสดงราคาโดยประมาณเท่านั้น เงินจริงยังเป็น USDT) · ทุกการแก้ไขบันทึกลง Audit Log</div>
+  <div class="alrt alrt-w tsm mb4" style="margin-bottom:12px;">🔒 <strong>ปิดประเทศ</strong> = ซ่อนจากตัวเลือกและหน้าร้าน · บล็อกสั่งซื้อใหม่/สมัครร้าน/เพิ่ม-แก้สินค้า/อนุมัติ · <strong>ออเดอร์ที่ค้างอยู่ยังเดินต่อได้</strong> (ส่งของ ยืนยันรับ คืนเงิน จ่ายผู้ขาย) และไม่ลบข้อมูลใดๆ · ต้องเหลือประเทศเปิดอย่างน้อย 1 ประเทศ · ก่อน<strong>เปิด</strong>ระบบรันชุดทดสอบให้ทุกครั้ง</div>
   <div class="tbl ox">
     <table><thead><tr><th>ประเทศ</th><th>ภาษาเริ่มต้น</th><th>สกุลเงิน</th><th>FX / 1 USDT</th><th>Address</th><th>ร้านค้า</th><th>สินค้า</th><th>สมาชิก</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
     <tbody id="cty-table"></tbody></table>
@@ -1299,6 +1300,23 @@ textarea.fi{resize:vertical;min-height:70px;}
   </div>
   <div class="card mt4" id="cr-quality" style="margin-top:16px;"></div>
 
+  <div class="ptitle" style="margin-top:28px;"><h2>📦 ออเดอร์ <span>รายประเทศ</span></h2>
+    <div class="fc gap8" style="flex-wrap:wrap;">
+      <select class="fi" style="width:170px;" id="cr-ord-country" onchange="renderCrOrders()"><option value="">ทุกประเทศ</option></select>
+      <select class="fi" style="width:150px;" id="cr-ord-status" onchange="renderCrOrders()">
+        <option value="">ทุกสถานะ</option><option value="paid">paid</option><option value="confirmed">confirmed</option>
+        <option value="shipped">shipped</option><option value="completed">completed</option>
+        <option value="exchange_requested">exchange_requested</option><option value="cancelled">cancelled</option>
+      </select>
+      <input class="fi" style="width:190px;" id="cr-ord-q" placeholder="ค้นหา Order / ผู้ซื้อ / ผู้ขาย" oninput="renderCrOrders()">
+      <button class="btn btn-ok btn-sm" onclick="loadCrOrders(true)">🔄 โหลดออเดอร์</button>
+    </div></div>
+  <div class="tbl ox">
+    <table><thead><tr><th>Order</th><th>ประเทศ</th><th>สินค้า</th><th>ผู้ซื้อ</th><th>ผู้ขาย</th><th>ยอดสินค้า (USDT)</th><th>ค่าส่ง (USDT)</th><th>ขนส่งที่ผู้ซื้อเลือก</th><th>สถานะ</th><th>วันที่</th></tr></thead>
+    <tbody id="cr-ord-table"><tr><td colspan="10" class="tm" style="text-align:center;padding:18px;">กด "โหลดออเดอร์"</td></tr></tbody></table>
+  </div>
+  <div class="txs tm" id="cr-ord-note" style="margin-top:6px;"></div>
+
   <div class="ptitle" style="margin-top:28px;"><h2>🧪 ทดสอบ <span>ทุกประเทศ</span></h2>
     <div class="fc gap8" style="flex-wrap:wrap;">
       <select class="fi" style="width:170px;" id="cr-test-country"><option value="">ทุกประเทศ</option></select>
@@ -1340,7 +1358,8 @@ textarea.fi{resize:vertical;min-height:70px;}
     <div class="fg"><label class="fl">รหัสโทรศัพท์</label><input class="fi" id="cty-phone" placeholder="+66"></div>
     <div class="fg"><label class="fl">ลำดับแสดงผล</label><input class="fi" id="cty-sort" type="number" min="0"></div>
     <div class="fg"><label class="fl">สถานะตลาด</label>
-      <select class="fi" id="cty-status"><option value="active">active (เปิดตลาด)</option><option value="inactive">inactive (ปิดตลาด)</option></select></div>
+      <select class="fi" id="cty-status"><option value="active">active (เปิดตลาด)</option><option value="inactive">inactive (ปิดตลาด)</option></select>
+      <div class="txs tm" style="margin-top:4px;">ประเทศเดิม: เปลี่ยนสถานะแล้วกดบันทึก ระบบจะแสดงหน้ายืนยัน (ผลกระทบ/เหตุผล/ชุดทดสอบ) ต่อให้</div></div>
     <div class="fc gap8 mt4"><button class="btn btn-ok w100" onclick="saveCountry()">💾 บันทึก</button></div>
   </div>
 </div>
@@ -3381,6 +3400,7 @@ approveSA = async function(sid){
     const res=await apiPost({action:'approveSeller',app_id:s.app_id||sid,member_id:s.member_id,status:'approved',approved_by:ADMIN.admin_id});
     hideLoad();
     if(res.success){s.status='approved';closeM('m-sa');filterSA('all',null);showToast('✅ อนุมัติ Seller แล้ว!');}
+    else if(res.country_closed) showToast('🔒 '+res.error+' — เปิดประเทศที่เมนู Countries ก่อนจึงอนุมัติได้ (ปฏิเสธได้ตามปกติ)','warn');   // [P7]
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
 };
@@ -3435,6 +3455,7 @@ initProds = async function(){
 
 approveProd = async function(pid){
   if(!ADMIN)return;
+  const _allowMm=!!window._mpcAllowMismatch; window._mpcAllowMismatch=false;   // [P6] แอดมินยืนยันอนุมัติข้ามประเทศร้านแล้ว (ใช้ครั้งเดียว)
   const _pid=String(pid).trim(); // [v27 FIX] normalize
   const p=DA.products.find(x=>String(x.id).trim()===_pid);if(!p)return;
   // [v22 FIX 2] อ่าน FF Override จาก modal fields (เหมือน function เก่า บรรทัด 1460)
@@ -3448,9 +3469,16 @@ approveProd = async function(pid){
     if(!isNaN(ffRateOverride))   payload.ff_rate   = ffRateOverride;
     if(!isNaN(ffAmountOverride)) payload.ff_amount = ffAmountOverride;
     if(approveNote) payload.admin_note = approveNote;  // [v23] โน้ตถึง Seller (optional)
+    if(_allowMm) payload.allow_country_mismatch = true;   // [P6]
     const res=await apiPost(payload);
     hideLoad();
     if(res.success){p.status='approved';closeM('m-prod');filterProds('all',null);showToast('✅ อนุมัติสินค้าแล้ว!');}
+    else if(res.mismatch){
+      // [P6] server ตรวจพบประเทศสินค้า ≠ ประเทศร้าน (กรณี UI ยังไม่ทราบประเทศร้าน) → ถามยืนยันก่อนอนุมัติข้าม
+      showConfirm(`⚠️ ${_mpcEsc(res.error)}<br><small class="tm">ผู้ซื้อในประเทศร้านจะไม่เห็นสินค้านี้ ยืนยันอนุมัติต่อหรือไม่?</small>`,
+        ()=>{ window._mpcAllowMismatch=true; approveProd(pid); },'⚠️','อนุมัติต่อ','btn-err');
+    }
+    else if(res.country_closed) showToast('🔒 '+res.error+' — เปิดประเทศที่เมนู Countries ก่อนจึงอนุมัติได้ (ปฏิเสธได้ตามปกติ)','warn');   // [P7]
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
 };
@@ -3944,34 +3972,98 @@ function openCountryModal(code){
   set('cty-status',c?String(c.status).toLowerCase():'active');
   openM('m-country');
 }
-async function _mpcUpsertCountry(payload){
+// [P6] endpoint Multi-Country ฝั่งแอดมินต้องแนบ admin_token (ออกให้ตอนล็อกอิน · อายุ 12 ชม.) — session เก่าที่ไม่มี token ต้องล็อกอินใหม่
+function _mpcAuth(){ return { admin_id: ADMIN && ADMIN.admin_id, admin_token: (ADMIN && ADMIN.admin_token) || '' }; }
+function _mpcAuthFailed(res){
+  if(res && res.auth===false){ showToast('🔒 '+(res.error||'เซสชันแอดมินหมดอายุ — กรุณาเข้าสู่ระบบใหม่'),'err'); return true; }
+  return false;
+}
+// [P7] เปิด-ปิดประเทศ
+//   onDone(res) ถูกเรียกเมื่อบันทึก/เปลี่ยนสถานะ "สำเร็จจริง" (รวมกรณีกด "เปิดเลย" หลังชุดทดสอบไม่ผ่าน)
+//   server ตอบ need_force (e125) เมื่อเปิดแล้วชุดทดสอบ fail → ข้อมูลถูกบันทึกแล้ว แต่ประเทศยังปิดอยู่
+async function _mpcUpsertCountry(payload, onDone){
   if(!ADMIN){ showToast('ไม่มีสิทธิ์','err'); return false; }
   showLoad('กำลังบันทึก...');
   try{
-    const res=await apiPost(Object.assign({action:'adminUpsertCountry',admin_id:ADMIN.admin_id},payload));
+    const res=await apiPost(Object.assign({action:'adminUpsertCountry'},_mpcAuth(),payload));
     hideLoad();
-    if(res&&res.success){ await mpcLoad(true); return true; }
+    if(res&&res.success){
+      await mpcLoad(true);
+      if(res.warnings&&res.warnings.length) showToast('⚠️ เปิดแล้ว · มีคำเตือน '+res.warnings.length+' รายการ (ดูที่ Country Report → ชุดทดสอบ)','warn');
+      if(typeof onDone==='function') onDone(res);
+      return true;
+    }
+    if(_mpcAuthFailed(res)) return false;
+    if(res&&res.need_force){ await initCountries(); _mpcForceOpenPrompt(res,payload,onDone); return false; }
     showToast('❌ '+((res&&res.error)||'บันทึกไม่สำเร็จ'),'err');
   }catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
   return false;
+}
+function _mpcForceOpenPrompt(res,payload,onDone){
+  const failed=res.failed||[];
+  const li=failed.map(f=>`<li style="margin-bottom:6px;"><strong>${_mpcEsc(f.label)}</strong><div class="txs tm" style="word-break:break-word;">${_mpcEsc(f.detail)}</div></li>`).join('');
+  showConfirm(`<div style="text-align:left;"><strong>ยังเปิดประเทศ ${_mpcEsc(payload.country_code)} ไม่ได้</strong> — ชุดทดสอบไม่ผ่าน ${failed.length} รายการ`+
+    `<ul style="margin:10px 0 10px 18px;">${li}</ul>`+
+    `<small class="tm">ข้อมูลที่แก้ไขถูกบันทึกแล้ว แต่ประเทศยังปิดอยู่ · แนะนำให้แก้ให้ผ่านก่อน (Country Report → ชุดทดสอบ) · หรือเลือก "เปิดเลย" เพื่อข้ามการตรวจ (บันทึกลง Audit_Log)</small></div>`,
+    ()=>{ _mpcUpsertCountry(Object.assign({},payload,{status:'active',force_open:true}),onDone); },'🚧','เปิดเลย (ข้ามการตรวจ)','btn-err');
 }
 async function saveCountry(){
   const v=id=>document.getElementById(id).value.trim();
   const code=v('cty-code').toUpperCase();
   if(!/^[A-Z]{2}$/.test(code)){ showToast('รหัสประเทศต้องเป็น ISO2 2 ตัวอักษร','err'); return; }
   const fx=Number(v('cty-fx')); if(!(fx>0)){ showToast('FX ต้องมากกว่า 0','err'); return; }
-  const ok=await _mpcUpsertCountry({country_code:code,name_th:v('cty-name-th'),name_en:v('cty-name-en'),
+  const prev=MPC.countries.find(x=>String(x.country_code)===code)||null;
+  const want=v('cty-status'), prevSt=prev?String(prev.status).toLowerCase():'';
+  const payload={country_code:code,name_th:v('cty-name-th'),name_en:v('cty-name-en'),
     default_lang:v('cty-lang'),currency_code:v('cty-cur').toUpperCase(),fx_to_usdt:fx,address_schema:v('cty-addr'),
-    postal_regex:v('cty-postal'),phone_prefix:v('cty-phone'),sort:Number(v('cty-sort'))||0,status:v('cty-status')});
-  if(ok){ closeM('m-country'); showToast('✅ บันทึกประเทศแล้ว'); initCountries(); }
+    postal_regex:v('cty-postal'),phone_prefix:v('cty-phone'),sort:Number(v('cty-sort'))||0};
+  // ประเทศเดิม: บันทึกข้อมูลก่อน แล้วเปลี่ยนสถานะผ่านขั้นตอนเปิด/ปิด (ผลกระทบ + เหตุผล + ชุดทดสอบ) · ประเทศใหม่: ส่ง status ไปกับการสร้าง (server รันชุดทดสอบก่อนเปิดให้)
+  const statusChange=!!prev && want!==prevSt;
+  if(!prev) payload.status=want;
+  await _mpcUpsertCountry(payload,()=>{
+    closeM('m-country'); showToast('✅ บันทึกประเทศแล้ว');
+    initCountries().then(()=>{ if(statusChange) toggleCountry(code); });
+  });
 }
-function toggleCountry(code){
+async function toggleCountry(code){
+  if(!ADMIN) return;
   const c=MPC.countries.find(x=>String(x.country_code)===code); if(!c) return;
-  const to=String(c.status).toLowerCase()==='active'?'inactive':'active';
-  showConfirm(`${to==='inactive'?'ปิด':'เปิด'}ตลาด <strong>${_mpcEsc(code)}</strong>?`+
-    (to==='inactive'?'<br><small class="tm">ผู้ซื้อจะไม่เห็นประเทศนี้ในตัวเลือก (สินค้าเดิมไม่ถูกลบ)</small>':''),
-    async()=>{ if(await _mpcUpsertCountry({country_code:code,status:to})){ showToast('✅ อัปเดตสถานะแล้ว'); initCountries(); } },
-    '🌏','ยืนยัน','btn-gold');
+  const closing=String(c.status).toLowerCase()==='active';
+  const ec=_mpcEsc(code), head=`${_mpcFlag(code)} <strong>${ec}</strong> ${_mpcEsc(c.name_th||c.name_en||'')}`;
+  if(!closing){
+    showConfirm(`<div style="text-align:left;">เปิดตลาด ${head}?<br><small class="tm">ระบบจะรันชุดทดสอบของประเทศนี้ก่อนเปิด — ถ้าไม่ผ่านจะไม่เปิดและแจ้งรายการที่ต้องแก้<br>สินค้าที่เคยอนุมัติไว้จะกลับมาแสดงทันที</small></div>`,
+      ()=>{ _mpcUpsertCountry({country_code:code,status:'active'},()=>{ showToast('✅ เปิดประเทศ '+code+' แล้ว'); initCountries(); }); },
+      '🌏','เปิดตลาด','btn-gold');
+    return;
+  }
+  showLoad('กำลังตรวจผลกระทบ...');
+  let im=null;
+  try{ im=await apiGet(Object.assign({action:'adminCountryImpact',country:code},_mpcAuth())); }
+  catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); return; }
+  hideLoad();
+  if(_mpcAuthFailed(im)) return;
+  if(!im||!im.success){ showToast('❌ '+((im&&im.error)||'ตรวจผลกระทบไม่สำเร็จ'),'err'); return; }
+  if(im.is_last_active){
+    showConfirm(`<div style="text-align:left;"><strong>ปิด ${head} ไม่ได้</strong><br><small class="tm">ต้องมีประเทศที่เปิดให้บริการอย่างน้อย 1 ประเทศ — ประเทศนี้เป็นประเทศสุดท้ายที่เปิดอยู่<br>เปิดประเทศอื่นก่อน แล้วจึงปิดประเทศนี้</small></div>`,
+      ()=>{},'⛔','รับทราบ','btn-ghost');
+    return;
+  }
+  const N=x=>Number(x||0).toLocaleString('en-US');
+  const bs=im.open_orders_by_status||{};
+  const bsTxt=Object.keys(bs).map(k=>`${_mpcEsc(k)} ${N(bs[k])}`).join(' · ');
+  const row=(ico,t)=>`<li style="margin-bottom:5px;">${ico} ${t}</li>`;
+  showConfirm(`<div style="text-align:left;">ปิดตลาด ${head}?`+
+    `<ul style="list-style:none;margin:10px 0;padding:0;font-size:13px;line-height:1.5;">`+
+    row('🛒',`ออเดอร์ที่ยังไม่จบ <strong>${N(im.open_orders)}</strong>${bsTxt?` <span class="tm">(${bsTxt})</span>`:''} — ยังส่งของ/ยืนยันรับ/คืนเงิน/จ่ายผู้ขายต่อได้ตามปกติ`)+
+    row('🏪',`ร้านที่อนุมัติแล้ว <strong>${N(im.shops_approved)}</strong> — ยังดูแดชบอร์ดและถอนเงินได้ แต่เพิ่ม/แก้สินค้าไม่ได้`)+
+    row('📦',`สินค้า approved <strong>${N(im.products_approved)}</strong> — ถูกซ่อนจากหน้าร้าน (ไม่ลบ · เปิดใหม่แล้วกลับมาขายได้ทันที)`)+
+    row('⏳',`รออนุมัติ: ร้าน <strong>${N(im.shops_pending)}</strong> · สินค้า <strong>${N(im.products_pending)}</strong> — อนุมัติไม่ได้จนกว่าจะเปิดประเทศ (ปฏิเสธได้)`)+
+    row('👥',`สมาชิกที่ตั้งประเทศนี้ <strong>${N(im.members)}</strong> — ระบบสลับไปประเทศที่เปิดอยู่ให้อัตโนมัติ`)+
+    `</ul><div class="tm txs">บล็อกในประเทศนี้: สั่งซื้อใหม่ · สมัครร้านใหม่ · เพิ่มที่อยู่ใหม่ · เพิ่ม/แก้สินค้า · การอนุมัติ · ตะกร้าที่ค้างอยู่จะสั่งซื้อไม่ได้</div>`+
+    `<input class="fi" id="cty-close-reason" maxlength="300" placeholder="เหตุผล เช่น ยังไม่เริ่มทำการตลาด (บันทึกใน Audit_Log)" style="margin-top:10px;width:100%;"></div>`,
+    ()=>{ const reason=(document.getElementById('cty-close-reason')?.value||'').trim();
+      _mpcUpsertCountry({country_code:code,status:'inactive',reason},()=>{ showToast('✅ ปิดประเทศ '+code+' แล้ว'); initCountries(); }); },
+    '⏸','ปิดตลาด','btn-err');
 }
 
 // ── Carriers ──
@@ -4022,9 +4114,10 @@ async function _mpcUpsertCarrier(payload){
   if(!ADMIN){ showToast('ไม่มีสิทธิ์','err'); return false; }
   showLoad('กำลังบันทึก...');
   try{
-    const res=await apiPost(Object.assign({action:'adminUpsertCarrier',admin_id:ADMIN.admin_id},payload));
+    const res=await apiPost(Object.assign({action:'adminUpsertCarrier'},_mpcAuth(),payload));
     hideLoad();
     if(res&&res.success){ await mpcLoad(true); return true; }
+    if(_mpcAuthFailed(res)) return false;
     showToast('❌ '+((res&&res.error)||'บันทึกไม่สำเร็จ'),'err');
   }catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
   return false;
@@ -4071,10 +4164,11 @@ function mpcProdMismatch(p){
 (function(){
   const _origApprove=approveProd;
   approveProd=function(pid){
+    if(window._mpcAllowMismatch) return _origApprove(pid);   // [P6] ยืนยันแล้ว ไม่ถามซ้ำ
     const p=DA.products.find(x=>String(x.id).trim()===String(pid).trim());
     if(p && mpcProdMismatch(p)){
       showConfirm(`⚠️ ประเทศสินค้า <strong>${_mpcCC(p.country)}</strong> ไม่ตรงกับประเทศร้าน <strong>${MPC.shopCountry[p.seller_member_id]}</strong><br><small class="tm">ผู้ซื้อในประเทศร้านจะไม่เห็นสินค้านี้ ยืนยันอนุมัติต่อหรือไม่?</small>`,
-        ()=>_origApprove(pid),'⚠️','อนุมัติต่อ','btn-err');
+        ()=>{ window._mpcAllowMismatch=true; _origApprove(pid); },'⚠️','อนุมัติต่อ','btn-err');
       return;
     }
     return _origApprove(pid);
@@ -4086,8 +4180,46 @@ function mpcProdMismatch(p){
 window._crData = null;
 async function initCountryReport(){
   await mpcLoad(false);
-  mpcFillFilter('cr-country'); mpcFillFilter('cr-test-country');
+  mpcFillFilter('cr-country'); mpcFillFilter('cr-test-country'); mpcFillFilter('cr-ord-country');
   if(!window._crData) loadCountryReport();
+}
+
+// [P6] ตารางออเดอร์ + ตัวกรองประเทศ/สถานะ/คำค้น (อ่านอย่างเดียว · แสดงล่าสุด 200 รายการที่ตรงตัวกรอง)
+window._crOrders = null;
+async function loadCrOrders(force){
+  if(window._crOrders && !force){ renderCrOrders(); return; }
+  showLoad('กำลังโหลดออเดอร์...');
+  try{
+    const rows=await apiGet({action:'read',sheet:'Orders'});
+    window._crOrders=Array.isArray(rows)?rows.filter(o=>o&&o.order_id):[];
+    await mpcLoad(false); mpcFillFilter('cr-ord-country');
+    renderCrOrders();
+  }catch(e){ showToast('⚠️ โหลดออเดอร์ไม่สำเร็จ: '+e.message,'err'); }
+  hideLoad();
+}
+function renderCrOrders(){
+  const body=document.getElementById('cr-ord-table'); if(!body) return;
+  const all=window._crOrders;
+  if(!all){ body.innerHTML='<tr><td colspan="10" class="tm" style="text-align:center;padding:18px;">กด "โหลดออเดอร์"</td></tr>'; return; }
+  const cc=document.getElementById('cr-ord-country')?.value||'';
+  const st=document.getElementById('cr-ord-status')?.value||'';
+  const q=(document.getElementById('cr-ord-q')?.value||'').trim().toLowerCase();
+  const list=all.filter(o=>
+    (!cc||_mpcCC(o.country_code)===cc) &&
+    (!st||String(o.order_status||'').toLowerCase()===st) &&
+    (!q||[o.order_id,o.buyer_member_id,o.seller_member_id,o.product_name_snap].some(v=>String(v||'').toLowerCase().includes(q)))
+  ).sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+  const shown=list.slice(0,200);
+  body.innerHTML=shown.length?shown.map(o=>{
+    const fee=Number(o.ship_fee_usdt)||0;
+    return `<tr><td class="mono tg">${_mpcEsc(o.order_id)}</td><td>${mpcCountryBdg(o.country_code)}</td>
+      <td>${_mpcEsc(o.product_name_snap||o.product_id||'')}</td><td class="tm">${_mpcEsc(o.buyer_member_id||'')}</td><td class="tm">${_mpcEsc(o.seller_member_id||'')}</td>
+      <td class="mono">${_crN(o.amount_usdt,2)}</td><td class="mono">${fee>0?_crN(fee,2):'—'}</td>
+      <td>${_mpcEsc(o.ship_method_code||'—')}</td><td><span class="bdg bdg-muted">${_mpcEsc(o.order_status||'')}</span></td>
+      <td class="txs tm">${_mpcEsc(String(o.created_at||'').slice(0,10))}</td></tr>`;
+  }).join(''):'<tr><td colspan="10" class="tm" style="text-align:center;padding:18px;">ไม่พบออเดอร์</td></tr>';
+  const note=document.getElementById('cr-ord-note');
+  if(note) note.textContent='พบ '+_crN(list.length)+' ออเดอร์'+(list.length>shown.length?' · แสดงล่าสุด '+shown.length+' รายการ':'')+' · แถวเก่าที่ไม่มี country_code นับเป็น TH';
 }
 function _crDate(d){ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function crQuick(days){
@@ -4100,7 +4232,7 @@ function _crN(v,d){ return Number(v||0).toLocaleString('en-US',{minimumFractionD
 async function loadCountryReport(){
   if(!ADMIN) return;
   const v=id=>document.getElementById(id)?.value||'';
-  const params={action:'adminCountryReport',admin_id:ADMIN.admin_id};
+  const params=Object.assign({action:'adminCountryReport'},_mpcAuth());
   if(v('cr-from')) params.from=v('cr-from');
   if(v('cr-to')) params.to=v('cr-to');
   if(v('cr-country')) params.country=v('cr-country');
@@ -4156,7 +4288,7 @@ function exportCountryReport(){
 function _crLv(l){ return l==='fail'?['❌','bdg-err']:(l==='warn'?['⚠️','bdg-warn']:['✅','bdg-ok']); }
 async function runCountrySelfTest(){
   if(!ADMIN) return;
-  const params={action:'adminCountrySelfTest',admin_id:ADMIN.admin_id};
+  const params=Object.assign({action:'adminCountrySelfTest'},_mpcAuth());
   const cc=document.getElementById('cr-test-country')?.value||''; if(cc) params.country=cc;
   showLoad('กำลังรันชุดทดสอบ...');
   const out=document.getElementById('cr-test-out');
