@@ -3427,6 +3427,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
   </div>
 </nav>
   <div class="stitle">🏪 Seller <span>Dashboard</span></div>
+  <div id="seller-closed-note"></div>
   <div class="g4 mb4">
     <div class="card"><div class="clbl" data-i18n="mp_ui_0134">📦 คำสั่งซื้อ</div><div class="cval mono" id="sd-orders">—</div><div class="csub" id="sd-orders-m" data-i18n="mp_ui_0135">เดือนนี้ +0</div></div>
     <div class="card"><div class="clbl" data-i18n="mp_ui_0136">💰 รายได้ (USDT)</div><div class="cval tg mono" id="sd-revenue">—</div><div class="csub" id="sd-pending-rev">Pending: —</div></div>
@@ -3498,9 +3499,10 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="smn-btn" onclick="go('seller-analytics');this.closest('.seller-mobile-nav').querySelectorAll('.smn-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');this.closest('.seller-mobile-nav').querySelector('.smn-trigger-label').textContent=this.textContent;this.closest('.seller-mobile-nav').classList.remove('open');">📈 Analytics</div>
   </div>
 </nav>
+  <div id="seller-closed-note-p"></div>
   <div class="fc btwn mb4">
     <div class="stitle" style="margin:0;" data-i18n-html="mp_ui_0149">📦 จัดการ <span>สินค้า</span></div>
-    <button class="btn btn-gold btn-sm" onclick="_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}setEmoji('📦');prodPrepCarriers([]);openM('m-addprod')" data-i18n="mp_ui_0150">+ เพิ่มสินค้าใหม่</button>
+    <button class="btn btn-gold btn-sm" onclick="if(mpcShopClosedGuard())return;_editingProdId=null;document.querySelector('#m-addprod .mtitle').textContent='📦 เพิ่มสินค้าใหม่';const _vi=document.getElementById('prod-video-url');if(_vi){_vi.value='';updateVideoPreview();}setEmoji('📦');prodPrepCarriers([]);openM('m-addprod')" data-i18n="mp_ui_0150">+ เพิ่มสินค้าใหม่</button>
   </div>
   <div class="tbl ox tbl-card-mode"><table><thead><tr><th data-i18n="mp_ui_0049">สินค้า</th><th data-i18n="mp_ui_0151">ราคา (USDT)</th><th>Payout Option</th><th>Stock</th><th data-i18n="mp_ui_0035">สถานะ</th><th data-i18n="mp_ui_0152">ยอดขาย</th><th data-i18n="mp_ui_0053">จัดการ</th></tr></thead><tbody id="spr-b"></tbody></table></div>
   <div id="spr-b-cards"></div>
@@ -4089,6 +4091,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <span class="mclose" onclick="closeM('m-shiporder')">✕</span>
     <div class="mtitle" data-i18n="mp_ui_0289">📦 ยืนยันจัดส่งสินค้า</div>
     <div class="alrt alrt-i mb4 tsm" data-i18n="mp_ui_0290">กรอกข้อมูลการจัดส่ง — Buyer จะเห็น Tracking Number ทันที</div>
+    <div id="ship-buyer-choice" class="tsm tm" style="display:none;margin-bottom:10px;"></div>
     <div class="fg">
       <label class="fl" data-i18n="mp_ui_0291">บริษัทขนส่ง *</label>
       <select class="fi" id="ship-carrier" onchange="updateTrackPreview()">
@@ -5204,6 +5207,12 @@ const TCC_I18N = {
   'mp_js_0617':["-- เลือกบริษัทขนส่ง --","-- Select carrier --","-- Chọn đơn vị vận chuyển --","-- ជ្រើសរើសក្រុមហ៊ុនដឹកជញ្ជូន --","-- ပို့ဆောင်ရေးကုမ္ပဏီရွေးပါ --","-- ເລືອກບໍລິສັດຂົນສົ່ງ --","-- Pilih pembawa --","-- Pilih kurir --","-- 选择物流公司 --"],
   'mp_js_0618':["ยังไม่มีขนส่งสำหรับประเทศนี้ — ติดต่อแอดมิน","No carriers for this country yet — please contact admin","Chưa có đơn vị vận chuyển cho quốc gia này — vui lòng liên hệ admin","មិនទាន់មានការដឹកជញ្ជូនសម្រាប់ប្រទេសនេះ — សូមទាក់ទង admin","ဤနိုင်ငံအတွက် ပို့ဆောင်ရေး မရှိသေးပါ — admin ကို ဆက်သွယ်ပါ","ຍັງບໍ່ມີຂົນສົ່ງສຳລັບປະເທດນີ້ — ຕິດຕໍ່ admin","Belum ada pembawa untuk negara ini — sila hubungi admin","Belum ada kurir untuk negara ini — hubungi admin","该国家暂无物流 — 请联系管理员"],
   'mp_js_0619':["โหลดรายการขนส่งไม่สำเร็จ — ค่าเดิมจะไม่ถูกแก้ไข","Could not load carriers — existing values will not be changed","Không tải được danh sách vận chuyển — giá trị cũ sẽ không bị thay đổi","មិនអាចផ្ទុកបញ្ជីការដឹកជញ្ជូនបាន — តម្លៃចាស់នឹងមិនត្រូវបានកែប្រែ","ပို့ဆောင်ရေးစာရင်း မဖွင့်နိုင်ပါ — လက်ရှိတန်ဖိုးများ မပြောင်းလဲပါ","ໂຫຼດລາຍການຂົນສົ່ງບໍ່ສຳເລັດ — ຄ່າເດີມຈະບໍ່ຖືກແກ້ໄຂ","Gagal memuatkan senarai pembawa — nilai sedia ada tidak akan diubah","Gagal memuat daftar kurir — nilai lama tidak akan diubah","无法加载物流列表 — 原有设置不会被修改"],
+  'mp_js_0620':["ประเทศ {p1} ปิดให้บริการแล้ว ระบบสลับไปตลาด {p2} ให้อัตโนมัติ","{p1} is no longer open. Switched to the {p2} market automatically.","{p1} đã ngừng phục vụ. Hệ thống tự động chuyển sang thị trường {p2}.","{p1} បានបិទសេវាកម្មហើយ។ ប្រព័ន្ធបានប្តូរទៅទីផ្សារ {p2} ដោយស្វ័យប្រវត្តិ។","{p1} ကို ဝန်ဆောင်မှု ပိတ်လိုက်ပါပြီ။ စနစ်က {p2} ဈေးကွက်သို့ အလိုအလျောက် ပြောင်းပေးလိုက်ပါသည်။","{p1} ປິດໃຫ້ບໍລິການແລ້ວ. ລະບົບປ່ຽນໄປຕະຫຼາດ {p2} ໃຫ້ອັດຕະໂນມັດ.","{p1} tidak lagi dibuka. Sistem bertukar ke pasaran {p2} secara automatik.","{p1} sudah ditutup. Sistem otomatis berpindah ke pasar {p2}.","{p1} 已暂停服务，系统已自动切换到 {p2} 市场。"],
+  'mp_js_0621':["ประเทศของร้านคุณ ({p1}) ปิดให้บริการชั่วคราว — ผู้ซื้อสั่งซื้อใหม่ไม่ได้ และคุณเพิ่ม/แก้ไขสินค้าไม่ได้ · ออเดอร์ที่ค้างอยู่ยังจัดส่งและรับเงินได้ตามปกติ","Your shop's country ({p1}) is temporarily closed — buyers can't place new orders and you can't add or edit products. Existing orders can still be shipped and paid out as usual.","Quốc gia của shop ({p1}) đang tạm ngừng phục vụ — người mua không thể đặt đơn mới và bạn không thể thêm/sửa sản phẩm. Các đơn đang xử lý vẫn được giao và thanh toán bình thường.","ប្រទេសរបស់ហាងអ្នក ({p1}) បានបិទសេវាកម្មជាបណ្តោះអាសន្ន — អ្នកទិញមិនអាចបញ្ជាទិញថ្មីបានទេ ហើយអ្នកមិនអាចបន្ថែម ឬកែប្រែផលិតផលបានទេ។ ការបញ្ជាទិញដែលនៅសល់នៅតែអាចដឹកជញ្ជូន និងទទួលប្រាក់បានជាធម្មតា។","သင့်ဆိုင်၏ နိုင်ငံ ({p1}) ကို ယာယီ ပိတ်ထားသည် — ဝယ်သူများ အော်ဒါအသစ် မမှာနိုင်ပါ၊ သင်လည်း ကုန်ပစ္စည်း ထည့်ရန်/ပြင်ရန် မရပါ။ လက်ကျန်အော်ဒါများကို ပုံမှန်အတိုင်း ပို့ဆောင်ပြီး ငွေလက်ခံနိုင်ပါသည်။","ປະເທດຂອງຮ້ານທ່ານ ({p1}) ປິດໃຫ້ບໍລິການຊົ່ວຄາວ — ຜູ້ຊື້ສັ່ງຊື້ໃໝ່ບໍ່ໄດ້ ແລະ ທ່ານເພີ່ມ/ແກ້ໄຂສິນຄ້າບໍ່ໄດ້ · ອໍເດີທີ່ຄ້າງຢູ່ຍັງຈັດສົ່ງ ແລະ ຮັບເງິນໄດ້ຕາມປົກກະຕິ.","Negara kedai anda ({p1}) ditutup sementara — pembeli tidak boleh membuat pesanan baharu dan anda tidak boleh menambah/mengedit produk. Pesanan sedia ada masih boleh dihantar dan dibayar seperti biasa.","Negara toko Anda ({p1}) ditutup sementara — pembeli tidak bisa memesan baru dan Anda tidak bisa menambah/mengedit produk. Pesanan yang sedang berjalan tetap bisa dikirim dan dibayarkan seperti biasa.","您店铺所在国家（{p1}）暂时停止服务——买家无法下新订单，您也无法添加或编辑商品。已有订单仍可正常发货和结算。"],
+  // ── [P6] ขนส่งที่ผู้ซื้อเลือก / ค่าส่งเฉพาะร้าน ──
+  'mp_ui_0347':["ขนส่งที่ผู้ซื้อเลือก","Carrier chosen by buyer","Đơn vị vận chuyển người mua chọn","ក្រុមហ៊ុនដឹកជញ្ជូនដែលអ្នកទិញបានជ្រើស","ဝယ်သူရွေးချယ်သော ပို့ဆောင်ရေး","ຂົນສົ່ງທີ່ຜູ້ຊື້ເລືອກ","Penghantar pilihan pembeli","Kurir pilihan pembeli","买家选择的物流"],
+  'mp_ui_0348':["ค่าส่งเฉพาะร้าน (USDT)","Shop's own fee (USDT)","Phí riêng của shop (USDT)","ថ្លៃដឹករបស់ហាង (USDT)","ဆိုင်ကိုယ်ပိုင် ပို့ခ (USDT)","ຄ່າສົ່ງສະເພາະຮ້ານ (USDT)","Yuran kedai (USDT)","Ongkir khusus toko (USDT)","店铺专属运费 (USDT)"],
+  'mp_ui_0349':["ขณะนี้ระบบปิดให้บริการทุกประเทศชั่วคราว — กรุณากลับมาใหม่ภายหลัง","All markets are temporarily closed — please check back later.","Hiện tất cả thị trường đang tạm ngừng phục vụ — vui lòng quay lại sau.","ទីផ្សារទាំងអស់បានបិទជាបណ្តោះអាសន្ន — សូមត្រឡប់មកវិញនៅពេលក្រោយ។","ဈေးကွက်အားလုံးကို ယာယီ ပိတ်ထားသည် — နောက်မှ ပြန်လည်ကြည့်ရှုပါ။","ຕະຫຼາດທັງໝົດປິດໃຫ້ບໍລິການຊົ່ວຄາວ — ກະລຸນາກັບມາໃໝ່ພາຍຫຼັງ.","Semua pasaran ditutup buat sementara — sila cuba lagi kemudian.","Semua pasar sedang ditutup sementara — silakan kembali lagi nanti.","所有市场暂时关闭，请稍后再来。"],
   // ── [SCH v1] Support Chat (แชทซัพพอร์ต) — mp_sch_NNNN ──
   'mp_sch_0001':["⚠️ กรุณาเข้าสู่ระบบก่อนใช้แชท","⚠️ Please log in before using chat","⚠️ Vui lòng đăng nhập trước khi dùng chat","⚠️ សូមចូលគណនីមុនពេលប្រើការជជែក","⚠️ ချက်တင်မသုံးမီ ကျေးဇူးပြု၍ လော့ဂ်အင်ဝင်ပါ","⚠️ ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນໃຊ້ແຊັດ","⚠️ Sila log masuk sebelum menggunakan sembang","⚠️ Silakan masuk terlebih dahulu sebelum menggunakan chat","⚠️ 使用聊天前请先登录"],
   'mp_sch_0002':["💬 แจ้งเลข Order {p1} ในแชทกับซัพพอร์ตได้เลย","💬 Just tell support your Order {p1} in the chat","💬 Hãy báo mã Order {p1} cho bộ phận hỗ trợ trong chat","💬 សូមប្រាប់លេខ Order {p1} ទៅក្រុមគាំទ្រក្នុងការជជែក","💬 ချက်တင်ထဲတွင် Order {p1} ကို ဆက်သွယ်ရေးအဖွဲ့သို့ ပြောပြနိုင်ပါသည်","💬 ແຈ້ງເລກ Order {p1} ໃຫ້ທີມຊ່ວຍເຫຼືອໃນແຊັດໄດ້ເລີຍ","💬 Sila maklumkan nombor Order {p1} kepada sokongan dalam sembang","💬 Sampaikan nomor Order {p1} ke tim dukungan melalui chat","💬 请在聊天中向客服提供订单号 {p1}"],
@@ -5831,7 +5840,7 @@ function pcard(p){
     <div class="pc-body">
       <div class="pc-name">${p.name}</div>
       <div class="pc-price-row">
-        <span class="pc-price">${p.price.toLocaleString()} USDT</span>
+        <span class="pc-price">${p.price.toLocaleString()} USDT</span>${mpcPriceLocalHtml(p)}
       </div>
       <div class="pc-meta">
         <div class="pc-stars">${starHtml(rating,'pc-star')}</div>
@@ -6889,7 +6898,7 @@ function filterOrd(st, btn){
       <td class="mono tg">${oid}</td>
       <td>${o.prod || o.product_name_snap || '-'}</td>
       <td>${_bShip}</td>
-      <td class="mono">${Number(o.amt || 0).toLocaleString()} USDT</td>
+      <td class="mono">${Number(o.amt || 0).toLocaleString()} USDT${_mpcOrdShipSub(o)}</td>
       <td>${sb(ostx)}</td>
       <td><span class="bdg bdg-warn">Plan ${o.plan || o.ff_plan || 'A'}</span></td>
       <td class="tsm tm">${(o.date || o.created_at || '').slice(0,10)}</td>
@@ -6942,6 +6951,7 @@ function filterOrd(st, btn){
           </div>
           <div class="mob-card-right">
             <div class="mob-amt-big tg">${Number(o.amt || 0).toLocaleString()} <span style="font-size:11px;font-weight:400;color:var(--t3);">USDT</span></div>
+            ${_mpcOrdShipSub(o)}
             <div style="margin-top:4px;">${sb(ostx)}</div>
           </div>
         </div>
@@ -7018,6 +7028,7 @@ function openOD(oid){
       <div class="fc btwn"><span class="tm">Order #</span><span class="mono tg">${o.id}</span></div>
       <div class="fc btwn"><span class="tm">${tccT('mp_js_0103')}</span><span>${o.seller}</span></div>
       <div class="fc btwn"><span class="tm">${tccT('mp_js_0418')}</span><span class="mono tg">${o.amt.toLocaleString()} USDT</span></div>
+      ${_mpcOrdShipRows(o)}
       <div class="fc btwn"><span class="tm">FF Plan</span><span class="bdg bdg-warn">Plan ${o.plan}</span></div>
       <div class="fc btwn"><span class="tm">${tccT('mp_js_0101')}</span><span>${sb(o.status)}</span></div>
       <div class="fc btwn"><span class="tm">${tccT('mp_js_0419')}</span><span>${o.date}</span></div>
@@ -7808,6 +7819,7 @@ async function initSD() {
 }
 
 function renderSDStats() {
+  try { mpcSellerClosedNote(); } catch (e) {}   // [P7]
   const d = SELLER_DATA;
   const prods = d.products || [];
   const ords  = d.orders   || [];
@@ -7967,6 +7979,7 @@ async function initSProds() {
 }
 
 function renderSProds() {
+  try { mpcSellerClosedNote(); } catch (e) {}   // [P7]
   const prods = SELLER_DATA?.products || [];
   document.getElementById('spr-b').innerHTML = prods.map(p => {
     const imgs = tryParseJSON(p.images_json);
@@ -8103,6 +8116,7 @@ async function loadCategories() {
 // ─────────────────────────────────────────────────────────────────────────
 
 function openEditProd(prodId) {
+  if (mpcShopClosedGuard()) return;   // [P7] ประเทศร้านปิด → แก้ไขสินค้าไม่ได้ (server ก็บล็อก e111)
   _editingProdId = prodId;
   const p = SELLER_DATA?.products?.find(x => x.product_id === prodId);
   if (!p) { openM('m-addprod'); return; }
@@ -8140,7 +8154,7 @@ function openEditProd(prodId) {
   const _emojiIn = document.getElementById('prod-emoji');
   if(_emojiIn){ _emojiIn.value = p.emoji_icon || '📦'; document.getElementById('prod-emoji-preview').textContent = p.emoji_icon || '📦'; }
   // [P3] prefill ขนส่งที่ร้านรองรับ
-  prodPrepCarriers((() => { const a = tryParseJSON(p.carriers_json || '[]'); return Array.isArray(a) ? a.map(x => (x && x.carrier_code) || x) : []; })());
+  prodPrepCarriers((() => { const a = tryParseJSON(p.carriers_json || '[]'); return Array.isArray(a) ? a : []; })());   // [P6] ส่งทั้งก้อน (รวม fee_usdt) เพื่อ prefill ค่าส่งรายเจ้า
   // prefill video_url
   const vidInput = document.getElementById('prod-video-url');
   if(vidInput){ vidInput.value = p.video_url||''; updateVideoPreview(); }
@@ -8219,7 +8233,12 @@ async function submitProd() {
   const _variants     = document.getElementById('prod-variants')?.value.trim() || '';
   const _emojiIcon    = document.getElementById('prod-emoji')?.value.trim() || '📦';
   const _carrBox      = document.getElementById('prod-carriers-box');   // [P3]
-  const _carriers     = (_carrBox && _carrBox.dataset.ready === '1') ? Array.from(document.querySelectorAll('.prod-carr-cb:checked')).map(c => c.value) : undefined;
+  const _carriers     = (_carrBox && _carrBox.dataset.ready === '1') ? Array.from(document.querySelectorAll('.prod-carr-cb:checked')).map(c => {
+        // [P6] มีค่าส่งเฉพาะร้าน → {carrier_code, fee_usdt} · ว่าง → ส่งเป็นรหัสล้วน (ใช้ค่ากลาง)
+        const fe = Array.from(document.querySelectorAll('.prod-carr-fee')).find(x => x.dataset.code === c.value);
+        const fv = fe && fe.value !== '' ? Number(fe.value) : NaN;
+        return (isFinite(fv) && fv >= 0) ? { carrier_code: c.value, fee_usdt: fv } : c.value;
+      }) : undefined;
   const _shopName     = (() => { const raw=SELLER_DATA?.shop?.shop_name||''; return isImgUrl(raw)?(SELLER_DATA?.shop?.owner_name||''):raw; })();
 
   // [v29 FIX] กรอง imgUrls ให้มีแค่ image URL จริง — ตัด video URL ที่หลุดเข้ามาออก
@@ -8359,7 +8378,7 @@ async function filterSOrd(st, btn) {
       <td>${o.product_name_snap||o.product_id}</td>
       <td class="tm">${o.buyer_member_id}<br><span class="tsm">${o.buyer_full_name||''}</span></td>
       <td>${shipHtml}</td>
-      <td class="mono">${Number(o.amount_usdt||0).toLocaleString()} USDT</td>
+      <td class="mono">${Number(o.amount_usdt||0).toLocaleString()} USDT${_mpcOrdShipSub(o, true)}</td>
       <td><span class="bdg ${poClass(o.payout_option)}">${o.payout_option}d</span></td>
       <td>${sb(o.order_status)}</td>
       <td class="tsm tm">${String(o.created_at||'').slice(0,10)}</td>
@@ -8405,6 +8424,7 @@ async function filterSOrd(st, btn) {
           </div>
           <div class="mob-card-right">
             <div class="mob-amt-big tg">${Number(o.amount_usdt||0).toLocaleString()}</div>
+            ${_mpcOrdShipSub(o, true)}
             <div style="font-size:10px;color:var(--t3);text-align:right;">USDT</div>
             <div style="margin-top:4px;">${sb(o.order_status)}</div>
           </div>
@@ -8431,12 +8451,13 @@ async function filterSOrd(st, btn) {
 // ═══════════════════════════════════════════════════════════════════════
 // [P3 Multi-Country] Seller: config ประเทศ/ขนส่ง, สมัครร้าน, ติ๊กขนส่งสินค้า, ส่งของตามประเทศ
 // ═══════════════════════════════════════════════════════════════════════
-var MPCFG = { countries: [], carriers: [], loaded: false, _p: null };
+var MPCFG = { countries: [], carriers: [], loaded: false, _p: null, allClosed: false, at: 0 };   // [P7] allClosed = มีประเทศในชีตแต่ปิดหมด · at = เวลาที่โหลด config ล่าสุด
 function mpcfgLoad() {
   if (MPCFG._p) return MPCFG._p;
   MPCFG._p = apiGet({ action: 'getCountryConfig' }).then(r => {
     if (r && r.success) {
       MPCFG.countries = r.countries || []; MPCFG.carriers = r.carriers || []; MPCFG.loaded = true;
+      MPCFG.allClosed = !!r.all_closed; MPCFG.at = Date.now();   // [P7]
       // เติมขนส่งต่างประเทศเข้า CARRIER_CONFIG (ถ้ายังไม่มี) ให้ป้ายชื่อ/ลิงก์ติดตามเดิมใช้ได้ทุกจุด
       MPCFG.carriers.forEach(k => { if (!CARRIER_CONFIG[k.carrier_code]) CARRIER_CONFIG[k.carrier_code] = { label: k.label, url: k.tracking_url_tpl || null }; });
     } else MPCFG._p = null;
@@ -8479,9 +8500,20 @@ async function prodPrepCarriers(selected) {
   const c2 = MPCFG.countries.find(x => x.country_code === cc);
   if (lbl && c2) lbl.textContent = mpcfgFlag(cc) + ' ' + cc + ' — ' + mpcName(c2);   // [P5]
   const list = MPCFG.carriers.filter(k => k.country_code === cc);
-  const sel = new Set((selected || []).map(x => String(x).toUpperCase()));
-  box.innerHTML = list.length ? list.map(k => `<label class="tsm" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--bdr);border-radius:20px;cursor:pointer;">
-      <input type="checkbox" class="prod-carr-cb" value="${mpcfgEsc(k.carrier_code)}" ${sel.has(k.carrier_code) ? 'checked' : ''}> ${mpcfgEsc(k.label)}${k.fee_usdt > 0 ? ' · ' + k.fee_usdt + ' USDT' : ''}</label>`).join('')
+  // [P6] selected = ["KERRY", {carrier_code:"FLASH", fee_usdt:2.5}] → จำว่าติ๊กเจ้าไหน + ค่าส่งเฉพาะร้าน (ว่าง = ใช้ค่ากลางของแอดมิน)
+  const selFee = {};
+  (selected || []).forEach(x => {
+    if (x && typeof x === 'object') selFee[String(x.carrier_code || '').toUpperCase()] = (x.fee_usdt !== undefined && x.fee_usdt !== '') ? x.fee_usdt : '';
+    else selFee[String(x).toUpperCase()] = '';
+  });
+  const feePh = mpcfgEsc(tccT('mp_ui_0348'));
+  box.innerHTML = list.length ? list.map(k => {
+    const up = String(k.carrier_code).toUpperCase(), on = Object.prototype.hasOwnProperty.call(selFee, up);
+    return `<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <label class="tsm" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--bdr);border-radius:20px;cursor:pointer;">
+      <input type="checkbox" class="prod-carr-cb" value="${mpcfgEsc(k.carrier_code)}" ${on ? 'checked' : ''}> ${mpcfgEsc(k.label)}${k.fee_usdt > 0 ? ' · ' + k.fee_usdt + ' USDT' : ''}</label>
+      <input type="number" min="0" step="any" class="fi prod-carr-fee" data-code="${mpcfgEsc(k.carrier_code)}" placeholder="${feePh}" title="${feePh}" value="${on && selFee[up] !== '' ? mpcfgEsc(selFee[up]) : ''}" style="width:130px;padding:5px 8px;font-size:11px;"></span>`;
+  }).join('')
     : '<span class="tsm tm">' + mpcfgEsc(tccT('mp_js_0618')) + '</span>';   // [P5]
   box.dataset.ready = '1';
 }
@@ -8494,8 +8526,24 @@ async function shipPrepCarriers(orderId) {
   window._shipCountry = cc;
   if (!sel.dataset.orig) sel.dataset.orig = sel.innerHTML;
   await mpcfgLoad();
+  // [P6] บอกผู้ขายว่าผู้ซื้อเลือกขนส่งอะไร และจ่ายค่าส่งเท่าไร (ผู้ขายได้ค่าส่งเมื่อออเดอร์เสร็จสิ้น)
+  const hint = document.getElementById('ship-buyer-choice');
+  if (hint) {
+    const m = o && o.ship_method_code, f = Number(o && o.ship_fee_usdt) || 0;
+    if (m || f > 0) {
+      hint.style.display = '';
+      hint.innerHTML = '🚚 ' + tccT('mp_ui_0347') + ': <strong>' + mpcfgEsc(m ? _mpcCarrierLabel(m) : '—') + '</strong> · ' + tccT('mp_ui_0344') + ': ' + (f > 0 ? mpcFmtUsdt(f) : tccT('mp_js_0607'));
+    } else { hint.style.display = 'none'; hint.innerHTML = ''; }
+  }
   const list = MPCFG.carriers.filter(k => k.country_code === cc);
-  if (!list.length) { sel.innerHTML = sel.dataset.orig; return; }
+  if (!list.length) {
+    // config โหลดไม่ได้ + ออเดอร์ไทย → ใช้รายการไทยเดิม · นอกนั้น (ประเทศที่ยังไม่มีขนส่ง) → ให้เลือกได้เฉพาะ "OTHER (ระบุเอง)"
+    // (เดิมถอยไปแสดงขนส่งไทย ซึ่ง server ปฏิเสธ e121 → ผู้ขายส่งของไม่ได้)
+    if (!MPCFG.loaded && cc === 'TH') { sel.innerHTML = sel.dataset.orig; return; }
+    sel.innerHTML = '<option value="">' + mpcfgEsc(tccT('mp_js_0617')) + '</option><option value="OTHER">' + mpcfgEsc(tccT('mp_ui_0293')) + '</option>';
+    sel.value = '';
+    return;
+  }
   sel.innerHTML = '<option value="">' + mpcfgEsc(tccT('mp_js_0617')) + '</option>' + list.map(k => `<option value="${mpcfgEsc(k.carrier_code)}">${mpcfgEsc(k.label)}</option>`).join('');
   sel.value = '';
 }
@@ -8514,7 +8562,7 @@ function mpcCountry(cc) { cc = String(cc || '').toUpperCase(); return (MPCFG.cou
 function mpcValid(cc) {
   cc = String(cc || '').toUpperCase();
   if (!/^[A-Z]{2}$/.test(cc)) return '';
-  if (MPCFG.loaded && MPCFG.countries.length && !mpcCountry(cc)) return '';   // ประเทศปิดตลาด/ไม่มี
+  if (MPCFG.loaded && (MPCFG.countries.length || MPCFG.allClosed) && !mpcCountry(cc)) return '';   // ประเทศปิดตลาด/ไม่มี · [P7] ปิดหมดทุกประเทศ → ไม่มีประเทศใดใช้ได้ (ต่างจากชีตว่าง/ยังไม่ migrate)
   return cc;
 }
 function mpcResolve() {
@@ -8539,6 +8587,7 @@ function mpcName(c) {
   return (lang === 'th' ? (c.name_th || c.name_en) : (c.name_en || c.name_th)) || c.country_code;
 }
 function mpcRenderSelect() {
+  try { mpcRenderClosedBanner(); mpcSellerClosedNote(); } catch (e) {}   // [P7]
   const sel = document.getElementById('mp-country-sel'); if (!sel) return;
   const list = MPCFG.countries.length ? MPCFG.countries : [{ country_code: 'TH', name_th: 'ไทย', name_en: 'Thailand' }];
   sel.innerHTML = list.map(c => `<option value="${mpcfgEsc(c.country_code)}">${mpcfgFlag(c.country_code)} ${mpcfgEsc(mpcName(c))}</option>`).join('');
@@ -8607,6 +8656,63 @@ async function mpcEnsure() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go0); else setTimeout(go0, 0);
 })();
 
+// ═══ [P7] แอดมินปิดประเทศระหว่างที่ผู้ใช้เปิดหน้าค้างไว้ ═══
+// ตรวจสถานะประเทศใหม่ → ถ้าตลาดปัจจุบันถูกปิด: สลับไปตลาดที่เปิดอยู่ · ตัดตะกร้าของตลาดเดิม · แจ้งผู้ใช้
+//   คืน true ถ้ามีการสลับตลาด · โหลดไม่สำเร็จ → คงค่าเดิม (mpcfgLoad ไม่ล้างค่าเมื่อ fail)
+//   ไม่บันทึกตลาดใหม่ลง localStorage → ถ้าตลาดเดิมกลับมาเปิด ผู้ใช้จะกลับไปตลาดเดิมเอง
+async function mpcRecheck() {
+  const before = mpcCur();
+  MPCFG._p = null;
+  try { await mpcfgLoad(); } catch (e) {}
+  if (!MPCFG.loaded) return false;
+  if (MPCFG.allClosed) {   // ปิดหมดทุกประเทศ: ไม่มีตลาดให้สลับ → ล้างรายการสินค้า + แสดงแบนเนอร์
+    try { mpcDropProdCache(); mpcResetProducts(); mpcRenderSelect(); mpcRefreshPage(); } catch (e) {}
+    return false;
+  }
+  if (mpcValid(before)) { mpcRenderSelect(); return false; }
+  MPC.cc = ''; MPC.cc = mpcResolve();
+  mpcResetProducts(); mpcSyncUrl(); mpcRenderSelect(); mpcRefreshPage();
+  const c = mpcCountry(MPC.cc);
+  showToast(tccTF('mp_js_0620', { p1: mpcfgFlag(before) + ' ' + before, p2: mpcfgFlag(MPC.cc) + ' ' + (c ? mpcName(c) : MPC.cc) }), 'warn');
+  return true;
+}
+// เปิดแท็บกลับมาหลังทิ้งไว้นาน → ตรวจสถานะประเทศอีกรอบ (config เก่าเกิน 10 นาที)
+try { document.addEventListener('visibilitychange', function () {
+  if (!document.hidden && MPCFG.loaded && Date.now() - (MPCFG.at || 0) > 10 * 60 * 1000) mpcRecheck();
+}); } catch (e) {}
+// ปิดทุกประเทศ (all_closed) → แถบแจ้งด้านบน
+function mpcRenderClosedBanner() {
+  let b = document.getElementById('mp-closed-banner');
+  if (!MPCFG.allClosed) { if (b) b.remove(); return; }
+  if (!b) {
+    b = document.createElement('div'); b.id = 'mp-closed-banner'; b.setAttribute('role', 'alert');
+    b.style.cssText = 'position:sticky;top:0;z-index:9999;background:#F0B90B;color:#0B0E11;text-align:center;padding:10px 14px;font-size:13px;font-weight:600;';
+    document.body.insertBefore(b, document.body.firstChild);
+  }
+  b.textContent = tccT('mp_ui_0349');
+}
+// ร้านของผู้ขายอยู่ในประเทศที่ปิด → คืนรหัสประเทศ · ไม่ปิด/ยังโหลด config ไม่เสร็จ → ''
+function mpcShopClosedCC() {
+  try {
+    const shop = SELLER_DATA && SELLER_DATA.shop; if (!shop) return '';
+    const cc = String(shop.country_code || 'TH').toUpperCase();
+    return (MPCFG.loaded && (MPCFG.countries.length || MPCFG.allClosed) && !mpcCountry(cc)) ? cc : '';
+  } catch (e) { return ''; }
+}
+function mpcShopClosedGuard() {
+  const cc = mpcShopClosedCC(); if (!cc) return false;
+  showToast(tccTF('mp_js_0621', { p1: mpcfgFlag(cc) + ' ' + cc }), 'warn');
+  return true;
+}
+function mpcSellerClosedNote() {
+  const cc = mpcShopClosedCC();
+  ['seller-closed-note', 'seller-closed-note-p'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    el.innerHTML = cc ? '<div style="background:rgba(240,185,11,.12);border:1px solid rgba(240,185,11,.4);color:var(--gold,#F0B90B);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;line-height:1.5;">🔒 '
+      + mpcfgEsc(tccTF('mp_js_0621', { p1: mpcfgFlag(cc) + ' ' + cc })) + '</div>' : '';
+  });
+}
+
 // ── ขนส่งของสินค้า: Carriers(ประเทศสินค้า) ∩ carriers_json ของร้าน · ค่าส่งรายเจ้าของร้านทับค่ากลางได้ ──
 function mpcCarriersFor(prod) {
   const cc = String((prod && prod.cc) || mpcCur()).toUpperCase();
@@ -8630,9 +8736,29 @@ function mpcCarriersFor(prod) {
 var _buyShip = { code: '', fee: 0 };
 var _buyCarriers = [];
 function mpcFmtUsdt(n) { return Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT'; }
+// [P6] ราคาโดยประมาณเป็นสกุลท้องถิ่นข้างราคา USDT (การ์ดสินค้า/ตะกร้า) — ว่างถ้ายังไม่มี config ประเทศ
+function mpcPriceLocalHtml(p) {
+  const l = mpcFmtLocal(p && p.price, p && p.cc);
+  return l ? '<span class="tsm tm" style="font-size:10px;margin-left:6px;white-space:nowrap;">' + l + '</span>' : '';
+}
+// [P6] ออเดอร์: ป้ายขนส่ง / ค่าส่ง (ผู้ซื้อถูกหัก สินค้า + ค่าส่ง · amount_usdt เก็บเฉพาะยอดสินค้า)
+function _mpcCarrierLabel(code) { code = String(code || ''); return (CARRIER_CONFIG[code] || {}).label || code; }
+function _mpcOrdShipSub(o, withMethod) {
+  const f = Number(o && o.ship_fee_usdt) || 0;
+  if (!(f > 0)) return '';
+  const m = withMethod && o.ship_method_code ? ' · ' + mpcfgEsc(_mpcCarrierLabel(o.ship_method_code)) : '';
+  return '<div class="tsm tm" style="font-size:10px;font-weight:400;">+ ' + mpcFmtUsdt(f) + ' 🚚' + m + '</div>';
+}
+function _mpcOrdShipRows(o) {
+  const f = Number(o && o.ship_fee_usdt) || 0, m = o && o.ship_method_code;
+  if (!(f > 0) && !m) return '';
+  return '<div class="fc btwn"><span class="tm">' + tccT('mp_ui_0344') + '</span><span class="mono tg">' + (f > 0 ? mpcFmtUsdt(f) : tccT('mp_js_0607')) + '</span></div>'
+    + (m ? '<div class="fc btwn"><span class="tm">' + tccT('mp_ui_0347') + '</span><span>' + mpcfgEsc(_mpcCarrierLabel(m)) + '</span></div>' : '');
+}
 function mpcBuyTotal() { return Math.round((Number((buyProd && buyProd.price) || 0) + Number(_buyShip.fee || 0)) * 1e6) / 1e6; }
-function mpcFmtLocal(usdt) {   // สกุลท้องถิ่นแสดงโดยประมาณ (USDT × fx) — ชำระจริงเป็น USDT เสมอ
-  const c = mpcCountry(buyProd && buyProd.cc); if (!c || !(Number(c.fx_to_usdt) > 0) || !c.currency_code) return '';
+function mpcFmtLocal(usdt, cc) {   // สกุลท้องถิ่นแสดงโดยประมาณ (USDT × fx) — ชำระจริงเป็น USDT เสมอ · cc ไม่ระบุ = ตลาดปัจจุบัน
+  if (!(Number(usdt) > 0)) return '';
+  const c = mpcCountry(cc || mpcCur()); if (!c || !(Number(c.fx_to_usdt) > 0) || !c.currency_code) return '';
   const v = usdt * Number(c.fx_to_usdt);
   try { return '≈ ' + new Intl.NumberFormat(undefined, { maximumFractionDigits: v < 100 ? 2 : 0 }).format(v) + ' ' + c.currency_code; }
   catch (e) { return '≈ ' + Math.round(v) + ' ' + c.currency_code; }
@@ -8643,7 +8769,7 @@ function mpcRenderTotal() {
   set('bt-price', mpcFmtUsdt(buyProd.price));
   set('bt-ship', Number(_buyShip.fee) > 0 ? mpcFmtUsdt(_buyShip.fee) : tccT('mp_js_0607'));
   set('bt-total', mpcFmtUsdt(mpcBuyTotal()));
-  set('bt-local', mpcFmtLocal(mpcBuyTotal()));
+  set('bt-local', mpcFmtLocal(mpcBuyTotal(), buyProd && buyProd.cc));
 }
 function mpcRenderShip() {
   const box = document.getElementById('buy-ship-list'), wrap = document.getElementById('buy-ship-wrap');
@@ -8730,10 +8856,30 @@ async function mpcShopPlan() {
   if (!addr) { showToast(tccTF('mp_js_0605', { p1: cc }), 'warn'); try { closeShopCart(); openEditAddr(null); } catch (e) {} return null; }
   const ships = {}; let shipTotal = 0;
   shopCart.forEach(c => {
-    const list = mpcCarriersFor(c.prod);
-    if (list.length) { ships[c.prod.id] = { code: list[0].code, fee: list[0].fee }; shipTotal += list[0].fee * c.qty; }
+    const k = mpcCartShipOf(c);   // [P6] ใช้ขนส่งที่ผู้ซื้อเลือกในตะกร้า (ไม่เลือก = เจ้าที่ถูกที่สุด)
+    if (k) { ships[c.prod.id] = { code: k.code, fee: k.fee }; shipTotal += k.fee * c.qty; }
   });
   return { cc: cc, addr: addr, ships: ships, shipTotal: Math.round(shipTotal * 1e6) / 1e6 };
+}
+
+// ── [P6] ตะกร้า: เลือกขนส่งต่อสินค้า (ค่าเริ่มต้น = ถูกสุด) · แต่ละชิ้นเป็น 1 ออเดอร์ จึงคิดค่าส่ง × จำนวน ──
+function mpcCartShipOf(c) {
+  const list = mpcCarriersFor(c.prod);
+  if (!list.length) return null;
+  return list.find(k => k.code === c.shipCode) || list[0];
+}
+function mpcCartShipTotal() {
+  return Math.round(shopCart.reduce((s, c) => { const k = mpcCartShipOf(c); return s + (k ? k.fee * c.qty : 0); }, 0) * 1e6) / 1e6;
+}
+function mpcCartPickShip(i, code) { if (shopCart[i]) { shopCart[i].shipCode = code; renderShopCart(); } }
+function mpcCartShipHtml(c, i) {
+  const list = mpcCarriersFor(c.prod);
+  if (!list.length) return '';
+  const cur = mpcCartShipOf(c);
+  const fee = k => (k.fee > 0 ? mpcFmtUsdt(k.fee) : tccT('mp_js_0607'));
+  if (list.length === 1) return `<div class="tsm tm" style="margin-top:3px;">🚚 ${mpcfgEsc(cur.label)} · ${fee(cur)}</div>`;
+  return `<select class="fi" aria-label="${mpcfgEsc(tccT('mp_ui_0342'))}" style="margin-top:4px;padding:3px 6px;font-size:11px;max-width:100%;" onclick="event.stopPropagation()" onchange="mpcCartPickShip(${i},this.value)">`
+    + list.map(k => `<option value="${mpcfgEsc(k.code)}" ${k.code === cur.code ? 'selected' : ''}>🚚 ${mpcfgEsc(k.label)} · ${fee(k)}</option>`).join('') + '</select>';
 }
 
 const CARRIER_CONFIG = {
@@ -9417,7 +9563,7 @@ async function loadSession(){
       // [v40] success:false + member:null = สมาชิกใหม่จริง ยังไม่มีใน Members sheet
       // → เรียก syncMember ได้ (INSERT ครั้งแรก)
       console.warn('[loadSession v40] member not found — calling syncMember (first-time INSERT only)...');
-      const sr = await apiPost({action:'syncMember', uid: SESSION.uid});
+      const sr = await apiPost({action:'syncMember', uid: SESSION.uid, country_code: (typeof mpcCur==='function' ? mpcCur() : '')});   // [P6]
       if(sr && sr.success){
         if(sr.ff_rights != null)            SESSION.ff_rights            = Number(sr.ff_rights);
         if(sr.ff_rights_status)             SESSION.ff_rights_status     = sr.ff_rights_status;
@@ -9930,7 +10076,7 @@ async function lgS3go(){
   // ส่ง BNB_ID ไป GAS_MP_TH เพื่อ upsert ข้อมูลจาก Member_BNB → Members
   // await ก่อน setTimeout เพื่อให้ Members sheet พร้อมก่อน initHome()
   try{
-    const syncRes = await apiPost({action:'syncMember', uid: SESSION.uid});
+    const syncRes = await apiPost({action:'syncMember', uid: SESSION.uid, country_code: (typeof mpcCur==='function' ? mpcCur() : '')});   // [P6]
     if(syncRes && syncRes.success){
       // อัปเดต SESSION ด้วย kyc_status / account_status ที่ sync มาจาก GAS
       if(syncRes.kyc_status)     SESSION.kyc_status     = syncRes.kyc_status;
@@ -10029,7 +10175,11 @@ async function confirmBuy(){
           // [v29] force refresh orders หลังสั่งซื้อสำเร็จ
           go('orders');
           initOrders({force:true});
-        } else { showToast(res.error||tccT('mp_js_0303'),'err'); }
+        } else {
+          showToast(res.error||tccT('mp_js_0303'),'err');
+          // [P7] e111 = ประเทศนี้เพิ่งถูกปิด → โหลดสถานะใหม่ · สลับตลาด · ปิดหน้าต่างซื้อ (สินค้านี้ซื้อไม่ได้แล้ว)
+          if (res.code === 'e111' || res.country_closed) mpcRecheck().then(sw => { if (sw) closeM('m-buy'); });
+        }
       }catch(e){hideLoad();showToast(tccT('mp_js_0304'),'err');}
     }, '🛒', tccT('mp_js_0298')
   );
@@ -10797,6 +10947,10 @@ async function initOrders(opts){
       ship_province: o.ship_province || '',
       ship_postal:   o.ship_postal   || '',
       buyer_full_name: o.buyer_full_name || '',
+      // [P6] ประเทศ / ขนส่งที่ผู้ซื้อเลือก / ค่าส่ง
+      country_code:     o.country_code     || '',
+      ship_method_code: o.ship_method_code || '',
+      ship_fee_usdt:    Number(o.ship_fee_usdt) || 0,
     }));
     filterOrd('all', document.querySelector('#ord-fbar .fbtn'));
   }catch(e){ hideLoad(); console.warn('[initOrders v29] error:', e.message); showToast(tccTF('mp_js_0405',{p1:e.message}),'warn'); }
@@ -11132,7 +11286,7 @@ function confirmCancel(){
           // คืน wallet balance ใน session (GAS refund จริงแล้ว)
           const ord = D.orders.find(o => (o.order_id||o.id) === _cancelOrderId);
           if (ord && SESSION.customer_wallet_usdt != null) {
-            const refundAmt = Number(ord.amount_usdt||ord.amt||0);
+            const refundAmt = Number(ord.amount_usdt||ord.amt||0) + (Number(ord.ship_fee_usdt)||0);   // [P6] server คืน สินค้า + ค่าส่ง
             SESSION.customer_wallet_usdt = Number(SESSION.customer_wallet_usdt) + refundAmt;
             saveSession(SESSION);
             updateAuthUI();
@@ -11470,10 +11624,15 @@ async function _loadMainBalanceRun(){
     <div id="shop-cart-items"></div>
     <div id="shop-cart-summary" style="display:none;">
       <div style="height:1px;background:rgba(243,186,47,.1);margin:12px 0;"></div>
+      <div id="shop-cart-ship-row" style="display:none;justify-content:space-between;font-size:13px;color:var(--t2);margin-bottom:6px;">
+        <span data-i18n="mp_ui_0344">ค่าจัดส่ง</span>
+        <span class="mono" id="shop-cart-ship">0.00 USDT</span>
+      </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--t2);margin-bottom:6px;">
         <span data-i18n="mp_ui_0323">ยอดรวม</span>
         <span class="mono tg" id="shop-cart-total">0.00 USDT</span>
       </div>
+      <div id="shop-cart-local" class="tsm tm" style="text-align:right;margin-bottom:6px;"></div>
       <div style="font-size:11px;color:var(--t3);margin-bottom:12px;"><span data-i18n="mp_ui_0320">MP Customer Wallet คงเหลือ:</span> <span id="shop-cart-bal-disp" class="tg">— USDT</span></div>
       <button class="btn btn-gold w100" onclick="shopCheckout()" data-i18n="mp_ui_0324">⚡ ชำระด้วย MP Wallet</button>
     </div>
@@ -12504,7 +12663,7 @@ function shopRenderGrid(){
       <div class="pc-body">
         <div class="pc-name">${p.name}</div>
         <div class="pc-price-row">
-          <span class="pc-price">${p.price.toLocaleString()} USDT</span>
+          <span class="pc-price">${p.price.toLocaleString()} USDT</span>${mpcPriceLocalHtml(p)}
         </div>
         <div class="pc-meta">
           <div class="pc-stars">${starHtml(p.rating,'pc-star')}</div>
@@ -12584,13 +12743,16 @@ function renderShopCart(){
     if(summary) summary.style.display='none';
     return;
   }
+  // [P6] ต้องรู้รายการขนส่งก่อนวาด — โหลด config แล้ววาดซ้ำ (ไม่วนซ้ำ: เงื่อนไขคือยังไม่ loaded เท่านั้น)
+  if(!MPCFG.loaded){ mpcfgLoad().then(()=>{ try{ if(MPCFG.loaded) renderShopCart(); }catch(e){} }); }
   const total = shopCart.reduce((s,c)=>s+c.prod.price*c.qty, 0);
   items.innerHTML = shopCart.map((c,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(243,186,47,.06);">
       <div style="font-size:2rem;flex-shrink:0;">${c.prod.ico}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.prod.name}</div>
-        <div style="font-family:var(--fm);font-size:12px;color:var(--gold);">${(c.prod.price*c.qty).toLocaleString()} USDT</div>
+        <div style="font-family:var(--fm);font-size:12px;color:var(--gold);">${(c.prod.price*c.qty).toLocaleString()} USDT${mpcPriceLocalHtml({price:c.prod.price*c.qty,cc:c.prod.cc})}</div>
+        ${mpcCartShipHtml(c,i)}
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
         <button onclick="shopQty(${i},-1)" style="background:rgba(243,186,47,.1);border:none;color:var(--gold);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;">−</button>
@@ -12601,8 +12763,16 @@ function renderShopCart(){
     </div>`).join('');
   if(summary){
     summary.style.display='';
+    // [P6] ยอดรวม = สินค้า + ค่าส่ง (ตรงกับที่ server หักจริง) + แสดงค่าส่งแยกและสกุลท้องถิ่นโดยประมาณ
+    const _shipSum = mpcCartShipTotal();
+    const _hasShip = MPCFG.loaded && shopCart.some(c => mpcCarriersFor(c.prod).length);
     const tot = document.getElementById('shop-cart-total');
-    if(tot) tot.textContent = total.toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
+    if(tot) tot.textContent = (total + _shipSum).toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
+    const shipRow = document.getElementById('shop-cart-ship-row'), shipEl = document.getElementById('shop-cart-ship');
+    if(shipRow) shipRow.style.display = _hasShip ? 'flex' : 'none';
+    if(shipEl) shipEl.textContent = _shipSum > 0 ? mpcFmtUsdt(_shipSum) : tccT('mp_js_0607');
+    const locEl = document.getElementById('shop-cart-local');
+    if(locEl) locEl.textContent = mpcFmtLocal(total + _shipSum, mpcCur());
     const balDisp = document.getElementById('shop-cart-bal-disp');
     if(balDisp) balDisp.textContent = Number(SESSION?.customer_wallet_usdt||0).toLocaleString('th',{minimumFractionDigits:2}) + ' USDT';
   }
@@ -12674,6 +12844,8 @@ async function _shopCheckoutRun(plan, total, mpBal){
         else {
           hideLoad();
           showToast('❌ '+(res?.error||tccTF('mp_js_0472',{p1:item.prod.name})),'err');
+          // [P7] e111 = ประเทศนี้เพิ่งถูกปิด → โหลดสถานะใหม่ · สลับตลาด · ตัดตะกร้าของตลาดเดิมออก
+          if (res && (res.code === 'e111' || res.country_closed)) mpcRecheck().then(() => { try { renderShopCart(); } catch (e) {} });
           return;
         }
       }
