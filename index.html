@@ -6876,7 +6876,7 @@ function filterOrd(st, btn){
       : `<span class="tsm tm">—</span>`;
     // [v_tracking] แสดง tracking สำหรับ buyer desktop row
     const _bTrack = o.tracking_number ? (() => {
-      const _tUrl = getTrackingUrl(o.carrier_code, o.tracking_number);
+      const _tUrl = getTrackingUrl(o.carrier_code, o.tracking_number, o.country_code);
       const _cLbl = (CARRIER_CONFIG[o.carrier_code]||{}).label || o.carrier_code || '';
       return `<div class="tsm" style="line-height:1.8;">
         <div style="color:var(--t3);font-size:10px;">${_cLbl}</div>
@@ -6962,7 +6962,7 @@ function filterOrd(st, btn){
           </span>
         </div>` : ''}
         ${(o.tracking_number) ? (() => {
-          const _tUrl = getTrackingUrl(o.carrier_code, o.tracking_number);
+          const _tUrl = getTrackingUrl(o.carrier_code, o.tracking_number, o.country_code);
           const _cLbl = (CARRIER_CONFIG[o.carrier_code]||{}).label || o.carrier_code || tccT('mp_js_0086');
           return `<div style="margin:6px 0 2px;padding:8px 10px;background:rgba(240,185,11,.07);border-radius:8px;border:1px solid rgba(240,185,11,.18);">
             <div style="font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin-bottom:5px;">${tccT('mp_js_0417')}</div>
@@ -7035,7 +7035,7 @@ function openOD(oid){
   const odTrackEl = document.getElementById('od-tracking');
   if (odTrackEl) {
     if (o.tracking_number) {
-      const tUrl = getTrackingUrl(o.carrier_code, o.tracking_number);
+      const tUrl = getTrackingUrl(o.carrier_code, o.tracking_number, o.country_code);
       const cLabel = (CARRIER_CONFIG[o.carrier_code]||{}).label || o.carrier_code || tccT('mp_js_0086');
       const shDate = o.shipped_at ? new Date(o.shipped_at).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}) : '-';
       odTrackEl.innerHTML = `
@@ -8337,7 +8337,7 @@ async function filterSOrd(st, btn) {
     if (o.order_status==='confirmed')
       acts = `<button class="btn btn-gold btn-sm" onclick="openShipModal('${o.order_id}')">${tccT('mp_js_0218')}</button>`;
     if (o.order_status==='shipped') {
-      const tUrl = getTrackingUrl(o.carrier_code, o.tracking_number);
+      const tUrl = getTrackingUrl(o.carrier_code, o.tracking_number, o.country_code);
       const cLabel = (CARRIER_CONFIG[o.carrier_code]||{}).label || o.carrier_code || '';
       acts = `<div class="tsm" style="line-height:1.8;">
         <div>${cLabel}</div>
@@ -8386,7 +8386,7 @@ async function filterSOrd(st, btn) {
       if (o.order_status==='confirmed')
         actsHtml = `<div class="mob-card-acts"><button class="btn btn-gold" onclick="openShipModal('${o.order_id}')">${tccT('mp_js_0218')}</button></div>`;
       if (o.order_status==='shipped') {
-        const tUrl2 = getTrackingUrl(o.carrier_code, o.tracking_number);
+        const tUrl2 = getTrackingUrl(o.carrier_code, o.tracking_number, o.country_code);
         const cLbl2 = (CARRIER_CONFIG[o.carrier_code]||{}).label || o.carrier_code || '';
         actsHtml = `<div class="mob-card-acts" style="flex-direction:column;align-items:flex-start;gap:4px;padding:8px 0 0;">
           <div class="tsm tm">${cLbl2}</div>
