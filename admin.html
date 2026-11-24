@@ -644,6 +644,7 @@ textarea.fi{resize:vertical;min-height:70px;}
   <span class="logo-badge">🔒 Admin Only</span>
   <div class="topbar-r">
     <div class="admin-user">เข้าสู่ระบบในฐานะ <strong id="admin-user-lbl">Admin</strong> <span id="admin-level-badge" style="display:none;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:700;vertical-align:middle;"></span></div>
+    <button class="btn btn-ghost btn-sm" onclick="adminRefresh()" title="ล้างแคชและโหลดเมนูนี้ใหม่">🔄 รีเฟรช</button>
     <button class="btn btn-ghost btn-sm" onclick="window.location='index_MP.html'">← กลับ Marketplace</button>
     <button class="btn btn-err btn-sm" onclick="adminLogout()">Logout</button>
   </div>
@@ -743,9 +744,9 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">📊</span>
     <span class="mob-section-title">Dashboard</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initOverview()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
-  <div class="ptitle"><h2>📊 Admin <span>Dashboard</span></h2><button class="btn btn-ghost btn-sm" onclick="initOverview()">🔄 รีเฟรช</button></div>
+  <div class="ptitle"><h2>📊 Admin <span>Dashboard</span></h2><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button></div>
   <div class="g5 mb4" id="ov-stats"></div>
   <div class="g2 mb4">
     <div class="card">
@@ -770,12 +771,12 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">👥</span>
     <span class="mob-section-title">User Management</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initUsers()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
   <div class="ptitle">
     <h2>👥 User <span>Management</span></h2>
     <div class="fc gap8">
-      <button class="btn btn-ghost btn-sm" onclick="initUsers()">🔄 รีเฟรช</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
       <input class="fi" style="width:260px;" placeholder="🔍 ค้นหา UID / Email / ชื่อ" id="u-search" oninput="filterUsers()">
       <select class="fi" style="width:140px;" id="u-role" onchange="filterUsers()">
         <option value="">ทุก Role</option><option>Member</option><option>Seller</option><option>Admin</option>
@@ -825,12 +826,12 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">🪪</span>
     <span class="mob-section-title">KYC Review</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initKYC()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
   <div class="ptitle">
     <h2>🪪 KYC <span>Review</span></h2>
     <div class="fc gap8">
-      <button class="btn btn-ghost btn-sm" onclick="initKYC()">🔄 รีเฟรช</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
       <select class="fi" style="width:150px;" id="kyc-status-f" onchange="filterKYC()">
         <option value="">ทุกสถานะ</option><option value="pending">รอตรวจสอบ</option>
         <option value="verified">อนุมัติแล้ว</option><option value="rejected">ปฏิเสธแล้ว</option>
@@ -878,9 +879,9 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">🏪</span>
     <span class="mob-section-title">Seller Applications</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initSA()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
-  <div class="ptitle"><h2>🏪 Seller <span>Applications</span></h2><button class="btn btn-ghost btn-sm" onclick="initSA()">🔄 รีเฟรช</button></div>
+  <div class="ptitle"><h2>🏪 Seller <span>Applications</span></h2><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button></div>
   <div class="fbar" id="sa-fbar">
     <select class="fi" style="width:160px;" id="sa-country" onchange="filterSA(window._saSt||'all',null)"><option value="">ทุกประเทศ</option></select>
     <button class="fbtn active" onclick="filterSA('all',this)">ทั้งหมด</button>
@@ -917,12 +918,12 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">⭐</span>
     <span class="mob-section-title">Review Management</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initReviews()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
   <div class="ptitle">
     <h2>⭐ Review <span>Management</span></h2>
     <div class="fc gap8">
-      <button class="btn btn-ghost btn-sm" onclick="initReviews()">🔄 รีเฟรช</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
       <input type="text" class="fi" id="rv-search" placeholder="ค้นหา product_id / review_id..." style="width:220px;" oninput="filterReviews()">
       <select class="fi" style="width:140px;" id="rv-reported-f" onchange="filterReviews()">
         <option value="">ทุกสถานะ</option>
@@ -964,9 +965,9 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">📦</span>
     <span class="mob-section-title">Product Approval</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initProds()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
-  <div class="ptitle"><h2>📦 Product <span>Approval</span></h2><button class="btn btn-ghost btn-sm" onclick="initProds()">🔄 รีเฟรช</button></div>
+  <div class="ptitle"><h2>📦 Product <span>Approval</span></h2><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button></div>
   <div class="fbar" id="prod-fbar">
     <select class="fi" style="width:160px;" id="prod-country" onchange="filterProds(window._prodSt||'all',null)"><option value="">ทุกประเทศ</option></select>
     <button class="fbtn active" onclick="filterProds('all',this)">ทั้งหมด</button>
@@ -1025,9 +1026,9 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">💳</span>
     <span class="mob-section-title">Wallet Management</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initWallets()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
-  <div class="ptitle"><h2>💳 Wallet <span>Management</span></h2><button class="btn btn-ghost btn-sm" onclick="initWallets()">🔄 รีเฟรช</button></div>
+  <div class="ptitle"><h2>💳 Wallet <span>Management</span></h2><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button></div>
   <div class="g4 mb4" id="wallet-cards"></div>
   <div class="tabs">
     <div class="tab active" onclick="swWalletTab('deposits',this)">⏳ Pending Deposits <span id="dep-badge" class="bdg bdg-err" style="display:none;margin-left:4px;"></span></div>
@@ -1086,14 +1087,14 @@ textarea.fi{resize:vertical;min-height:70px;}
     <span class="mob-section-icon">📋</span>
     <span class="mob-section-title">Global TX View</span>
     <div class="mob-section-actions">
-      <button class="btn btn-ghost btn-sm" onclick="initGTX()">🔄</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button>
       <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥</button>
     </div>
   </div>
   <div class="ptitle">
     <h2>📋 Global <span>TX View</span></h2>
     <div class="fc gap8">
-      <button class="btn btn-ghost btn-sm" onclick="initGTX()">🔄 รีเฟรช</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
       <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 Export CSV</button>
     </div>
   </div>
@@ -1140,9 +1141,9 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">🎁</span>
     <span class="mob-section-title">Funding Free Refresh</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initFFAdmin()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
-  <div class="ptitle"><h2>🎁 Funding Free <span>Refresh Panel</span></h2><button class="btn btn-ghost btn-sm" onclick="initFFAdmin()">🔄 รีเฟรช</button></div>
+  <div class="ptitle"><h2>🎁 Funding Free <span>Refresh Panel</span></h2><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button></div>
   <div class="fbar" id="ff-fbar">
     <button class="fbtn active" onclick="filterFF('all',this)">ทั้งหมด</button>
     <button class="fbtn" onclick="filterFF('pending',this)">รอพิจารณา</button>
@@ -1178,12 +1179,12 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">🤝</span>
     <span class="mob-section-title">Referral Management</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initRef()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
   <div class="ptitle">
     <h2>🤝 Referral <span>Management</span></h2>
     <div class="fc gap8">
-      <button class="btn btn-ghost btn-sm" onclick="initRef()">🔄 รีเฟรช</button>
+      <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
       <input type="text" class="fi" id="ref-search" placeholder="ค้นหา member_id / email..." style="width:220px;" oninput="filterRef()">
       <select class="fi" style="width:130px;" id="ref-type-f" onchange="filterRef()">
         <option value="">ทุกประเภท</option>
@@ -1243,10 +1244,10 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">🌏</span>
     <span class="mob-section-title">Countries</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initCountries()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
   <div class="ptitle"><h2>🌏 Marketplace <span>Countries</span></h2>
-    <div class="fc gap8"><button class="btn btn-ghost btn-sm" onclick="initCountries()">🔄 รีเฟรช</button>
+    <div class="fc gap8"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
     <button class="btn btn-ok btn-sm" onclick="openCountryModal('')">＋ เพิ่มประเทศ</button></div></div>
   <div class="alrt alrt-w tsm mb4" style="margin-bottom:12px;">อัตราแลกเปลี่ยน = จำนวนสกุลท้องถิ่นต่อ 1 USDT (ใช้แสดงราคาโดยประมาณเท่านั้น เงินจริงยังเป็น USDT) · ทุกการแก้ไขบันทึกลง Audit Log</div>
   <div class="alrt alrt-w tsm mb4" style="margin-bottom:12px;">🔒 <strong>ปิดประเทศ</strong> = ซ่อนจากตัวเลือกและหน้าร้าน · บล็อกสั่งซื้อใหม่/สมัครร้าน/เพิ่ม-แก้สินค้า/อนุมัติ · <strong>ออเดอร์ที่ค้างอยู่ยังเดินต่อได้</strong> (ส่งของ ยืนยันรับ คืนเงิน จ่ายผู้ขาย) และไม่ลบข้อมูลใดๆ · ต้องเหลือประเทศเปิดอย่างน้อย 1 ประเทศ · ก่อน<strong>เปิด</strong>ระบบรันชุดทดสอบให้ทุกครั้ง</div>
@@ -1262,11 +1263,11 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="mob-section-header">
     <span class="mob-section-icon">🚚</span>
     <span class="mob-section-title">Carriers</span>
-    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="initCarriers()">🔄</button></div>
+    <div class="mob-section-actions"><button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄</button></div>
   </div>
   <div class="ptitle"><h2>🚚 Marketplace <span>Carriers</span></h2>
     <div class="fc gap8"><select class="fi" style="width:170px;" id="car-country" onchange="renderCarriers()"></select>
-    <button class="btn btn-ghost btn-sm" onclick="initCarriers()">🔄 รีเฟรช</button>
+    <button class="btn btn-ghost btn-sm" onclick="adminRefresh()">🔄 รีเฟรช</button>
     <button class="btn btn-ok btn-sm" onclick="openCarrierModal('','')">＋ เพิ่มขนส่ง</button></div></div>
   <div class="tbl ox">
     <table><thead><tr><th>รหัส</th><th>ประเทศ</th><th>ชื่อขนส่ง</th><th>ลิงก์ติดตาม (ใช้ {t} แทนเลขพัสดุ)</th><th>ค่าส่ง (USDT)</th><th>ETA (วัน)</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
@@ -1459,29 +1460,123 @@ function fmtDate(v, len){
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyhYtaLrEFVFV15eJWRDvTbNCGlxK1eAdDQTx_LgVObHnWQmIsFM9orgJLPAgKWpJCr/exec'; // [v25] sync URL กับ index_MP_News_v42
 // GAS_MAIN_URL ไม่จำเป็นสำหรับ Admin — ทุก action ชี้ GAS_URL เดียวกับ index_MP_TH
 
-// ✅ apiGet: redirect follow — GAS /exec redirects to final URL automatically
-// ถ้า response ไม่ใช่ JSON (เช่น HTML error page) จะ throw error ที่อ่านได้
-async function apiGet(params){
+// ═══════════════════════════════════════════════════════════════════════
+// [v57 PERF] API LAYER
+//  • apiGet/apiPost: มี timeout (GET 25 วิ + retry 1 ครั้ง · POST 45 วิ ไม่ retry กันรายการซ้ำ)
+//  • adminGet(): แคชกลางในหน่วยความจำ + รวม request ซ้ำ (in-flight dedup) → ย้ายเมนู/กลับหน้าเดิมไม่ยิง GAS ซ้ำ
+//  • apiPost สำเร็จ/ล้มเหลวก็ตาม → adminInvalidate() ล้างแคช + ให้ทุกเมนูโหลดใหม่ครั้งถัดไป
+// ═══════════════════════════════════════════════════════════════════════
+const API_TO_GET = 25000, API_TO_POST = 45000;
+let _apiErr = 0;                 // นับ GET ที่ล้มเหลวจริง (ใช้ตัดสินว่าเมนูโหลดสำเร็จหรือไม่)
+const _secStamp = {}, _secBusy = {}, _secRerun = {};
+const _AC = {}; let _ACI = {}; let _acGen = 0;
+const _AC_TTL = {Members:60000,Products:60000,Seller_Applications:60000,Referrals:60000,Reviews:60000,KYC_Documents:60000,
+                 FF_Refresh:60000,Transactions:30000,Orders:60000,Countries:300000,Carriers:300000,Admins:30000};
+
+function _fetchTO(url, opts, ms, isPost){
+  const ctrl = new AbortController();
+  const tid = setTimeout(()=>ctrl.abort(), ms);
+  return fetch(url, Object.assign({}, opts, {signal: ctrl.signal}))
+    .then(r=>{ clearTimeout(tid); return r; })
+    .catch(e=>{
+      clearTimeout(tid);
+      if(e && e.name==='AbortError'){
+        throw new Error(isPost
+          ? 'ระบบตอบช้าเกิน '+Math.round(ms/1000)+' วินาที — รายการอาจถูกบันทึกแล้ว กรุณารีเฟรชตรวจสอบก่อนกดซ้ำ'
+          : 'ระบบตอบช้าเกิน '+Math.round(ms/1000)+' วินาที — กรุณากด 🔄 รีเฟรชเพื่อลองใหม่');
+      }
+      throw e;
+    });
+}
+async function _apiGetOnce(params){
   const url=new URL(GAS_URL);
-  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
-  const res=await fetch(url.toString(),{method:'GET',redirect:'follow'});
+  Object.entries(params).forEach(([k,v])=>{ if(v!==undefined && v!==null) url.searchParams.set(k,v); });
+  const res=await _fetchTO(url.toString(),{method:'GET',redirect:'follow'},API_TO_GET,false);
   const text=await res.text();
   try{ return JSON.parse(text); }
   catch(e){ console.error('apiGet parse error, raw response:',text.slice(0,300)); throw new Error('Response ไม่ใช่ JSON — ตรวจสอบ GAS Deploy settings (Who has access: Anyone)'); }
 }
+// ✅ apiGet: redirect follow — GAS /exec redirects to final URL automatically · retry 1 ครั้งเมื่อ timeout/เครือข่าย/ได้ HTML
+async function apiGet(params){
+  try{ return await _apiGetOnce(params); }
+  catch(e1){
+    await new Promise(r=>setTimeout(r,700));
+    try{ return await _apiGetOnce(params); }
+    catch(e2){ _apiErr++; throw e2; }
+  }
+}
 
 // ✅ apiPost: text/plain หลีกเลี่ยง CORS preflight OPTIONS (GAS ไม่รองรับ)
-// GAS doPost อ่าน e.postData.contents แล้ว JSON.parse เองได้ปกติ
+const _NO_INV = {adminLogin:1,adminRegister:1,auditLog:1,adminResetHash:1};
 async function apiPost(body){
-  const res=await fetch(GAS_URL,{
-    method:'POST',
-    redirect:'follow',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify(body)
-  });
-  const text=await res.text();
-  try{ return JSON.parse(text); }
-  catch(e){ console.error('apiPost parse error, raw response:',text.slice(0,300)); throw new Error('Response ไม่ใช่ JSON — ตรวจสอบ GAS Deploy settings'); }
+  try{
+    const res=await _fetchTO(GAS_URL,{
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(body)
+    },API_TO_POST,true);
+    const text=await res.text();
+    try{ return JSON.parse(text); }
+    catch(e){ console.error('apiPost parse error, raw response:',text.slice(0,300)); throw new Error('Response ไม่ใช่ JSON — ตรวจสอบ GAS Deploy settings'); }
+  } finally {
+    if(!(body && _NO_INV[body.action])) adminInvalidate();   // เขียนแล้ว → ข้อมูลที่แคชไว้ไม่น่าเชื่อถืออีก
+  }
+}
+
+function adminInvalidate(){
+  _acGen++;
+  Object.keys(_AC).forEach(k=>{ delete _AC[k]; });
+  _ACI = {};
+  Object.keys(_secStamp).forEach(k=>{ delete _secStamp[k]; });
+  try{ if(typeof MPC!=='undefined' && MPC) MPC.loaded=false; }catch(e){}
+  window._crOrders=null; window._crData=null;
+}
+function _acKey(p){ return Object.keys(p).sort().map(k=>k+'='+p[k]).join('&'); }
+function _acTtl(p,o){
+  if(o && o.ttl!=null) return o.ttl;
+  if(p.action==='read') return _AC_TTL[p.sheet]||45000;
+  return 45000;
+}
+// adminGet(params,{ttl,force}) — ใช้แทน apiGet สำหรับการอ่านข้อมูลของทุกเมนู
+function adminGet(params,opt){
+  opt=opt||{};
+  const key=_acKey(params), ttl=_acTtl(params,opt), hit=_AC[key];
+  if(!opt.force && hit && Date.now()-hit.ts<ttl) return Promise.resolve(hit.d);
+  if(_ACI[key]) return _ACI[key];
+  const gen=_acGen;
+  const pr=apiGet(params).then(d=>{
+    if(gen===_acGen && d && !(typeof d==='object' && !Array.isArray(d) && d.error)) _AC[key]={d:d,ts:Date.now()};
+    return d;
+  }).finally(()=>{ if(_ACI[key]===pr) delete _ACI[key]; });
+  _ACI[key]=pr;
+  return pr;
+}
+// สถิติแบบเบา (ไม่แตะ Transactions/Orders) — GAS เก่าไม่มี statsLite → ถอยไปใช้ stats
+async function adminStatsLite(){
+  try{ const r=await adminGet({action:'statsLite'}); if(r && !r.error) return r; }catch(e){}
+  return adminGet({action:'stats'});
+}
+// Transactions เฉพาะแถวที่ต้องใช้ (กรองที่ GAS) — ถ้า GAS เก่า/ไม่มี token ถอยไปอ่านทั้งชีตแล้วกรองเอง
+async function adminTxGet(f){
+  f=f||{};
+  try{
+    const r=await adminGet(Object.assign({action:'adminTx'},_mpcAuth(),f));
+    if(Array.isArray(r)) return r;
+  }catch(e){}
+  const all=await adminGet({action:'read',sheet:'Transactions'});
+  if(!Array.isArray(all)) return all;
+  let out=all.filter(t=>(!f.member_id||String(t.member_id||'')===String(f.member_id))&&(!f.tx_type||t.tx_type===f.tx_type)&&(!f.tx_status||t.tx_status===f.tx_status));
+  if(f.limit) out=out.slice(-f.limit);
+  return out;
+}
+// 🔄 ปุ่มรีเฟรช: ล้างแคช แล้วโหลดเมนูที่เปิดอยู่ใหม่
+function adminRefresh(){
+  adminInvalidate();
+  const act=document.querySelector('.section.active');
+  const id=act?act.id.replace(/^sec-/,''):'overview';
+  showToast('🔄 กำลังรีเฟรชข้อมูล...');
+  initSec(id,true);
 }
 
 // ─── ADMIN SESSION ───
@@ -1615,6 +1710,7 @@ const _showSecOrigPerm = typeof showSec !== 'undefined' ? showSec : null;
 function adminLogout(){
   ADMIN=null;
   try{sessionStorage.removeItem('tcc_admin');}catch(e){}
+  adminInvalidate();
   showAdminLogin();
 }
 function showAdminLogin(){
@@ -1646,13 +1742,33 @@ function showConfirm(msg, onOk, ico='⚠️', okLabel='ยืนยัน', okCl
   okBtn.onclick=()=>{el.style.display='none';onOk();};
   document.getElementById('_aconfirm-cancel').onclick=()=>{el.style.display='none';};
 }
+let _loadBtnTid=null, _loadFailTid=null, _softTid=null;
+// overlay เต็มจอ — ใช้เฉพาะตอน "เขียน/อนุมัติ" · มีปุ่มปิดหลัง 8 วิ และปิดเองที่ 60 วิ (กัน overlay ค้าง)
 function showLoad(msg){
   let el=document.getElementById('_load');
-  if(!el){el=document.createElement('div');el.id='_load';el.innerHTML=`<div style="text-align:center"><div style="font-size:2rem;margin-bottom:12px">⏳</div><div id="_lmsg" style="font-size:14px;color:var(--t2)"></div></div>`;Object.assign(el.style,{position:'fixed',inset:0,background:'rgba(11,14,17,.85)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)'});document.body.appendChild(el);}
+  if(!el){el=document.createElement('div');el.id='_load';el.innerHTML=`<div style="text-align:center"><div style="font-size:2rem;margin-bottom:12px">⏳</div><div id="_lmsg" style="font-size:14px;color:var(--t2)"></div><button id="_lclose" class="btn btn-ghost btn-sm" style="margin-top:14px;display:none" onclick="hideLoad()">✕ ปิด</button></div>`;Object.assign(el.style,{position:'fixed',inset:0,background:'rgba(11,14,17,.85)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)'});document.body.appendChild(el);}
   document.getElementById('_lmsg').textContent=msg||'กำลังดำเนินการ...';
+  const cb=document.getElementById('_lclose'); if(cb) cb.style.display='none';
   el.style.display='flex';
+  clearTimeout(_loadBtnTid); clearTimeout(_loadFailTid);
+  _loadBtnTid=setTimeout(()=>{ const c=document.getElementById('_lclose'); if(c) c.style.display=''; },8000);
+  _loadFailTid=setTimeout(()=>{ hideLoad(); showToast('⏱ ใช้เวลานานผิดปกติ — ปิดหน้าโหลดให้แล้ว · หากข้อมูลไม่ขึ้นกด 🔄 รีเฟรช','warn'); },60000);
 }
-function hideLoad(){const el=document.getElementById('_load');if(el)el.style.display='none';}
+// [v57] ตัวโหลดแบบไม่บล็อกหน้าจอ — ใช้กับการ "อ่านข้อมูล" ทุกเมนู (กดเมนูอื่นได้ระหว่างรอ)
+function showLoadSoft(msg){
+  let el=document.getElementById('_loadsoft');
+  if(!el){el=document.createElement('div');el.id='_loadsoft';Object.assign(el.style,{position:'fixed',top:'64px',left:'50%',transform:'translateX(-50%)',background:'rgba(30,35,41,.95)',border:'1px solid var(--bdr)',borderRadius:'20px',padding:'6px 16px',fontSize:'13px',color:'var(--t2)',zIndex:9997,pointerEvents:'none',boxShadow:'0 4px 16px rgba(0,0,0,.4)'});document.body.appendChild(el);}
+  el.textContent='⏳ '+(msg||'กำลังโหลด...');
+  el.style.display='block';
+  clearTimeout(_softTid); _softTid=setTimeout(()=>{ el.style.display='none'; },60000);
+}
+function hideLoad(){
+  clearTimeout(_loadBtnTid); clearTimeout(_loadFailTid);
+  const el=document.getElementById('_load'); if(el) el.style.display='none';
+  // [v58] loader เล็กของเมนูอื่นที่ยังโหลดอยู่ ต้องไม่ถูกปิดโดยเมนูที่เพิ่งโหลดเสร็จ (เมนูที่เรียกอยู่นับเป็น 1)
+  const busy=Object.keys(_secBusy).filter(k=>_secBusy[k]).length;
+  if(busy<=1){ clearTimeout(_softTid); const so=document.getElementById('_loadsoft'); if(so) so.style.display='none'; }
+}
 
 // ─── HASH (ต้องตรงกับ GAS hashSimple ทุกประการ) ───
 function hashSimple(str){
@@ -1801,7 +1917,11 @@ function showSec(id, el) {
   if (el) el.classList.add('active');
   initSec(id);
 }
-function initSec(id) {
+// [v57 PERF] กลับมาเมนูเดิมภายใน SEC_TTL (และโหลดสำเร็จ) → ไม่โหลดซ้ำ ใช้เนื้อหาเดิมที่ค้างในหน้า
+//   • เขียนข้อมูล (apiPost) หรือกด 🔄 → ล้าง _secStamp ทั้งหมด → เมนูถัดไปโหลดใหม่
+//   • กำลังโหลดเมนูนั้นอยู่ → ไม่ยิงซ้ำ · โหลดไม่สำเร็จ (GET ล้มเหลว) → ไม่จำว่าโหลดแล้ว
+const SEC_TTL = 60000;
+function initSec(id, force) {
   const m = {
     overview: initOverview, users: initUsers, kyc: initKYC,
     'seller-apps': initSA, products: initProds,
@@ -1814,28 +1934,60 @@ function initSec(id) {
     countries: initCountries, carriers: initCarriers,   // [P2]
     'country-report': initCountryReport,                // [P5]
   };
-  if (m[id]) m[id]();
+  const fn = m[id];
+  if (!fn) return;
+  if (id === 'chat-mgmt') { fn(); return; }
+  if (!force) {
+    if (_secBusy[id]) return;
+    if (_secStamp[id] && Date.now() - _secStamp[id] < SEC_TTL) return;
+  } else if (_secBusy[id]) {
+    // [v58] กดรีเฟรชขณะรอบก่อนยังโหลดอยู่ → ไม่รันซ้อน (ผลของรอบเก่าจะมาทับรอบใหม่ได้) · รอให้รอบนี้จบแล้วรันใหม่ทันที 1 รอบ
+    _secRerun[id] = true; return;
+  }
+  _secBusy[id] = true;
+  const e0 = _apiErr, gen = _acGen;
+  Promise.resolve().then(fn)
+    .then(() => {
+      if (_apiErr === e0 && gen === _acGen) _secStamp[id] = Date.now();
+      if (!_secRerun[id]) _secBar(id, _apiErr !== e0);     // [v58] GET ล้มเหลวระหว่างโหลด → แสดงแถบ "ลองใหม่" ในหน้านั้น
+    })
+    .catch(e => { console.error('[initSec] ' + id, e); _secBar(id, true); })
+    .finally(() => {
+      _secBusy[id] = false;
+      if (_secRerun[id]) { _secRerun[id] = false; initSec(id, true); return; }
+      // [v58] ไม่มีเมนูไหนค้างโหลดแล้ว → ปิด loader เล็กเสมอ (กันค้างเมื่อ init ล้มก่อนถึง hideLoad)
+      if (!Object.keys(_secBusy).some(k => _secBusy[k])) { const so = document.getElementById('_loadsoft'); if (so) so.style.display = 'none'; }
+    });
+}
+// [v58] แถบแจ้งเตือน + ปุ่ม "ลองใหม่" ในหน้าเมนู (แทนการพึ่ง toast ที่หายเร็ว)
+function _secBar(id, failed) {
+  const sec = document.getElementById('sec-' + id); if (!sec) return;
+  let bar = document.getElementById('sec-retry-' + id);
+  if (!failed) { if (bar) bar.remove(); return; }
+  if (bar) return;
+  bar = document.createElement('div');
+  bar.id = 'sec-retry-' + id;
+  bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;border:1px solid rgba(246,70,93,.4);background:rgba(246,70,93,.08);border-radius:8px;font-size:13px;color:var(--t2)';
+  bar.innerHTML = '<span>⚠️ โหลดข้อมูลไม่สำเร็จหรือไม่ครบ — ระบบตอบช้าหรือการเชื่อมต่อมีปัญหา</span>';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'btn btn-ghost btn-sm'; btn.textContent = '🔄 ลองใหม่';
+  btn.onclick = function () { adminInvalidate(); initSec(id, true); };
+  bar.appendChild(btn);
+  sec.insertBefore(bar, sec.firstChild);
 }
 
 // ═══════════════════════════════════════
 // OVERVIEW
 // ═══════════════════════════════════════
-async function initOverview() {
-  document.getElementById('ov-stats').innerHTML='<div class="card"><div class="clbl">กำลังโหลด...</div><div class="cval mono">⏳</div></div>'.repeat(5);
-  const bars=[1.2,1.8,1.4,2.1,1.9,2.6,2.3,2.0,2.4,2.8,2.1,3.1];
-  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const mx=Math.max(...bars);
-  document.getElementById('ov-chart').innerHTML=bars.map((v,i)=>`<div class="cbar" style="height:${Math.round((v/mx)*120)}px;background:${i===11?'var(--gold)':'rgba(240,185,11,.4)'}"></div>`).join('');
-  document.getElementById('ov-chart-lbl').innerHTML=months.map(m=>`<span>${m}</span>`).join('');
-  try{
-    const stats=await apiGet({action:'stats'});
-    if(stats&&!stats.error){
+function _ovApply(stats){
+  if(!(stats&&!stats.error)) return;
+  {
       document.getElementById('ov-stats').innerHTML=[
         {ico:'👥',lbl:'สมาชิกทั้งหมด',val:Number(stats.totalMembers||0).toLocaleString(),sub:`Sellers: ${stats.sellers||0}`,c:''},
-        {ico:'📦',lbl:'Orders Active',val:stats.activeOrders||0,sub:`รอ Approve สินค้า: ${stats.pendingProds||0}`,c:''},
+        {ico:'📦',lbl:'Orders Active',val:stats.activeOrders==null?'…':stats.activeOrders,sub:`รอ Approve สินค้า: ${stats.pendingProds||0}`,c:''},
         {ico:'🪪',lbl:'KYC รอตรวจ',val:stats.pendingKYC||0,sub:'ต้องดำเนินการ',c:stats.pendingKYC>0?'terr':'tok'},
         {ico:'💰',lbl:'TCC Fund (USDT)',val:Number(stats.tccFund||0).toLocaleString(),sub:`Market Fee: ${Number(stats.mktFee||0).toLocaleString()}`,c:'tok'},
-        {ico:'🎁',lbl:'Volume วันนี้',val:Number(stats.todayVolume||0).toFixed(2),sub:`Seller Apps: ${stats.pendingApps||0}`,c:'tg'},
+        {ico:'🎁',lbl:'Volume วันนี้',val:stats.todayVolume==null?'…':Number(stats.todayVolume||0).toFixed(2),sub:`Seller Apps: ${stats.pendingApps||0}`,c:'tg'},
       ].map(s=>`<div class="card"><div class="clbl">${s.ico} ${s.lbl}</div><div class="cval mono ${s.c}">${s.val}</div><div class="csub">${s.sub}</div></div>`).join('');
       if(document.getElementById('sb-kyc-cnt'))document.getElementById('sb-kyc-cnt').textContent=stats.pendingKYC||0;
       if(document.getElementById('sb-sa-cnt'))document.getElementById('sb-sa-cnt').textContent=stats.pendingApps||0;
@@ -1849,6 +2001,23 @@ async function initOverview() {
       document.getElementById('ov-wallets').innerHTML=`
         <div class="fc btwn mb2 tsm"><span class="tm">TCC Fund</span><span class="mono tg">${Number(stats.tccFund||0).toLocaleString()}</span></div>
         <div class="fc btwn mb2 tsm"><span class="tm">Market Fee</span><span class="mono terr">${Number(stats.mktFee||0).toLocaleString()}</span></div>`;
+  }
+}
+async function initOverview() {
+  document.getElementById('ov-stats').innerHTML='<div class="card"><div class="clbl">กำลังโหลด...</div><div class="cval mono">⏳</div></div>'.repeat(5);
+  const bars=[1.2,1.8,1.4,2.1,1.9,2.6,2.3,2.0,2.4,2.8,2.1,3.1];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const mx=Math.max(...bars);
+  document.getElementById('ov-chart').innerHTML=bars.map((v,i)=>`<div class="cbar" style="height:${Math.round((v/mx)*120)}px;background:${i===11?'var(--gold)':'rgba(240,185,11,.4)'}"></div>`).join('');
+  document.getElementById('ov-chart-lbl').innerHTML=months.map(m=>`<span>${m}</span>`).join('');
+  try{
+    let lite=null;
+    try{ lite=await adminGet({action:'statsLite'}); }catch(e){}
+    if(lite&&!lite.error){
+      _ovApply(lite);
+      adminGet({action:'stats'}).then(st=>{ if(st&&!st.error) _ovApply(st); }).catch(()=>{});   // เติม Orders Active / Volume วันนี้ ทีหลัง (ไม่บล็อก)
+    } else {
+      _ovApply(await adminGet({action:'stats'}));   // GAS เก่าไม่มี statsLite
     }
   }catch(e){ showToast('⚠️ โหลด stats ไม่สำเร็จ — ใช้ข้อมูล Demo','warn'); }
   document.getElementById('ov-ordstats').innerHTML=['paid','confirmed','completed','exchange_requested','cancelled'].map(s=>{
@@ -1865,9 +2034,9 @@ async function initOverview() {
 let uPage = 1; const U_PP = 5;
 async function initUsers() {
   filterUsers();
-  showLoad('กำลังโหลดสมาชิก...');
+  showLoadSoft('กำลังโหลดสมาชิก...');
   try{
-    const members=await apiGet({action:'read',sheet:'Members'});
+    const members=await adminGet({action:'read',sheet:'Members'});
     hideLoad();
     if(Array.isArray(members)&&members.length){
       DA.users=members.map(m=>{
@@ -1968,7 +2137,7 @@ async function loadUserDeposits(uid) {
   if (!container) return;
   container.innerHTML = '<div class="tsm tm" style="padding:12px 0;">กำลังโหลด...</div>';
   try {
-    const txs = await apiGet({action:'read', sheet:'Transactions'});
+    const txs = await adminTxGet({member_id:uid, tx_type:'Deposit', limit:200});   // [v57 PERF] เฉพาะ Deposit ของสมาชิกคนนี้
     if (!Array.isArray(txs)) { container.innerHTML = '<div class="tsm tm">โหลดไม่ได้</div>'; return; }
     // [v7 FIX] String comparison — member_id อาจเป็น numeric BNB_ID จาก syncMember
     const uidStr = String(uid || '');
@@ -2040,7 +2209,7 @@ function adminAction(action) {
 // ═══════════════════════════════════════
 // KYC REVIEW
 // ═══════════════════════════════════════
-function initKYC() { filterKYC(); }
+
 function filterKYC() {
   const f = document.getElementById('kyc-status-f').value;
   const items = f ? DA.kyc.filter(k => k.status === f) : DA.kyc;
@@ -2131,45 +2300,13 @@ function showKYCReject(kid) {
     <button class="btn btn-ghost w100" onclick="document.getElementById('kyc-reject-form').style.display='none'">ยกเลิก</button>
     <button class="btn btn-err w100" onclick="rejectKYC('${kid}')">ยืนยันปฏิเสธ</button>`;
 }
-function approveKYC(kid) {
-  showConfirm(
-    `อนุมัติ KYC <strong>${kid}</strong>?<br><small class="tm">สมาชิกจะได้รับแจ้งเตือนทันที</small>`,
-    async () => {
-      showLoad('กำลังอนุมัติ...');
-      try {
-        const res = await apiPost({ action:'approveKYC', member_id:kid, admin_id:ADMIN?.admin_id });
-        hideLoad();
-        const k = DA.kyc.find(x=>x.id===kid); if(k) k.status='verified';
-        closeM('m-kyc'); filterKYC();
-        addNotifLog(`✅ อนุมัติ KYC ${kid} แล้ว`);
-        showToast('✅ อนุมัติ KYC แล้ว — ส่ง Notification ถึงสมาชิกแล้ว');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '✅', 'อนุมัติ', 'btn-ok'
-  );
-}
-function rejectKYC(kid) {
-  const reason = document.getElementById('kyc-reject-reason').value;
-  if (!reason) { showToast('กรุณาระบุเหตุผล','warn'); return; }
-  showConfirm(
-    `ปฏิเสธ KYC <strong>${kid}</strong>?<br><small class="tm">เหตุผล: ${reason}</small>`,
-    async () => {
-      showLoad('กำลังดำเนินการ...');
-      try {
-        await apiPost({ action:'approveKYC', member_id:kid, admin_id:ADMIN?.admin_id, reject:true, reason });
-        hideLoad();
-        const k = DA.kyc.find(x=>x.id===kid); if(k) k.status='rejected';
-        closeM('m-kyc'); filterKYC();
-        addNotifLog(`❌ ปฏิเสธ KYC ${kid} — ${reason}`);
-        showToast('❌ ปฏิเสธ KYC แล้ว — ส่ง Notification ถึงสมาชิกแล้ว');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '❌', 'ยืนยันปฏิเสธ', 'btn-err'
-  );
-}
+
+
 
 // ═══════════════════════════════════════
 // SELLER APPLICATIONS
 // ═══════════════════════════════════════
-function initSA() { filterSA('all', null); }
+
 function filterSA(st, btn) {
   document.querySelectorAll('#sa-fbar .fbtn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -2227,38 +2364,8 @@ function openSAModal(sid) {
     <button class="btn btn-err w100" onclick="document.getElementById('sa-reject-form').style.display='';document.getElementById('sa-actions').innerHTML='<button class=\\'btn btn-ghost w100\\' onclick=\\'document.getElementById(\\'sa-reject-form\\').style.display=\\'none\\'\\'>ยกเลิก</button><button class=\\'btn btn-err w100\\' onclick=\\'rejectSA(\\'${s.id}\\')\\'>ยืนยันปฏิเสธ</button>'">✗ ปฏิเสธ</button>`;
   openM('m-sa');
 }
-function approveSA(sid) {
-  showConfirm(
-    `อนุมัติใบสมัคร Seller <strong>${sid}</strong>?<br><small class="tm">สมาชิกจะได้รับ Notification และสิทธิ์ขายสินค้าทันที</small>`,
-    async () => {
-      showLoad('กำลังอนุมัติ...');
-      try {
-        const s = DA.seller_apps.find(x=>x.id===sid);
-        await apiPost({ action:'approveSeller', app_id:sid, member_id:s?.uid, admin_id:ADMIN?.admin_id });
-        hideLoad();
-        if(s) s.status='approved';
-        closeM('m-sa'); filterSA('all',null);
-        showToast('✅ อนุมัติ Seller แล้ว — ส่ง Notification แล้ว');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '✅', 'อนุมัติ', 'btn-ok'
-  );
-}
-function rejectSA(sid) {
-  const reason = document.getElementById('sa-reject-reason')?.value || 'ไม่ผ่านเกณฑ์';
-  showConfirm(
-    `ปฏิเสธใบสมัคร Seller <strong>${sid}</strong>?<br><small class="tm">เหตุผล: ${reason}</small>`,
-    async () => {
-      showLoad('กำลังดำเนินการ...');
-      try {
-        await apiPost({ action:'approveSeller', app_id:sid, reject:true, reason, admin_id:ADMIN?.admin_id });
-        hideLoad();
-        const s = DA.seller_apps.find(x=>x.id===sid); if(s) s.status='rejected';
-        closeM('m-sa'); filterSA('all',null);
-        showToast('❌ ปฏิเสธใบสมัครแล้ว — ส่ง Notification แล้ว','warn');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '❌', 'ยืนยันปฏิเสธ', 'btn-err'
-  );
-}
+
+
 
 // ═══════════════════════════════════════
 // PRODUCT APPROVAL
@@ -2399,21 +2506,7 @@ function openProdModal(pid) {
 // ═══════════════════════════════════════
 // WALLETS
 // ═══════════════════════════════════════
-function initWallets() {
-  const w = DA.wallets;
-  document.getElementById('wallet-cards').innerHTML = `
-    <div class="wallet-card tcc"><div class="wc-ico">🏦</div><div class="wc-name">TCC Fund</div><div class="wc-bal tg mono">${w.tcc.bal.toLocaleString()}<span class="tsm tok"> USDT</span></div><div class="tsm tm mt2">วันนี้ ${w.tcc.change} USDT</div></div>
-    <div class="wallet-card fee"><div class="wc-ico">💸</div><div class="wc-name">Market Fee</div><div class="wc-bal terr mono">${w.fee.bal.toLocaleString()}<span class="tsm"> USDT</span></div><div class="tsm tm mt2">วันนี้ ${w.fee.change} USDT</div></div>
-    <div class="wallet-card cust"><div class="wc-ico">👥</div><div class="wc-name">Customer Total</div><div class="wc-bal tinf mono">${w.cust.bal.toLocaleString()}<span class="tsm"> USDT</span></div><div class="tsm tm mt2">วันนี้ ${w.cust.change} USDT</div></div>
-    <div class="wallet-card sell"><div class="wc-ico">🏪</div><div class="wc-name">Seller Total</div><div class="wc-bal tok mono">${w.sell.bal.toLocaleString()}<span class="tsm"> USDT</span></div><div class="tsm tm mt2">วันนี้ ${w.sell.change} USDT</div></div>`;
-  document.getElementById('wallet-adj-list').innerHTML = [
-    {date:'2025-05-10',wallet:'TCC Fund',amt:'+10,000',by:'superadmin',note:'Seed fund Q2'},
-    {date:'2025-05-08',wallet:'Customer U-0001',amt:'+500',by:'superadmin',note:'Compensation'},
-  ].map(a => `<div class="fc btwn mb2 tsm" style="padding:6px 0;border-bottom:1px solid var(--bdr);">
-    <div><div>${a.wallet}</div><div class="tm txs">${a.date} · ${a.by} · ${a.note}</div></div>
-    <span class="mono ${a.amt.startsWith('+')?'tok':'terr'}">${a.amt}</span>
-  </div>`).join('');
-}
+
 function swWalletTab(t, btn) {
   document.querySelectorAll('#sec-wallets .tab').forEach(x => x.classList.remove('active'));
   btn.classList.add('active');
@@ -2425,7 +2518,7 @@ function swWalletTab(t, btn) {
 // GLOBAL TX VIEW
 // ═══════════════════════════════════════
 let gtxPage = 1; const GTX_PP = 6;
-function initGTX() { filterGTX(); }
+
 function filterGTX() {
   const wf = document.getElementById('gtx-wallet').value;
   const tf = document.getElementById('gtx-type').value;
@@ -2518,7 +2611,7 @@ function typeColor(t) {
 // ═══════════════════════════════════════
 // FF REFRESH ADMIN
 // ═══════════════════════════════════════
-function initFFAdmin() { filterFF('all', null); }
+
 function filterFF(st, btn) {
   document.querySelectorAll('#ff-fbar .fbtn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -2570,39 +2663,8 @@ function openFFModal(fid) {
     <button class="btn btn-err w100" onclick="document.getElementById('ff-reject-form').style.display='';document.getElementById('ff-actions').innerHTML='<button class=\\'btn btn-ghost w100\\' onclick=\\'document.getElementById(\\'ff-reject-form\\').style.display=\\'none\\'\\'>ยกเลิก</button><button class=\\'btn btn-err w100\\' onclick=\\'rejectFF(\\'${f.id}\\')\\'>ยืนยันปฏิเสธ</button>'">✗ ปฏิเสธ</button>`;
   openM('m-ff');
 }
-function approveFF(fid) {
-  showConfirm(
-    `อนุมัติ Refresh Rights <strong>${fid}</strong>?<br><small class="tm">สมาชิกจะได้รับ 5/5 Rights คืนทันที</small>`,
-    async () => {
-      showLoad('กำลังอนุมัติ...');
-      try {
-        const f = DA.ff_requests.find(x=>x.id===fid);
-        await apiPost({ action:'approveFF', request_id:fid, member_id:f?.uid, admin_id:ADMIN?.admin_id });
-        hideLoad();
-        if(f) f.status='approved';
-        closeM('m-ff'); filterFF('all',null);
-        addNotifLog(`✅ อนุมัติ FF Refresh ${fid}`);
-        showToast('✅ อนุมัติ Refresh Rights แล้ว — สมาชิกได้รับ 5/5 Rights ทันที');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '🔄', 'อนุมัติ', 'btn-ok'
-  );
-}
-function rejectFF(fid) {
-  const reason = document.getElementById('ff-reject-reason')?.value || 'ไม่ผ่านเกณฑ์';
-  showConfirm(
-    `ปฏิเสธคำขอ Refresh <strong>${fid}</strong>?<br><small class="tm">เหตุผล: ${reason}</small>`,
-    async () => {
-      showLoad('กำลังดำเนินการ...');
-      try {
-        await apiPost({ action:'approveFF', request_id:fid, reject:true, reason, admin_id:ADMIN?.admin_id });
-        hideLoad();
-        const f = DA.ff_requests.find(x=>x.id===fid); if(f) f.status='rejected';
-        closeM('m-ff'); filterFF('all',null);
-        showToast('❌ ปฏิเสธคำขอ Refresh แล้ว — ส่ง Notification ถึงสมาชิก','warn');
-      } catch(e){ hideLoad(); showToast('❌ '+e.message,'err'); }
-    }, '❌', 'ยืนยันปฏิเสธ', 'btn-err'
-  );
-}
+
+
 
 // ═══════════════════════════════════════
 // REFERRAL MANAGEMENT
@@ -2621,11 +2683,11 @@ async function initRef() {
   document.getElementById('ref-table').innerHTML =
     `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--t3);">กำลังโหลด...</td></tr>`;
 
-  showLoad('กำลังโหลด Referrals...');
+  showLoadSoft('กำลังโหลด Referrals...');
   try {
     const [refs, members] = await Promise.all([
-      apiGet({ action: 'read', sheet: 'Referrals' }),
-      apiGet({ action: 'read', sheet: 'Members' })
+      adminGet({ action: 'read', sheet: 'Referrals' }),
+      adminGet({ action: 'read', sheet: 'Members' })
     ]);
     hideLoad();
 
@@ -2764,7 +2826,7 @@ async function loadAdminApproval() {
   pendEl.innerHTML='<div class="tsm tm">กำลังโหลด...</div>';
   allEl.innerHTML ='<div class="tsm tm">กำลังโหลด...</div>';
 
-  const admins = await apiGet({action:'read',sheet:'Admins'});
+  const admins = await adminGet({action:'read',sheet:'Admins'});
   if(!Array.isArray(admins)){
     pendEl.innerHTML='<div class="tsm err">โหลดข้อมูลไม่ได้</div>';
     return;
@@ -2903,7 +2965,7 @@ async function initSettings() {
     {plan:'C',desc:'50% × 2 รอบ',key:'ff_plan_c_enabled',active:true},
   ]);
   try{
-    const cfg=await apiGet({action:'getConfig'});
+    const cfg=await adminGet({action:'getConfig'});
     if(cfg&&!cfg.error){
       // อัปเดต input values จาก Config sheet
       const fieldMap={
@@ -3110,7 +3172,7 @@ async function initReviews() {
   if(rvCardsEl) rvCardsEl.innerHTML = '<div class="empty"><div class="empty-ico">⏳</div>กำลังโหลด...</div>';
   document.getElementById('rv-stats').innerHTML = '';
   try {
-    const rvs = await apiGet({ action: 'read', sheet: 'Reviews' });
+    const rvs = await adminGet({ action: 'read', sheet: 'Reviews' });
     if (!Array.isArray(rvs)) { showToast('⚠️ โหลด Reviews ไม่สำเร็จ', 'warn'); return; }
     _allReviews = rvs;
 
@@ -3276,13 +3338,13 @@ async function doDeleteReview(rvId) {
 // ✅ [v25 FIX] initKYC — โหลด Members + KYC_Documents พร้อมกัน
 // KYC_Documents มี 4 rows ต่อ member (doc_type: id_card / id_back / selfie / address)
 // ใช้ filter+find แยก URL ตาม doc_type แทน find row เดียว
-initKYC = async function(){
+async function initKYC(){
   filterKYC();
-  showLoad('กำลังโหลด KYC...');
+  showLoadSoft('กำลังโหลด KYC...');
   try{
     const [members, kycDocs]=await Promise.all([
-      apiGet({action:'read',sheet:'Members'}),
-      apiGet({action:'read',sheet:'KYC_Documents'}).catch(()=>[])
+      adminGet({action:'read',sheet:'Members'}),
+      adminGet({action:'read',sheet:'KYC_Documents'}).catch(()=>[])
     ]);
     hideLoad();
     if(Array.isArray(members)){
@@ -3335,10 +3397,10 @@ initKYC = async function(){
       filterKYC();
     }
   }catch(e){hideLoad();showToast('⚠️ โหลด KYC ไม่สำเร็จ','warn');}
-};
+}
 
 // Override KYC approve/reject
-approveKYC = async function(kid){
+async function approveKYC(kid){
   if(!ADMIN){showToast('ไม่มีสิทธิ์','err');return;}
   const _kid=String(kid).trim(); // [v27 FIX] normalize
   const k=DA.kyc.find(x=>String(x.id).trim()===_kid);if(!k)return;
@@ -3349,8 +3411,8 @@ approveKYC = async function(kid){
     if(res.success){k.status='verified';closeM('m-kyc');filterKYC();showToast('✅ อนุมัติ KYC แล้ว!');}
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
-};
-rejectKYC = async function(kid){
+}
+async function rejectKYC(kid){
   if(!ADMIN){showToast('ไม่มีสิทธิ์','err');return;}
   const _kid=String(kid).trim(); // [v27 FIX] normalize
   const k=DA.kyc.find(x=>String(x.id).trim()===_kid);if(!k)return;
@@ -3362,13 +3424,13 @@ rejectKYC = async function(kid){
     if(res.success){k.status='rejected';closeM('m-kyc');filterKYC();showToast('❌ ปฏิเสธ KYC แล้ว');}
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
-};
+}
 
-initSA = async function(){
+async function initSA(){
   filterSA('all',null);
-  showLoad('กำลังโหลด Seller Applications...');
+  showLoadSoft('กำลังโหลด Seller Applications...');
   try{
-    const apps=await apiGet({action:'read',sheet:'Seller_Applications'});
+    const apps=await adminGet({action:'read',sheet:'Seller_Applications'});
     hideLoad();
     if(Array.isArray(apps)){
       DA.seller_apps=apps
@@ -3389,9 +3451,9 @@ initSA = async function(){
       filterSA('all',null);
     }
   }catch(e){hideLoad();showToast('⚠️ โหลด Seller Applications ไม่สำเร็จ','warn');}
-};
+}
 
-approveSA = async function(sid){
+async function approveSA(sid){
   if(!ADMIN)return;
   const _sid=String(sid).trim(); // [v27 FIX] normalize
   const s=DA.seller_apps.find(x=>String(x.id).trim()===_sid);if(!s)return;
@@ -3403,8 +3465,8 @@ approveSA = async function(sid){
     else if(res.country_closed) showToast('🔒 '+res.error+' — เปิดประเทศที่เมนู Countries ก่อนจึงอนุมัติได้ (ปฏิเสธได้ตามปกติ)','warn');   // [P7]
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
-};
-rejectSA = async function(sid){
+}
+async function rejectSA(sid){
   if(!ADMIN)return;
   const _sid=String(sid).trim(); // [v27 FIX] normalize
   const s=DA.seller_apps.find(x=>String(x.id).trim()===_sid);if(!s)return;
@@ -3416,12 +3478,12 @@ rejectSA = async function(sid){
     if(res.success){s.status='rejected';closeM('m-sa');filterSA('all',null);showToast('❌ ปฏิเสธแล้ว');}
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
-};
+}
 
 initProds = async function(){
-  showLoad('กำลังโหลดสินค้า...');
+  showLoadSoft('กำลังโหลดสินค้า...');
   try{
-    const prods=await apiGet({action:'read',sheet:'Products'});
+    const prods=await adminGet({action:'read',sheet:'Products'});
     hideLoad();
     if(Array.isArray(prods)){
       DA.products=prods.map(p=>({
@@ -3499,7 +3561,7 @@ rejectProd = async function(pid){
   }catch(e){hideLoad();showToast('❌ server error','err');}
 };
 
-initWallets = async function(){
+async function initWallets(){
   document.getElementById('wallet-cards').innerHTML=`
     <div class="wallet-card tcc"><div class="wc-ico">🏦</div><div class="wc-name">TCC Fund</div><div class="wc-bal tg mono" id="wc-tcc">กำลังโหลด...</div></div>
     <div class="wallet-card fee"><div class="wc-ico">💸</div><div class="wc-name">Market Fee</div><div class="wc-bal terr mono" id="wc-fee">กำลังโหลด...</div></div>
@@ -3508,9 +3570,11 @@ initWallets = async function(){
   document.getElementById('wallet-adj-list').innerHTML='';
 
   try{
-    const [stats, txs] = await Promise.all([
-      apiGet({action:'stats'}),
-      apiGet({action:'read', sheet:'Transactions'})
+    // [v57 PERF] statsLite (ไม่แตะ Transactions/Orders) + เฉพาะ Deposit ที่ pending + Adjustment ล่าสุด 5 รายการ (กรองที่ GAS)
+    const [stats, txs, adjs] = await Promise.all([
+      adminStatsLite(),
+      adminTxGet({tx_type:'Deposit', tx_status:'pending', limit:500}),
+      adminTxGet({tx_type:'Admin_Adjust', limit:5})
     ]);
 
     // ── ยอด Wallet Cards ทั้ง 4 ──
@@ -3597,7 +3661,7 @@ initWallets = async function(){
       }
 
       // ── Recent Adjustments ──
-      document.getElementById('wallet-adj-list').innerHTML=txs.filter(t=>t.tx_type==='Admin_Adjust').slice(-5).reverse().map(a=>{
+      document.getElementById('wallet-adj-list').innerHTML=(Array.isArray(adjs)?adjs:[]).filter(t=>t.tx_type==='Admin_Adjust').slice(-5).reverse().map(a=>{
         const amt = Number(a.amount_usdt);
         const amtDisp = isNaN(amt) ? '—' : amt.toFixed(2);
         return `<div class="fc btwn mb2 tsm" style="padding:6px 0;border-bottom:1px solid var(--bdr);">
@@ -3608,7 +3672,7 @@ initWallets = async function(){
     }
   }catch(e){ console.error('initWallets error:',e); }
 
-};
+}
 
 // ── Approve Deposit ─────────────────────────────────────────────────────
 // ── TX Detail Modal ────────────────────────────────────────────────────────
@@ -3736,11 +3800,11 @@ function doAdminWalletAdjust(){
   );
 }
 
-initGTX = async function(){
+async function initGTX(){
   filterGTX();
-  showLoad('กำลังโหลดธุรกรรม...');
+  showLoadSoft('กำลังโหลดธุรกรรม...');
   try{
-    const txs=await apiGet({action:'read',sheet:'Transactions'});
+    const txs=await adminTxGet({limit:500});   // [v57 PERF] ล่าสุด 500 รายการ (กรอง/ตัดที่ GAS)
     hideLoad();
     if(Array.isArray(txs)){
       DA.gtx=txs.slice().reverse().map(t=>{
@@ -3760,13 +3824,13 @@ initGTX = async function(){
       filterGTX();
     }
   }catch(e){hideLoad();}
-};
+}
 
-initFFAdmin = async function(){
+async function initFFAdmin(){
   filterFF('all',null);
-  showLoad('กำลังโหลด FF Refresh...');
+  showLoadSoft('กำลังโหลด FF Refresh...');
   try{
-    const reqs=await apiGet({action:'read',sheet:'FF_Refresh'});
+    const reqs=await adminGet({action:'read',sheet:'FF_Refresh'});
     hideLoad();
     if(Array.isArray(reqs)){
       DA.ff_requests=reqs.map(r=>({
@@ -3779,9 +3843,9 @@ initFFAdmin = async function(){
       filterFF('all',null);
     }
   }catch(e){hideLoad();}
-};
+}
 
-approveFF = async function(fid){
+async function approveFF(fid){
   if(!ADMIN)return;
   const _fid=String(fid).trim(); // [v27 FIX] normalize
   const f=DA.ff_requests.find(x=>String(x.id).trim()===_fid);if(!f)return;
@@ -3792,8 +3856,8 @@ approveFF = async function(fid){
     if(res.success){f.status='approved';closeM('m-ff');filterFF('all',null);showToast('✅ อนุมัติ FF Refresh แล้ว!');}
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
-};
-rejectFF = async function(fid){
+}
+async function rejectFF(fid){
   if(!ADMIN)return;
   const _fid=String(fid).trim(); // [v27 FIX] normalize
   const f=DA.ff_requests.find(x=>String(x.id).trim()===_fid);if(!f)return;
@@ -3804,7 +3868,7 @@ rejectFF = async function(fid){
     if(res.success){f.status='rejected';closeM('m-ff');filterFF('all',null);showToast('❌ ปฏิเสธแล้ว');}
     else showToast(res.error||'ไม่สำเร็จ','err');
   }catch(e){hideLoad();showToast('❌ server error','err');}
-};
+}
 
 // ══════════════════════════════════════════════
 // MOBILE NAVIGATION — v28
@@ -3879,7 +3943,7 @@ function updateMobNavDots() {
 // ═══════════════════════════════════════════════════════════════════════
 // [P2 Multi-Country] Countries / Carriers admin + ตัวกรองประเทศ
 // ═══════════════════════════════════════════════════════════════════════
-var MPC = { countries: [], carriers: [], loaded: false, shopCountry: {} };
+var MPC = { countries: [], carriers: [], counts: null, loaded: false, shopCountry: {} };
 function _mpcEsc(v){ return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function _mpcFlag(cc){
   cc=String(cc||'').toUpperCase();
@@ -3889,12 +3953,20 @@ function _mpcFlag(cc){
 function _mpcCC(v){ const c=String(v==null?'':v).trim().toUpperCase(); return /^[A-Z]{2}$/.test(c)?c:'TH'; } // แถวเก่าที่ว่าง = TH
 function mpcCountryBdg(cc){ cc=_mpcCC(cc); return `<span class="bdg bdg-muted">${_mpcFlag(cc)} ${cc}</span>`; }
 
-async function mpcLoad(force){
-  if(MPC.loaded && !force) return;
+// [v57 PERF] 1 request (adminCountryBundle) แทน Countries+Carriers (+Products+Seller_Applications+Members สำหรับนับ) · GAS เก่า → ถอยไปอ่านชีตเดิม
+async function mpcLoad(force, withCounts){
+  if(MPC.loaded && !force && (!withCounts || MPC.counts)) return;
   try{
-    const [c,k]=await Promise.all([apiGet({action:'read',sheet:'Countries'}),apiGet({action:'read',sheet:'Carriers'})]);
+    let c=null,k=null,counts=null;
+    try{
+      // [v58] counts=1 เสมอ → cache key เดียว (Countries/Carriers/ตัวกรองใช้ผลเดียวกัน = 1 request ต่อรอบ) · GAS นับจากชีตที่แคชไว้แล้ว
+      const b=await adminGet(Object.assign({action:'adminCountryBundle',counts:1},_mpcAuth()),{ttl:120000});
+      if(b&&b.success&&Array.isArray(b.countries)){ c=b.countries; k=Array.isArray(b.carriers)?b.carriers:[]; counts=b.counts||null; }
+    }catch(e){}
+    if(!c){ [c,k]=await Promise.all([adminGet({action:'read',sheet:'Countries'}),adminGet({action:'read',sheet:'Carriers'})]); }
     MPC.countries=Array.isArray(c)?c.filter(x=>x.country_code).sort((a,b)=>(Number(a.sort)||0)-(Number(b.sort)||0)):[];
     MPC.carriers=Array.isArray(k)?k.filter(x=>x.carrier_code):[];
+    if(counts) MPC.counts=counts; else if(withCounts) MPC.counts=null;
     MPC.loaded=true;
     if(!MPC.countries.length) showToast('⚠️ ยังไม่มีข้อมูล Countries — รัน migrateCountryColumns ก่อน','warn');
   }catch(e){ showToast('⚠️ โหลด Countries/Carriers ไม่สำเร็จ: '+e.message,'warn'); }
@@ -3910,7 +3982,7 @@ function mpcFillFilter(id){
 }
 async function mpcShopCountryMap(){
   try{
-    const apps=await apiGet({action:'read',sheet:'Seller_Applications'});
+    const apps=await adminGet({action:'read',sheet:'Seller_Applications'});
     const map={};
     if(Array.isArray(apps)) apps.forEach(a=>{
       if(!a.member_id) return;
@@ -3924,18 +3996,20 @@ async function mpcShopCountryMap(){
 
 // ── Countries ──
 async function initCountries(){
-  showLoad('กำลังโหลดประเทศ...');
-  await mpcLoad(true);
-  const cnt={};
+  showLoadSoft('กำลังโหลดประเทศ...');
+  await mpcLoad(false,true);   // [v58] ไม่บังคับโหลดใหม่ทุกรอบ — เขียนข้อมูล/กด 🔄 จะล้างแคช (MPC.loaded=false) เอง
+  let cnt=MPC.counts;   // [v57 PERF] นับจากฝั่ง GAS แล้ว (GAS เก่า → ถอยไปอ่าน 3 ชีตแบบเดิม)
+  if(!cnt){ cnt={};
   try{
     const [prods,apps,mems]=await Promise.all([
-      apiGet({action:'read',sheet:'Products'}),apiGet({action:'read',sheet:'Seller_Applications'}),apiGet({action:'read',sheet:'Members'})]);
+      adminGet({action:'read',sheet:'Products'}),adminGet({action:'read',sheet:'Seller_Applications'}),adminGet({action:'read',sheet:'Members'})]);
     const add=(arr,key,filter)=>{ if(!Array.isArray(arr)) return; arr.forEach(r=>{ if(filter&&!filter(r)) return;
       const cc=_mpcCC(r.country_code); (cnt[cc]=cnt[cc]||{shops:0,prods:0,mems:0})[key]++; }); };
     add(apps,'shops',r=>String(r.status||'').toLowerCase().trim()==='approved');
     add(prods,'prods',r=>String(r.approval_status||'').toLowerCase().trim()==='approved');
     add(mems,'mems',r=>r.member_id);
   }catch(e){}
+  }
   hideLoad();
   const rows=MPC.countries;
   document.getElementById('cty-table').innerHTML=rows.map(c=>{
@@ -4068,8 +4142,8 @@ async function toggleCountry(code){
 
 // ── Carriers ──
 async function initCarriers(){
-  showLoad('กำลังโหลดขนส่ง...');
-  await mpcLoad(true);
+  showLoadSoft('กำลังโหลดขนส่ง...');
+  await mpcLoad(false);   // [v58] ดูข้อ initCountries
   hideLoad();
   mpcFillFilter('car-country');
   renderCarriers();
@@ -4145,10 +4219,11 @@ function toggleCarrier(code,cc){
 (function(){
   const wrap=(name,filterId,pre)=>{
     const orig=window[name];
-    window[name]=async function(){
-      await mpcLoad(false); mpcFillFilter(filterId);
-      if(pre) await pre();
-      return orig.apply(this,arguments);
+    window[name]=function(){
+      const self=this, args=arguments;
+      const pl=mpcLoad(false).then(()=>mpcFillFilter(filterId)).catch(()=>{});   // [v57] ไม่บล็อกการโหลดข้อมูลหลัก
+      if(pre) return Promise.all([pl,pre()]).then(()=>orig.apply(self,args));
+      return Promise.all([pl,orig.apply(self,args)]).then(()=>undefined);
     };
   };
   wrap('initUsers','u-country');
@@ -4188,9 +4263,14 @@ async function initCountryReport(){
 window._crOrders = null;
 async function loadCrOrders(force){
   if(window._crOrders && !force){ renderCrOrders(); return; }
-  showLoad('กำลังโหลดออเดอร์...');
+  showLoadSoft('กำลังโหลดออเดอร์...');
   try{
-    const rows=await apiGet({action:'read',sheet:'Orders'});
+    let rows=null; window._crOrdersCap=0;
+    try{   // [v57 PERF] ออเดอร์ล่าสุด 1500 แถว (อ่านท้ายชีตที่ GAS) แทนทั้งชีต · GAS เก่า → ถอยไปอ่านทั้งชีต
+      const r=await adminGet(Object.assign({action:'adminOrdersRecent',limit:1500},_mpcAuth()));
+      if(Array.isArray(r)){ rows=r; window._crOrdersCap=1500; }
+    }catch(e){}
+    if(!rows) rows=await adminGet({action:'read',sheet:'Orders'});
     window._crOrders=Array.isArray(rows)?rows.filter(o=>o&&o.order_id):[];
     await mpcLoad(false); mpcFillFilter('cr-ord-country');
     renderCrOrders();
@@ -4219,7 +4299,7 @@ function renderCrOrders(){
       <td class="txs tm">${_mpcEsc(String(o.created_at||'').slice(0,10))}</td></tr>`;
   }).join(''):'<tr><td colspan="10" class="tm" style="text-align:center;padding:18px;">ไม่พบออเดอร์</td></tr>';
   const note=document.getElementById('cr-ord-note');
-  if(note) note.textContent='พบ '+_crN(list.length)+' ออเดอร์'+(list.length>shown.length?' · แสดงล่าสุด '+shown.length+' รายการ':'')+' · แถวเก่าที่ไม่มี country_code นับเป็น TH';
+  if(note) note.textContent='พบ '+_crN(list.length)+' ออเดอร์'+(list.length>shown.length?' · แสดงล่าสุด '+shown.length+' รายการ':'')+(window._crOrdersCap&&all.length>=window._crOrdersCap?' · ดึงจากออเดอร์ล่าสุด '+_crN(window._crOrdersCap)+' รายการ':'')+' · แถวเก่าที่ไม่มี country_code นับเป็น TH';
 }
 function _crDate(d){ const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
 function crQuick(days){
@@ -4236,9 +4316,9 @@ async function loadCountryReport(){
   if(v('cr-from')) params.from=v('cr-from');
   if(v('cr-to')) params.to=v('cr-to');
   if(v('cr-country')) params.country=v('cr-country');
-  showLoad('กำลังสร้างรายงาน...');
+  showLoadSoft('กำลังสร้างรายงาน...');
   try{
-    const r=await apiGet(params);
+    const r=await adminGet(params);
     if(!r||!r.success) throw new Error((r&&r.error)||'โหลดรายงานไม่สำเร็จ');
     window._crData=r; renderCountryReport(r);
   }catch(e){ showToast('⚠️ '+e.message,'err'); }
