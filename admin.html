@@ -1420,10 +1420,16 @@ textarea.fi{resize:vertical;min-height:70px;}
         <div class="txs tm mt2">Commission จ่ายจาก TCC Fund เสมอ</div></div>
       <div class="d"></div>
       <div style="font-weight:600;margin-bottom:1rem;">🏪 Seller Payout Fee</div>
+      <div class="fg"><label class="fl">7-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_7d_fee_pct" value="30"><div class="txs tm mt2">Seller ได้รับ 70% — 30% Marketing Fee (ค่าตั้งต้นเท่านั้น: ยอดจริงคำนวณจากโค้ด GAS)</div></div>
       <div class="fg"><label class="fl">45-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_45d_fee_pct" value="10"><div class="txs tm mt2">Seller ได้รับ 90% — 10% เข้า Market Fee Wallet</div></div>
       <div class="fg"><label class="fl">60-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_60d_fee_pct" value="0"><div class="txs tm mt2">Seller ได้รับ 100% — ไม่มีค่าธรรมเนียม</div></div>
       <button class="btn btn-gold" onclick="doSaveSettings(this)">💾 บันทึก</button>
     </div>
+  </div>
+  <div class="card" style="margin-top:1rem;">
+    <div style="font-weight:600;margin-bottom:.25rem;">💸 เปิด/ปิด Payout Option ของ Seller</div>
+    <div class="txs tm mb2">ปิดชุดไหน Seller จะลงสินค้าใหม่หรือเปลี่ยนไปใช้ชุดนั้นไม่ได้ · สินค้าและออเดอร์เดิมที่ใช้ชุดนั้นอยู่ทำงานต่อตามปกติ · บันทึกทันทีเมื่อสลับสวิตช์</div>
+    <div id="payout-toggles"></div>
   </div>
 </div>
 
@@ -2383,7 +2389,7 @@ function filterProds(st, btn) {
     <td>${mpcCountryBdg(p.country)}${mpcProdMismatch(p)?' <span class="bdg bdg-err" title="ประเทศสินค้าไม่ตรงกับร้าน">⚠️ ไม่ตรงร้าน</span>':''}</td>
     <td><span class="bdg bdg-muted">${p.cat}</span></td>
     <td class="mono tg">${p.price.toLocaleString()} USDT</td>
-    <td><span class="bdg ${p.po==='60d'?'bdg-ok':p.po==='30d'?'bdg-inf':p.po==='15d'?'bdg-muted':'bdg-warn'}">${p.po}</span></td>
+    <td><span class="bdg ${poBdgCls(p.po)}">${p.po}</span></td>
     <td class="mono">${p.rating_avg > 0 ? '<span style="color:var(--gold)">★</span> ' + p.rating_avg : '—'}</td>
     <td class="mono tsm">${p.total_reviews || 0}</td>
     <td class="tsm tm">${p.submitted}</td>
@@ -2429,7 +2435,7 @@ function openProdModal(pid) {
       ${mpcProdMismatch(p)?'<div class="alrt alrt-w tsm mb2">⚠️ ประเทศสินค้าไม่ตรงกับประเทศของร้าน — ตรวจสอบก่อนอนุมัติ</div>':''}
       <div class="fc btwn mb2"><span class="tm">หมวดหมู่</span><span>${p.cat}</span></div>
       <div class="fc btwn mb2"><span class="tm">ราคา</span><span class="mono tg">${p.price.toLocaleString()} USDT</span></div>
-      <div class="fc btwn mb2"><span class="tm">Payout Option</span><span class="bdg ${p.po==='60d'?'bdg-ok':p.po==='30d'?'bdg-inf':p.po==='15d'?'bdg-muted':'bdg-warn'}">${p.po} (${p.po==='60d'?'Seller ได้ 100%':p.po==='45d'?'Seller ได้ 90%':p.po==='30d'?'Seller ได้ 85%':'Seller ได้ 80%'})</span></div>
+      <div class="fc btwn mb2"><span class="tm">Payout Option</span><span class="bdg ${poBdgCls(p.po)}">${p.po} (${poSellerTxt(p.po)})</span></div>
       <div class="fc btwn mb2"><span class="tm">จำนวนรูป</span><span>${imgs.length} รูป</span></div>
       ${p.video_url ? `<div class="fc btwn mb2"><span class="tm">วิดีโอ</span><span><a href="${p.video_url}" target="_blank" style="color:var(--acc);font-size:12px;">▶ ดูวิดีโอ</a></span></div>` : ''}
       <div class="fc btwn"><span class="tm">ส่งเมื่อ</span><span>${p.submitted}</span></div>
@@ -2964,6 +2970,7 @@ async function initSettings() {
     {plan:'B',desc:'25% × 4 รอบ',key:'ff_plan_b_enabled',active:true},
     {plan:'C',desc:'50% × 2 รอบ',key:'ff_plan_c_enabled',active:true},
   ]);
+  renderPayoutToggles();
   try{
     const cfg=await adminGet({action:'getConfig'});
     if(cfg&&!cfg.error){
@@ -2974,6 +2981,7 @@ async function initSettings() {
         max_withdraw_daily_usdt:'[data-key="max_withdraw_daily_usdt"]',
         referral_commission_pct:'[data-key="referral_commission_pct"]',
         referral_seller_commission_pct:'[data-key="referral_seller_commission_pct"]',
+        payout_7d_fee_pct:'[data-key="payout_7d_fee_pct"]',
         payout_45d_fee_pct:'[data-key="payout_45d_fee_pct"]',
         payout_60d_fee_pct:'[data-key="payout_60d_fee_pct"]',
       };
@@ -2988,8 +2996,68 @@ async function initSettings() {
         {plan:'C',desc:`${cfg.ff_plan_c_pct||50}% × ${cfg.ff_plan_c_rounds||2} รอบ`,key:'ff_plan_c_enabled',active:cfg.ff_plan_c_enabled!=='false'},
       ];
       renderFFToggles(plans);
+      renderPayoutToggles(cfg);
     }
   }catch(e){}
+}
+
+// ═══ [v59] Payout Option — ป้าย + สวิตช์เปิด/ปิดชุด ═══
+const PAYOUT_OPTS=[
+  {po:7, title:'🚀 7 วัน',  desc:'Seller ได้ 70% · FF 25%'},
+  {po:15,title:'⚡ 15 วัน', desc:'Seller ได้ 80% · FF 50%'},
+  {po:30,title:'⚡ 30 วัน', desc:'Seller ได้ 85% · FF 60%'},
+  {po:45,title:'⚡ 45 วัน', desc:'Seller ได้ 90% · FF 80%'},
+  {po:60,title:'🏆 60 วัน', desc:'Seller ได้ 100% · FF 100%'},
+];
+const PO_BDG={'7d':'bdg-err','15d':'bdg-muted','30d':'bdg-inf','45d':'bdg-warn','60d':'bdg-ok'};
+const PO_SELLER={'7d':70,'15d':80,'30d':85,'45d':90,'60d':100};
+function poBdgCls(po){ return PO_BDG[po]||'bdg-warn'; }
+function poSellerTxt(po){ return 'Seller ได้ '+(PO_SELLER[po]!=null?PO_SELLER[po]:80)+'%'; }
+let _poEnabled={7:true,15:true,30:true,45:true,60:true};
+function renderPayoutToggles(cfg){
+  const el=document.getElementById('payout-toggles');
+  if(!el) return;
+  if(cfg) PAYOUT_OPTS.forEach(o=>{ _poEnabled[o.po]=String(cfg['payout_'+o.po+'d_enabled']==null?'true':cfg['payout_'+o.po+'d_enabled']).trim().toLowerCase()!=='false'; });
+  el.innerHTML=PAYOUT_OPTS.map(o=>{
+    const on=_poEnabled[o.po];
+    return `
+    <div class="fc btwn mb4" style="padding:8px 0;border-bottom:1px solid var(--bdr);">
+      <div>
+        <div style="font-weight:600;font-size:13px;">${o.title}</div>
+        <div class="tsm tm">${o.desc}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="tsm" id="po-lbl-${o.po}">${on?'เปิด':'ปิด'}</span>
+        <label class="toggle">
+          <input type="checkbox" id="po-chk-${o.po}" ${on?'checked':''} onchange="togglePayoutOption(${o.po},this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function togglePayoutOption(po, chk){
+  if(!ADMIN){ chk.checked=!chk.checked; return; }
+  const active=chk.checked;
+  // ต้องเหลืออย่างน้อย 1 ชุด ไม่งั้น Seller ลงสินค้าไม่ได้เลย
+  if(!active && PAYOUT_OPTS.filter(o=>o.po!==po&&_poEnabled[o.po]).length===0){
+    chk.checked=true;
+    showToast('⚠️ ต้องเปิด Payout Option อย่างน้อย 1 ชุด','warn');
+    return;
+  }
+  const lbl=document.getElementById('po-lbl-'+po);
+  chk.disabled=true;
+  try{
+    const res=await apiPost({action:'updateConfig',config_key:'payout_'+po+'d_enabled',config_value:active?'true':'false',admin_id:ADMIN.admin_id});
+    if(!res||!res.success) throw new Error((res&&res.error)||'บันทึกไม่สำเร็จ');
+    _poEnabled[po]=active;
+    if(lbl) lbl.textContent=active?'เปิด':'ปิด';
+    showToast((active?'✅ เปิด':'⏸ ปิด')+' Payout '+po+' วัน — บันทึก Config แล้ว');
+  }catch(e){
+    chk.checked=!active;   // คืนค่าเดิมถ้าบันทึกไม่สำเร็จ
+    if(lbl) lbl.textContent=chk.checked?'เปิด':'ปิด';
+    showToast('❌ บันทึก Payout Option ไม่สำเร็จ: '+e.message,'err');
+  }finally{ chk.disabled=false; }
 }
 
 function renderFFToggles(plans){
