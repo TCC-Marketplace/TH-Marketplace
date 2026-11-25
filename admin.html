@@ -1413,27 +1413,34 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="ptitle"><h2>⚙️ System <span>Settings</span></h2></div>
   <div class="g2">
     <div class="card">
-      <div style="font-weight:600;margin-bottom:1rem;">🎁 Funding Free Plans <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Funding Free Plans — วิธีใช้</div><p>สวิตช์ A / B / C บันทึกลง Config key <code>ff_plan_a/b/c_enabled</code> ทันทีที่สลับ</p><p class="info-warn">⚠️ ขณะนี้ GAS และหน้า Marketplace ยังไม่ได้อ่านค่านี้ ปิดสวิตช์แล้วลูกค้ายังเลือก Plan นั้นได้ตามเดิม</p><p>สัดส่วนจริงกำหนดตายตัวในโค้ด GAS (<code>FF_CONFIG</code>): A 10%×10 · B 25%×4 · C 50%×2</p></div></span></div>
+      <div style="font-weight:600;margin-bottom:1rem;">🎁 Funding Free Plans <span class="bdg bdg-ok" style="margin-left:6px;">มีผลจริง</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Funding Free Plans — วิธีใช้</div><p>สวิตช์ A / B / C บันทึกลง Config key <code>ff_plan_a/b/c_enabled</code> ทันทีที่สลับ</p><p><b>ปิดแล้ว:</b> การ์ด Plan นั้นในหน้าซื้อและฟอร์มลงสินค้าจางและกดไม่ได้ · GAS ปฏิเสธออเดอร์ใหม่และการลงสินค้าใหม่ที่ใช้ Plan นั้น</p><p><b>ไม่กระทบ:</b> ออเดอร์และตาราง FF ที่สร้างไปแล้วจ่ายต่อตามปกติ · ต้องเปิดอย่างน้อย 1 Plan</p><p>สัดส่วนแต่ละ Plan กำหนดในโค้ด GAS (<code>FF_CONFIG</code>): A 10%×10 · B 25%×4 · C 50%×2</p></div></span></div>
       <div id="ff-plan-toggles"></div>
       <div class="d"></div>
-      <div style="font-weight:600;margin-bottom:1rem;">💰 ขีดจำกัด Wallet <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">ขีดจำกัด Wallet — วิธีใช้</div><p>ช่องนี้บันทึกลง Config (<code>min_deposit_usdt</code>, <code>min_withdraw_usdt</code>, <code>max_withdraw_daily_usdt</code>) ด้วยปุ่ม 💾 บันทึก</p><p class="info-warn">⚠️ ขณะนี้ระบบใช้ค่าคงที่ในโค้ด GAS: ฝากขั้นต่ำ 10, ถอนขั้นต่ำ 20 USDT และยังไม่มีการตรวจ "ถอนสูงสุด/วัน" การแก้ตัวเลขตรงนี้จึงยังไม่เปลี่ยนพฤติกรรม</p></div></span></div>
-      <div class="fg"><label class="fl">Minimum Deposit (USDT)</label><input type="number" class="fi" data-key="min_deposit_usdt" value="10"></div>
-      <div class="fg"><label class="fl">Minimum Withdrawal (USDT)</label><input type="number" class="fi" data-key="min_withdraw_usdt" value="20"></div>
-      <div class="fg"><label class="fl">Maximum Withdrawal / Day (USDT)</label><input type="number" class="fi" data-key="max_withdraw_daily_usdt" value="50000"></div>
+      <div style="font-weight:600;margin-bottom:1rem;">💰 ขีดจำกัด Wallet <span class="bdg bdg-ok" style="margin-left:6px;">มีผลจริง</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">ขีดจำกัด Wallet — วิธีใช้</div><p>บันทึกลง Config (<code>min_deposit_usdt</code>, <code>min_withdraw_usdt</code>, <code>max_withdraw_daily_usdt</code>) ด้วยปุ่ม 💾 บันทึก</p><p><b>ฝากขั้นต่ำ / ถอนขั้นต่ำ:</b> ใช้ตรวจทั้งหน้า Marketplace และ GAS ข้อความแจ้งเตือน 9 ภาษาเปลี่ยนตามตัวเลข</p><p><b>ถอนสูงสุด/วัน:</b> นับยอดถอนของสมาชิกแต่ละคนในวันเดียวกัน (เวลาไทย) รวมคำขอที่รออนุมัติและที่สำเร็จ ไม่รวมที่ถูกปฏิเสธ · ใส่ 0 = ไม่จำกัด</p></div></span></div>
+      <div class="fg"><label class="fl">Minimum Deposit (USDT)</label><input type="number" class="fi" data-key="min_deposit_usdt" value="10" min="0.01" step="any"></div>
+      <div class="fg"><label class="fl">Minimum Withdrawal (USDT)</label><input type="number" class="fi" data-key="min_withdraw_usdt" value="20" min="0.01" step="any"></div>
+      <div class="fg"><label class="fl">Maximum Withdrawal / Day (USDT)</label><input type="number" class="fi" data-key="max_withdraw_daily_usdt" value="50000" min="0" step="any"><div class="txs tm mt2">ต่อสมาชิก 1 คนต่อวัน (เวลาไทย) · 0 = ไม่จำกัด</div></div>
       <button class="btn btn-gold" onclick="doSaveSettings(this)">💾 บันทึก</button>
     </div>
     <div class="card">
-      <div style="font-weight:600;margin-bottom:1rem;">🤝 Referral Settings <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Referral Settings — วิธีใช้</div><p>ช่องนี้บันทึกลง Config (<code>referral_commission_pct</code>, <code>referral_seller_commission_pct</code>)</p><p class="info-warn">⚠️ ขณะนี้ค่าคอมมิชชันคำนวณจากค่าคงที่ใน GAS: Team 10% ของยอด, Level A 15% / Level B 10% / ผู้แนะนำ 10% ของส่วน Team การแก้ตัวเลขตรงนี้ยังไม่เปลี่ยนยอดที่จ่ายจริง</p></div></span></div>
-      <div class="fg"><label class="fl">Buyer Commission Rate (%)</label><input type="number" class="fi" data-key="referral_commission_pct" value="10"></div>
-      <div class="fg"><label class="fl">Seller Commission Rate (%)</label><input type="number" class="fi" data-key="referral_seller_commission_pct" value="10"></div>
-      <div class="fg"><label class="fl">Commission Source</label>
-        <select class="fi"><option selected>TCC Fund</option></select>
-        <div class="txs tm mt2">Commission จ่ายจาก TCC Fund เสมอ</div></div>
+      <div style="font-weight:600;margin-bottom:1rem;">🤝 Referral Settings <span class="bdg bdg-ok" style="margin-left:6px;">มีผลจริง</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Referral Settings — วิธีใช้</div><p>บันทึกลง Config · <b>มีผลกับออเดอร์ใหม่เท่านั้น</b> ระบบเก็บอัตราทั้ง 6 ตัวไว้ในออเดอร์ตอนสร้าง (คอลัมน์ <code>comm_rates_snap</code>) ค่าคอมฝั่งซื้อและฝั่งขายของออเดอร์นั้นคิดตามอัตราที่เก็บไว้ แม้เปลี่ยนค่าภายหลัง · ออเดอร์เก่าที่ไม่มี snapshot ใช้ค่าเดิม 10/10/15/10/10/10</p><table class="info-tb"><tr><td>Team Rate (ซื้อ)</td><td><code>referral_commission_pct</code> · % ของยอดซื้อ → Team Chain ฝั่งซื้อ</td></tr><tr><td>Team Rate (ขาย)</td><td><code>referral_seller_commission_pct</code> · % ของยอดที่ Seller ได้ → Team Chain ฝั่งขาย</td></tr><tr><td>Level A / B</td><td><code>referral_level_a_pct</code>, <code>referral_level_b_pct</code> · % ของส่วน Team</td></tr><tr><td>ผู้แนะนำ Buyer</td><td><code>referral_buyer_ref_pct</code> · % ของส่วน Team ฝั่งซื้อ</td></tr><tr><td>ผู้แนะนำ Seller</td><td><code>referral_seller_ref_pct</code> · % ของยอดที่ Seller ได้</td></tr></table><p>ค่าตั้งต้น: 10 / 10 / 15 / 10 / 10 / 10 · ช่วงที่ยอมรับ 0–100</p></div></span></div>
+      <div class="fg"><label class="fl">Team Commission — ฝั่งซื้อ (% ของยอดซื้อ)</label><input type="number" class="fi" data-key="referral_commission_pct" value="10" min="0" max="100" step="any"></div>
+      <div class="fg"><label class="fl">Team Commission — ฝั่งขาย (% ของยอดที่ Seller ได้รับ)</label><input type="number" class="fi" data-key="referral_seller_commission_pct" value="10" min="0" max="100" step="any"></div>
+      <div class="fg"><label class="fl">Level A Leader (% ของส่วน Team)</label><input type="number" class="fi" data-key="referral_level_a_pct" value="15" min="0" max="100" step="any"></div>
+      <div class="fg"><label class="fl">Level B Leader (% ของส่วน Team)</label><input type="number" class="fi" data-key="referral_level_b_pct" value="10" min="0" max="100" step="any"></div>
+      <div class="fg"><label class="fl">Buyer Referrer (% ของส่วน Team ฝั่งซื้อ)</label><input type="number" class="fi" data-key="referral_buyer_ref_pct" value="10" min="0" max="100" step="any"></div>
+      <div class="fg"><label class="fl">Seller Referrer (% ของยอดที่ Seller ได้รับ)</label><input type="number" class="fi" data-key="referral_seller_ref_pct" value="10" min="0" max="100" step="any"></div>
+      <div class="fg"><label class="fl">Commission Source <span class="bdg bdg-muted" style="margin-left:6px;">แสดงเท่านั้น</span></label>
+        <select class="fi" disabled><option selected>TCC Fund</option></select>
+        <div class="txs tm mt2">ข้อมูลอ้างอิงเท่านั้น — ปัจจุบัน GAS จ่ายคอมมิชชันเข้ายอดทีม/สมาชิกโดยตรง และไม่ได้หักยอด TCC Fund อัตโนมัติ</div></div>
+      <button class="btn btn-gold" onclick="doSaveSettings(this)">💾 บันทึก</button>
       <div class="d"></div>
-      <div style="font-weight:600;margin-bottom:1rem;">🏪 Seller Payout Fee <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Seller Payout Fee — วิธีใช้</div><p>ยอดที่ Seller ได้รับจริง กำหนดตายตัวในโค้ด GAS (<code>PAYOUT_PCT_MAP</code>):</p><table class="info-tb"><tr><td>7 วัน</td><td>ได้ 70% · หัก 30%</td></tr><tr><td>15 วัน</td><td>ได้ 80% · หัก 20%</td></tr><tr><td>30 วัน</td><td>ได้ 85% · หัก 15%</td></tr><tr><td>45 วัน</td><td>ได้ 90% · หัก 10%</td></tr><tr><td>60 วัน</td><td>ได้ 100% · ไม่หัก</td></tr></table><p class="info-warn">⚠️ ช่อง Fee (%) ด้านล่างเป็นค่าอ้างอิงในชีต Config เท่านั้น ระบบไม่ได้อ่านไปคำนวณ การแก้ตัวเลขจะไม่เปลี่ยนยอดจ่ายจริง หากต้องการเปลี่ยน % ต้องแก้ <code>PAYOUT_PCT_MAP</code> และ <code>FF_CONFIG</code> ในโค้ด GAS (และ index) แล้ว deploy ใหม่</p><p>วันจ่าย Seller = วันสั่งซื้อ + จำนวนวันของชุดที่เลือก</p></div></span></div>
-      <div class="fg"><label class="fl">7-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_7d_fee_pct" value="30"><div class="txs tm mt2">Seller ได้รับ 70% — 30% Marketing Fee (ค่าอ้างอิงเท่านั้น — ไม่กระทบยอดจ่ายจริง)</div></div>
-      <div class="fg"><label class="fl">45-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_45d_fee_pct" value="10"><div class="txs tm mt2">Seller ได้รับ 90% — 10% เข้า Market Fee Wallet</div></div>
-      <div class="fg"><label class="fl">60-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_60d_fee_pct" value="0"><div class="txs tm mt2">Seller ได้รับ 100% — ไม่มีค่าธรรมเนียม</div></div>
+      <div style="font-weight:600;margin-bottom:1rem;">🏪 Seller Payout Fee <span class="bdg bdg-ok" style="margin-left:6px;">มีผลจริง</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Seller Payout Fee — วิธีใช้</div><p>Fee (%) คือส่วนที่หักจากยอดสินค้า → Seller ได้ = 100 − Fee · ส่วนที่หักเข้า Market Fee Wallet · บันทึกลง Config <code>payout_{n}d_fee_pct</code></p><p><b>มีผลกับออเดอร์ใหม่เท่านั้น:</b> ระบบเก็บ % ที่ใช้ไว้ในออเดอร์ตอนสร้าง (คอลัมน์ <code>payout_pct_snap</code>) การเปลี่ยน Fee ภายหลังไม่กระทบออเดอร์เดิมทั้งยอดจ่ายและรายงาน</p><p>ออเดอร์เก่าที่สร้างก่อนระบบนี้ใช้ยอดที่บันทึกไว้เดิม หน้าลงสินค้าของ Seller แสดง % ตามค่าที่ตั้ง</p><p>ช่วงที่ยอมรับ 0–100 · ค่าตั้งต้น: 7 วัน 30 · 15 วัน 20 · 30 วัน 15 · 45 วัน 10 · 60 วัน 0</p></div></span></div>
+      <div class="fg"><label class="fl">7-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_7d_fee_pct" value="30" min="0" max="100" step="any" oninput="poFeeHint(7,this)"><div class="txs tm mt2" id="po-fee-hint-7">Seller ได้รับ 70% — 30% เข้า Market Fee Wallet</div></div>
+      <div class="fg"><label class="fl">15-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_15d_fee_pct" value="20" min="0" max="100" step="any" oninput="poFeeHint(15,this)"><div class="txs tm mt2" id="po-fee-hint-15">Seller ได้รับ 80% — 20% เข้า Market Fee Wallet</div></div>
+      <div class="fg"><label class="fl">30-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_30d_fee_pct" value="15" min="0" max="100" step="any" oninput="poFeeHint(30,this)"><div class="txs tm mt2" id="po-fee-hint-30">Seller ได้รับ 85% — 15% เข้า Market Fee Wallet</div></div>
+      <div class="fg"><label class="fl">45-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_45d_fee_pct" value="10" min="0" max="100" step="any" oninput="poFeeHint(45,this)"><div class="txs tm mt2" id="po-fee-hint-45">Seller ได้รับ 90% — 10% เข้า Market Fee Wallet</div></div>
+      <div class="fg"><label class="fl">60-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_60d_fee_pct" value="0" min="0" max="100" step="any" oninput="poFeeHint(60,this)"><div class="txs tm mt2" id="po-fee-hint-60">Seller ได้รับ 100% — ไม่มีค่าธรรมเนียม</div></div>
       <button class="btn btn-gold" onclick="doSaveSettings(this)">💾 บันทึก</button>
     </div>
   </div>
@@ -2992,14 +2999,22 @@ async function initSettings() {
         max_withdraw_daily_usdt:'[data-key="max_withdraw_daily_usdt"]',
         referral_commission_pct:'[data-key="referral_commission_pct"]',
         referral_seller_commission_pct:'[data-key="referral_seller_commission_pct"]',
+        referral_level_a_pct:'[data-key="referral_level_a_pct"]',
+        referral_level_b_pct:'[data-key="referral_level_b_pct"]',
+        referral_buyer_ref_pct:'[data-key="referral_buyer_ref_pct"]',
+        referral_seller_ref_pct:'[data-key="referral_seller_ref_pct"]',
         payout_7d_fee_pct:'[data-key="payout_7d_fee_pct"]',
+        payout_15d_fee_pct:'[data-key="payout_15d_fee_pct"]',
+        payout_30d_fee_pct:'[data-key="payout_30d_fee_pct"]',
         payout_45d_fee_pct:'[data-key="payout_45d_fee_pct"]',
         payout_60d_fee_pct:'[data-key="payout_60d_fee_pct"]',
       };
       Object.entries(fieldMap).forEach(([key,sel])=>{
         const inp=document.querySelector('#sec-settings '+sel);
-        if(inp&&cfg[key]!=null) inp.value=cfg[key];
+        if(inp&&cfg[key]!=null&&String(cfg[key]).trim()!=='') inp.value=cfg[key];
       });
+      // [v60] อัปเดตข้อความ Seller ได้ % ตาม Fee ที่ตั้งไว้จริง
+      [7,15,30,45,60].forEach(po=>{ const inp=document.querySelector('#sec-settings [data-key="payout_'+po+'d_fee_pct"]'); if(inp) poFeeHint(po,inp); });
       // อัปเดต FF Plan toggles จาก Config
       const plans=[
         {plan:'A',desc:`${cfg.ff_plan_a_pct||10}% × ${cfg.ff_plan_a_rounds||10} รอบ`,key:'ff_plan_a_enabled',active:cfg.ff_plan_a_enabled!=='false'},
@@ -3021,7 +3036,18 @@ const PAYOUT_OPTS=[
   {po:60,title:'🏆 60 วัน', desc:'Seller ได้ 100% · FF 100%'},
 ];
 const PO_BDG={'7d':'bdg-err','15d':'bdg-muted','30d':'bdg-inf','45d':'bdg-warn','60d':'bdg-ok'};
-const PO_SELLER={'7d':70,'15d':80,'30d':85,'45d':90,'60d':100};
+const PO_SELLER={'7d':70,'15d':80,'30d':85,'45d':90,'60d':100};   // [v60] ค่าตั้งต้น — initSettings อัปเดตจาก Config payout_{n}d_fee_pct
+const PO_FF={7:25,15:50,30:60,45:80,60:100};
+const PO_FEE_DEF={7:30,15:20,30:15,45:10,60:0};
+function poDesc(o){ const v=PO_SELLER[o.po+'d']; return 'Seller ได้ '+(v!=null?v:80)+'% · FF '+PO_FF[o.po]+'%'; }
+function poFeeHint(po,inp){
+  const el=document.getElementById('po-fee-hint-'+po); if(!el) return;
+  const v=Number(inp.value);
+  if(inp.value===''||!isFinite(v)||v<0||v>100){ el.style.color='var(--err)'; el.textContent='⚠️ Fee ต้องอยู่ระหว่าง 0–100'; return; }
+  el.style.color=''; const r=Math.round((100-v)*100)/100;
+  PO_SELLER[po+'d']=r;
+  el.textContent= v>0 ? 'Seller ได้รับ '+r+'% — '+v+'% เข้า Market Fee Wallet' : 'Seller ได้รับ 100% — ไม่มีค่าธรรมเนียม';
+}
 function poBdgCls(po){ return PO_BDG[po]||'bdg-warn'; }
 function poSellerTxt(po){ return 'Seller ได้ '+(PO_SELLER[po]!=null?PO_SELLER[po]:80)+'%'; }
 let _poEnabled={7:true,15:true,30:true,45:true,60:true};
@@ -3035,7 +3061,7 @@ function renderPayoutToggles(cfg){
     <div class="fc btwn mb4" style="padding:8px 0;border-bottom:1px solid var(--bdr);">
       <div>
         <div style="font-weight:600;font-size:13px;">${o.title}</div>
-        <div class="tsm tm">${o.desc}</div>
+        <div class="tsm tm">${poDesc(o)}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <span class="tsm" id="po-lbl-${o.po}">${on?'เปิด':'ปิด'}</span>
@@ -3085,9 +3111,11 @@ document.addEventListener('click',e=>{
   document.querySelectorAll('.info-ico.on').forEach(x=>x.classList.remove('on'));
 });
 
+let _ffEnabled={A:true,B:true,C:true};
 function renderFFToggles(plans){
   const el=document.getElementById('ff-plan-toggles');
   if(!el) return;
+  plans.forEach(p=>{ _ffEnabled[p.plan]=!!p.active; });
   el.innerHTML=plans.map(p=>`
     <div class="fc btwn mb4" style="padding:8px 0;border-bottom:1px solid var(--bdr);">
       <div>
@@ -3098,7 +3126,7 @@ function renderFFToggles(plans){
         <span class="tsm" id="ff-plan-${p.plan}-lbl">${p.active?'เปิด':'ปิด'}</span>
         <label class="toggle">
           <input type="checkbox" ${p.active?'checked':''}
-            onchange="toggleFFPlan('${p.plan}',this.checked);document.getElementById('ff-plan-${p.plan}-lbl').textContent=this.checked?'เปิด':'ปิด'">
+            onchange="toggleFFPlan('${p.plan}',this)">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -3191,34 +3219,47 @@ async function doSaveSettings(btn) {
   if(!ADMIN){showToast('ไม่มีสิทธิ์','err');return;}
   const card=btn.closest('.card');
   if(!card){showToast('ไม่พบ card','err');return;}
-  const inputs=card.querySelectorAll('input[type="number"]');
-  const labels=card.querySelectorAll('label.fl, label');
-  if(!inputs.length){showToast('ไม่พบ input ใน card','warn');return;}
+  const inputs=[...card.querySelectorAll('input[type="number"][data-key]')];
+  if(!inputs.length){showToast('ไม่พบช่องตั้งค่าใน card นี้','warn');return;}
 
-  // map label → input โดยใช้ data-key attribute หรือ label text → config key
-  const labelKeyMap={
-    'ฝากขั้นต่ำ':'min_deposit_usdt','ถอนขั้นต่ำ':'min_withdraw_usdt',
-    'ถอนสูงสุด/วัน':'max_withdraw_daily_usdt',
-    'Referral (Buyer)':'referral_commission_pct','Referral (Seller)':'referral_seller_commission_pct',
-    'Market Fee 45d (%)':'payout_45d_fee_pct','Market Fee 60d (%)':'payout_60d_fee_pct',
+  // [v60] ตรวจค่าก่อนส่ง — ห้ามว่าง/ติดลบ/เกินช่วง (GAS ตรวจซ้ำอีกชั้น)
+  const rangeOf=k=>{
+    if(k==='min_deposit_usdt'||k==='min_withdraw_usdt') return [0.01,1000000];
+    if(k==='max_withdraw_daily_usdt') return [0,1000000000];
+    return [0,100];   // referral_*_pct, payout_*_fee_pct
   };
-
-  // ดึง key จาก data-key attribute ของ input
-  const configMap=[];
-  inputs.forEach(inp=>{
-    const k=inp.dataset.key||inp.id;
-    if(k) configMap.push({key:k, val:inp.value});
-  });
-
-  if(!configMap.length){showToast('กรุณาระบุ data-key บน input','warn');return;}
+  const items=[];
+  for(const inp of inputs){
+    const k=inp.dataset.key, raw=String(inp.value).trim(), n=Number(raw);
+    const [lo,hi]=rangeOf(k);
+    const lbl=(inp.closest('.fg')?.querySelector('label')?.textContent||k).trim();
+    if(raw===''||!isFinite(n)||n<lo||n>hi){
+      inp.focus();
+      showToast('⚠️ '+lbl+' ต้องอยู่ระหว่าง '+lo+' ถึง '+hi,'warn');
+      return;
+    }
+    items.push({key:k,val:n,lbl});
+  }
+  const get=k=>{const it=items.find(x=>x.key===k);return it?it.val:null;};
+  const mn=get('min_withdraw_usdt'), mx=get('max_withdraw_daily_usdt');
+  if(mn!=null&&mx!=null&&mx>0&&mx<mn){
+    showToast('⚠️ ถอนสูงสุด/วัน ('+mx+') ต้องไม่น้อยกว่าถอนขั้นต่ำ ('+mn+') — หรือใส่ 0 = ไม่จำกัด','warn');
+    return;
+  }
 
   showLoad('กำลังบันทึก...');
   try{
-    await Promise.all(configMap.map(({key,val})=>
-      apiPost({action:'updateConfig',config_key:key,config_value:Number(val),admin_id:ADMIN.admin_id})
+    const results=await Promise.all(items.map(it=>
+      apiPost({action:'updateConfig',config_key:it.key,config_value:it.val,admin_id:ADMIN.admin_id})
+        .then(r=>({it,r})).catch(e=>({it,r:{success:false,error:e.message}}))
     ));
     hideLoad();
-    showToast('✅ บันทึก Settings สำเร็จ');
+    const failed=results.filter(x=>!x.r||!x.r.success);
+    if(failed.length){
+      showToast('❌ บันทึกไม่สำเร็จ: '+failed.map(x=>x.it.lbl+' ('+((x.r&&x.r.error)||'error')+')').join(', '),'err');
+    }else{
+      showToast('✅ บันทึก Settings สำเร็จ — มีผลกับระบบทันที');
+    }
   }catch(e){hideLoad();showToast('❌ '+e.message,'err');}
 }
 function doAdjustRights(uid) {
@@ -3239,15 +3280,29 @@ function viewDoc(label, url) {
   showToast('📄 '+label+' — ไม่พบ URL เอกสาร','warn');
 }
 // ✅ [FIXED] toggleFFPlan — บันทึกลง Config sheet จริง
-async function toggleFFPlan(plan, active) {
-  if(!ADMIN) return;
-  const key='ff_plan_'+plan.toLowerCase()+'_enabled';
+async function toggleFFPlan(plan, chk) {
+  if(!ADMIN){ chk.checked=!chk.checked; return; }
+  const active=chk.checked;
+  // [v60] ต้องเหลืออย่างน้อย 1 Plan ไม่งั้นลูกค้าซื้อไม่ได้เลย
+  if(!active && ['A','B','C'].filter(x=>x!==plan&&_ffEnabled[x]).length===0){
+    chk.checked=true;
+    showToast('⚠️ ต้องเปิด FF Plan อย่างน้อย 1 Plan','warn');
+    return;
+  }
+  const lbl=document.getElementById('ff-plan-'+plan+'-lbl');
+  chk.disabled=true;
   try{
-    await apiPost({action:'updateConfig',config_key:key,config_value:active?'true':'false',admin_id:ADMIN.admin_id});
+    const key='ff_plan_'+plan.toLowerCase()+'_enabled';
+    const res=await apiPost({action:'updateConfig',config_key:key,config_value:active?'true':'false',admin_id:ADMIN.admin_id});
+    if(!res||!res.success) throw new Error((res&&res.error)||'บันทึกไม่สำเร็จ');
+    _ffEnabled[plan]=active;
+    if(lbl) lbl.textContent=active?'เปิด':'ปิด';
     showToast((active?'✅ เปิด':'⏸ ปิด')+' Plan '+plan+' — บันทึก Config แล้ว');
   }catch(e){
-    showToast('❌ บันทึก FF Plan ไม่สำเร็จ','err');
-  }
+    chk.checked=!active;
+    if(lbl) lbl.textContent=chk.checked?'เปิด':'ปิด';
+    showToast('❌ บันทึก FF Plan ไม่สำเร็จ: '+e.message,'err');
+  }finally{ chk.disabled=false; }
 }
 function openM(id) { document.getElementById(id).classList.add('open'); }
 function closeM(id) { document.getElementById(id).classList.remove('open'); }
