@@ -729,6 +729,8 @@ textarea.fi{resize:vertical;min-height:80px;}
 .popt{border:2px solid var(--bdr);border-radius:var(--rl);padding:1.25rem;cursor:pointer;transition:all .2s;}
 .popt.sel{border-color:var(--gold);background:rgba(240,185,11,.06);}
 .popt.popt-off{opacity:.45;filter:grayscale(.6);cursor:not-allowed;pointer-events:none;position:relative;}
+.plan-off{opacity:.45;filter:grayscale(.6);cursor:not-allowed!important;pointer-events:none;}
+.plan-off .plan-off-tag{display:block;margin-top:4px;font-size:11px;font-weight:700;color:var(--err);}
 .popt .popt-off-tag{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--err);}
 .popt-pct{font-family:var(--fm);font-size:1.8rem;font-weight:700;color:var(--ok);}
 /* FF Plan Cards [v2] */
@@ -3693,7 +3695,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       </div>
     </div>
 
-    <div class="alrt alrt-i tsm" style="margin-bottom:1rem;" data-i18n-html="mp_ui_0171">
+    <div class="alrt alrt-i tsm" style="margin-bottom:1rem;" id="dep-min-note">
       ℹ️ ยืนยัน 12 confirmations · ขั้นต่ำ <strong>10 USDT</strong> · หลังโอนแล้วกรอก TX Hash ด้านล่าง
     </div>
 
@@ -3757,17 +3759,17 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <label class="fl" data-i18n="mp_ui_0183">เลือก Funding Free Plan</label>
       <!-- [v11 FIX] flex row wrap แทน .g3 auto-fit minmax(220px) — ป้องกัน card overflow ใน modal แคบ ทำให้ click ไม่ได้ -->
       <div style="display:flex;flex-wrap:wrap;gap:8px;" id="buy-plans">
-        <div class="card" style="cursor:pointer;flex:1;min-width:120px;border-color:var(--bdg);background:rgba(240,185,11,.05);" onclick="selPlan('A',this)">
+        <div class="card" style="cursor:pointer;flex:1;min-width:120px;border-color:var(--bdg);background:rgba(240,185,11,.05);" data-plan="A" onclick="selPlan('A',this)">
           <div style="font-weight:700;color:var(--gold);">Plan A</div>
           <div class="txs tm" id="pa-label" data-i18n="mp_ui_0184">— × 10 เดือน</div>
           <div id="pa-amt" class="mono" style="font-size:11px;color:var(--ok);margin-top:4px;"></div>
         </div>
-        <div class="card" style="cursor:pointer;flex:1;min-width:120px;" onclick="selPlan('B',this)">
+        <div class="card" style="cursor:pointer;flex:1;min-width:120px;" data-plan="B" onclick="selPlan('B',this)">
           <div style="font-weight:700;color:var(--gold);">Plan B</div>
           <div class="txs tm" id="pb-label" data-i18n="mp_ui_0185">— × 4 ครั้ง</div>
           <div id="pb-amt" class="mono" style="font-size:11px;color:var(--ok);margin-top:4px;"></div>
         </div>
-        <div class="card" style="cursor:pointer;flex:1;min-width:120px;" onclick="selPlan('C',this)">
+        <div class="card" style="cursor:pointer;flex:1;min-width:120px;" data-plan="C" onclick="selPlan('C',this)">
           <div style="font-weight:700;color:var(--gold);">Plan C</div>
           <div class="txs tm" id="pc-label" data-i18n="mp_ui_0186">— × 2 ครั้ง</div>
           <div id="pc-amt" class="mono" style="font-size:11px;color:var(--ok);margin-top:4px;"></div>
@@ -3907,35 +3909,35 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         <div class="popt" data-po="7" onclick="selPO(7,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_po7_title">🚀 7 วัน</div>
           <div class="popt-pct" style="color:#ff4d6d;">70%</div>
-          <div class="txs tm mt2" data-i18n="mp_ui_po7_fee">รับ 70% · ตัด 30% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee">รับ 70% · ตัด 30% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_po7_ff">🎁 ลูกค้าได้ FF <strong>25%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_po7_badge"><span class="bdg bdg-err">เร็วมากที่สุด</span></div>
         </div>
         <div class="popt" data-po="15" onclick="selPO(15,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0237">🚀 15 วัน</div>
           <div class="popt-pct" style="color:#1890ff;">80%</div>
-          <div class="txs tm mt2" data-i18n="mp_ui_0238">รับ 80% · ตัด 20% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee">รับ 80% · ตัด 20% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0239">🎁 ลูกค้าได้ FF <strong>50%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0240"><span class="bdg bdg-inf">เร็วที่สุด</span></div>
         </div>
         <div class="popt" data-po="30" onclick="selPO(30,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0241">⚡ 30 วัน</div>
           <div class="popt-pct" style="color:#FF8C00;">85%</div>
-          <div class="txs tm mt2" data-i18n="mp_ui_0242">รับ 85% · ตัด 15% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee">รับ 85% · ตัด 15% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0243">🎁 ลูกค้าได้ FF <strong>60%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0244"><span class="bdg bdg-orange">รวดเร็ว</span></div>
         </div>
         <div class="popt sel" data-po="45" onclick="selPO(45,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0245">⚡ 45 วัน</div>
           <div class="popt-pct">90%</div>
-          <div class="txs tm mt2" data-i18n="mp_ui_0246">รับ 90% · ตัด 10% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee">รับ 90% · ตัด 10% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0247">🎁 ลูกค้าได้ FF <strong>80%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0248"><span class="bdg bdg-warn">ได้เร็วกว่า</span></div>
         </div>
         <div class="popt" data-po="60" style="grid-column:1/-1;" onclick="selPO(60,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0249">🏆 60 วัน</div>
           <div class="popt-pct">100%</div>
-          <div class="txs tm mt2" data-i18n="mp_ui_0250">รับ 100% · ไม่มีค่าธรรมเนียม</div>
+          <div class="txs tm mt2 popt-fee">รับ 100% · ไม่มีค่าธรรมเนียม</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0251">🎁 ลูกค้าได้ FF <strong>100%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0252"><span class="bdg bdg-ok">ได้เต็มจำนวน</span></div>
         </div>
@@ -4153,13 +4155,13 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     </div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0178">จำนวน USDT</label>
       <div style="position:relative;">
-        <input type="number" class="fi" id="swd-amount" placeholder="0.00" min="10" step="0.01">
+        <input type="number" class="fi" id="swd-amount" placeholder="0.00" min="0" step="0.01">
         <button class="btn btn-gold btn-sm" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);"
           onclick="document.getElementById('swd-amount').value=Number(SESSION?.seller_wallet_usdt||0).toFixed(2)">MAX</button>
       </div>
     </div>
     <div class="clbl mt2" id="swd-bal-disp" style="font-size:12px;color:var(--t2);">Seller Wallet: — USDT</div>
-    <div class="alrt alrt-w tsm mt2" data-i18n="mp_ui_0304">⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ 10 USDT</div>
+    <div class="alrt alrt-w tsm mt2" id="swd-min-note">⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ 10 USDT</div>
     <button class="btn btn-gold w100 mt4" onclick="doSellerWithdraw()" data-i18n="mp_ui_0305">💸 ยืนยันการถอน</button>
   </div>
 </div>
@@ -4354,7 +4356,7 @@ const TCC_I18N = {
   'mp_ui_0168':["เข้าสู่ระบบด้วยบัญชีสมาชิก TCC","Log in with your TCC member account","Đăng nhập bằng tài khoản thành viên TCC","ចូលគណនីដោយប្រើគណនីសមាជិក TCC","TCC အဖွဲ့ဝင်အကောင့်ဖြင့် ဝင်ရောက်ပါ","ເຂົ້າສູ່ລະບົບດ້ວຍບັນຊີສະມາຊິກ TCC","Log masuk dengan akaun ahli TCC","Masuk dengan akun anggota TCC","使用 TCC 会员账户登录"],
   'mp_ui_0169':["📋 รายละเอียดธุรกรรม","📋 Transaction details","📋 Chi tiết giao dịch","📋 ព័ត៌មានលម្អិតប្រតិបត្តិការ","📋 ငွေလွှဲမှုအသေးစိတ်","📋 ລາຍລະອຽດທຸລະກຳ","📋 Butiran transaksi","📋 Rincian transaksi","📋 交易详情"],
   'mp_ui_0170':["โอน USDT มายังที่อยู่นี้","Transfer USDT to this address","Chuyển USDT đến địa chỉ này","ផ្ទេរ USDT ទៅអាសយដ្ឋាននេះ","USDT ကို ဤလိပ်စာသို့ လွှဲပါ","ໂອນ USDT ມາຍັງທີ່ຢູ່ນີ້","Pindahkan USDT ke alamat ini","Transfer USDT ke alamat ini","请向此地址转入 USDT"],
-  'mp_ui_0171':["ℹ️ ยืนยัน 12 confirmations · ขั้นต่ำ <strong>10 USDT</strong> · หลังโอนแล้วกรอก TX Hash ด้านล่าง","ℹ️ Confirm 12 confirmations · minimum <strong>10 USDT</strong> · after transferring, enter the TX Hash below","ℹ️ Xác nhận 12 confirmations · tối thiểu <strong>10 USDT</strong> · sau khi chuyển, nhập TX Hash bên dưới","ℹ️ ផ្ទៀងផ្ទាត់ 12 confirmations · អប្បបរមា <strong>10 USDT</strong> · បន្ទាប់ពីផ្ទេរ សូមបញ្ចូល TX Hash ខាងក្រោម","ℹ️ 12 confirmations အတည်ပြု · အနည်းဆုံး <strong>10 USDT</strong> · လွှဲပြီးပါက အောက်တွင် TX Hash ထည့်ပါ","ℹ️ ຢືນຢັນ 12 confirmations · ຂັ້ນຕ່ຳ <strong>10 USDT</strong> · ຫຼັງໂອນແລ້ວ ກອກ TX Hash ດ້ານລຸ່ມ","ℹ️ Pengesahan 12 confirmations · minimum <strong>10 USDT</strong> · selepas pindahan, masukkan TX Hash di bawah","ℹ️ Konfirmasi 12 confirmations · minimum <strong>10 USDT</strong> · setelah transfer, isi TX Hash di bawah","ℹ️ 需 12 个确认 · 最低 <strong>10 USDT</strong> · 转账后请在下方填写 TX Hash"],
+  'mp_ui_0171':["ℹ️ ยืนยัน 12 confirmations · ขั้นต่ำ <strong>{p1} USDT</strong> · หลังโอนแล้วกรอก TX Hash ด้านล่าง","ℹ️ Confirm 12 confirmations · minimum <strong>{p1} USDT</strong> · after transferring, enter the TX Hash below","ℹ️ Xác nhận 12 confirmations · tối thiểu <strong>{p1} USDT</strong> · sau khi chuyển, nhập TX Hash bên dưới","ℹ️ ផ្ទៀងផ្ទាត់ 12 confirmations · អប្បបរមា <strong>{p1} USDT</strong> · បន្ទាប់ពីផ្ទេរ សូមបញ្ចូល TX Hash ខាងក្រោម","ℹ️ 12 confirmations အတည်ပြု · အနည်းဆုံး <strong>{p1} USDT</strong> · လွှဲပြီးပါက အောက်တွင် TX Hash ထည့်ပါ","ℹ️ ຢືນຢັນ 12 confirmations · ຂັ້ນຕ່ຳ <strong>{p1} USDT</strong> · ຫຼັງໂອນແລ້ວ ກອກ TX Hash ດ້ານລຸ່ມ","ℹ️ Pengesahan 12 confirmations · minimum <strong>{p1} USDT</strong> · selepas pindahan, masukkan TX Hash di bawah","ℹ️ Konfirmasi 12 confirmations · minimum <strong>{p1} USDT</strong> · setelah transfer, isi TX Hash di bawah","ℹ️ 需 12 个确认 · 最低 <strong>{p1} USDT</strong> · 转账后请在下方填写 TX Hash"],
   'mp_ui_0172':["จำนวน USDT ที่โอน *","USDT amount transferred *","Số USDT đã chuyển *","ចំនួន USDT ដែលបានផ្ទេរ *","လွှဲပြီး USDT ပမာဏ *","ຈຳນວນ USDT ທີ່ໂອນ *","Jumlah USDT dipindahkan *","Jumlah USDT yang ditransfer *","转账 USDT 数量 *"],
   'mp_ui_0173':["วางรหัส TX จาก Blockchain Explorer...","Paste the TX hash from the Blockchain Explorer...","Dán mã TX từ Blockchain Explorer...","បិទភ្ជាប់កូដ TX ពី Blockchain Explorer...","Blockchain Explorer မှ TX ကုဒ်ကို ကူးထည့်ပါ...","ວາງລະຫັດ TX ຈາກ Blockchain Explorer...","Tampal kod TX daripada Blockchain Explorer...","Tempel kode TX dari Blockchain Explorer...","粘贴来自区块链浏览器的 TX 哈希..."],
   'mp_ui_0174':["ตัวอย่าง: 0x1a2b3c... หรือ abc123def... (จาก TronScan / BscScan)","Example: 0x1a2b3c... or abc123def... (from TronScan / BscScan)","Ví dụ: 0x1a2b3c... hoặc abc123def... (từ TronScan / BscScan)","ឧទាហរណ៍៖ 0x1a2b3c... ឬ abc123def... (ពី TronScan / BscScan)","ဥပမာ - 0x1a2b3c... သို့မဟုတ် abc123def... (TronScan / BscScan မှ)","ຕົວຢ່າງ: 0x1a2b3c... ຫຼື abc123def... (ຈາກ TronScan / BscScan)","Contoh: 0x1a2b3c... atau abc123def... (daripada TronScan / BscScan)","Contoh: 0x1a2b3c... atau abc123def... (dari TronScan / BscScan)","示例：0x1a2b3c... 或 abc123def...（来自 TronScan / BscScan）"],
@@ -4421,26 +4423,28 @@ const TCC_I18N = {
   'mp_ui_0235':["🎬 วิดีโอสินค้า <span class=\"tm tsm\">(ไม่บังคับ)</span>","🎬 Product video <span class=\"tm tsm\">(optional)</span>","🎬 Video sản phẩm <span class=\"tm tsm\">(không bắt buộc)</span>","🎬 វីដេអូទំនិញ <span class=\"tm tsm\">(មិនបង្ខំ)</span>","🎬 ကုန်ပစ္စည်းဗီဒီယို <span class=\"tm tsm\">(မဖြစ်မနေမဟုတ်)</span>","🎬 ວິດີໂອສິນຄ້າ <span class=\"tm tsm\">(ບໍ່ບັງຄັບ)</span>","🎬 Video produk <span class=\"tm tsm\">(pilihan)</span>","🎬 Video produk <span class=\"tm tsm\">(opsional)</span>","🎬 商品视频 <span class=\"tm tsm\">（选填）</span>"],
   'mp_ui_0236':["วางลิงก์ YouTube หรือ URL ไฟล์วิดีโอ (.mp4)","Paste a YouTube link or a video file URL (.mp4)","Dán liên kết YouTube hoặc URL tệp video (.mp4)","បិទភ្ជាប់តំណ YouTube ឬ URL ឯកសារវីដេអូ (.mp4)","YouTube လင့်ခ် သို့မဟုတ် ဗီဒီယိုဖိုင် URL (.mp4) ကို ကူးထည့်ပါ","ວາງລິ້ງ YouTube ຫຼື URL ໄຟລ໌ວິດີໂອ (.mp4)","Tampal pautan YouTube atau URL fail video (.mp4)","Tempel tautan YouTube atau URL file video (.mp4)","粘贴 YouTube 链接或视频文件 URL (.mp4)"],
   'mp_ui_po7_title':["🚀 7 วัน","🚀 7 days","🚀 7 ngày","🚀 7 ថ្ងៃ","🚀 ၇ ရက်","🚀 7 ວັນ","🚀 7 hari","🚀 7 hari","🚀 7 天"],
-  'mp_ui_po7_fee':["รับ 70% · ตัด 30% Marketing Fee","Receive 70% · 30% Marketing Fee deducted","Nhận 70% · khấu trừ 30% Marketing Fee","ទទួលបាន 70% · កាត់ 30% Marketing Fee","၇၀% ရရှိ · Marketing Fee ၃၀% နုတ်ယူ","ຮັບ 70% · ຫັກ 30% Marketing Fee","Terima 70% · tolak 30% Marketing Fee","Terima 70% · potong 30% Marketing Fee","实收 70% · 扣除 30% 营销费"],
+  'mp_ui_po7_fee':["รับ {p1}% · ตัด {p2}% Marketing Fee","Receive {p1}% · {p2}% Marketing Fee deducted","Nhận {p1}% · khấu trừ {p2}% Marketing Fee","ទទួលបាន {p1}% · កាត់ {p2}% Marketing Fee","{p1}% ရရှိ · Marketing Fee {p2}% နုတ်ယူ","ຮັບ {p1}% · ຫັກ {p2}% Marketing Fee","Terima {p1}% · tolak {p2}% Marketing Fee","Terima {p1}% · potong {p2}% Marketing Fee","实收 {p1}% · 扣除 {p2}% 营销费"],
   'mp_ui_po7_ff':["🎁 ลูกค้าได้ FF <strong>25%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>25%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>25%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>25%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>25%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>25%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>25%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>25%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>25%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
   'mp_ui_po7_badge':["<span class=\"bdg bdg-err\">เร็วมากที่สุด</span>","<span class=\"bdg bdg-err\">Ultra fast</span>","<span class=\"bdg bdg-err\">Siêu nhanh</span>","<span class=\"bdg bdg-err\">លឿនខ្លាំងបំផុត</span>","<span class=\"bdg bdg-err\">အလွန်မြန်ဆန်</span>","<span class=\"bdg bdg-err\">ໄວຫຼາຍທີ່ສຸດ</span>","<span class=\"bdg bdg-err\">Sangat pantas</span>","<span class=\"bdg bdg-err\">Super cepat</span>","<span class=\"bdg bdg-err\">极速</span>"],
   'mp_ui_po_off':["ปิดชั่วคราว","Temporarily closed","Tạm đóng","បិទជាបណ្តោះអាសន្ន","ယာယီပိတ်ထားသည်","ປິດຊົ່ວຄາວ","Ditutup sementara","Ditutup sementara","暂时关闭"],
   'gerr_payout_disabled':["ชุด Payout นี้ถูกปิดชั่วคราวโดยแอดมิน กรุณาเลือกชุดอื่น","This payout option is temporarily closed by the admin. Please choose another one.","Gói Payout này đang tạm đóng bởi quản trị viên. Vui lòng chọn gói khác.","ជម្រើស Payout នេះត្រូវបានអ្នកគ្រប់គ្រងបិទជាបណ្តោះអាសន្ន សូមជ្រើសរើសជម្រើសផ្សេង","ဤ Payout ရွေးချယ်မှုကို အက်ဒမင်က ယာယီပိတ်ထားသည်။ အခြားတစ်ခု ရွေးချယ်ပါ။","ຊຸດ Payout ນີ້ຖືກແອດມິນປິດຊົ່ວຄາວ ກະລຸນາເລືອກຊຸດອື່ນ","Pilihan Payout ini ditutup sementara oleh admin. Sila pilih yang lain.","Opsi Payout ini ditutup sementara oleh admin. Silakan pilih yang lain.","该 Payout 方案已被管理员暂时关闭，请选择其他方案。"],
+  'gerr_plan_disabled':["FF Plan {p1} ถูกปิดชั่วคราวโดยแอดมิน กรุณาเลือก Plan อื่น","FF Plan {p1} is temporarily closed by the admin. Please choose another plan.","Gói FF Plan {p1} đang tạm đóng bởi quản trị viên. Vui lòng chọn gói khác.","FF Plan {p1} ត្រូវបានបិទជាបណ្តោះអាសន្នដោយអ្នកគ្រប់គ្រង។ សូមជ្រើសរើស Plan ផ្សេង។","FF Plan {p1} ကို အက်ဒမင်က ယာယီပိတ်ထားသည်။ အခြား Plan ကို ရွေးချယ်ပါ။","FF Plan {p1} ຖືກປິດຊົ່ວຄາວໂດຍແອດມິນ. ກະລຸນາເລືອກ Plan ອື່ນ.","FF Plan {p1} ditutup sementara oleh admin. Sila pilih Plan lain.","FF Plan {p1} ditutup sementara oleh admin. Silakan pilih Plan lain.","FF 方案 {p1} 已被管理员暂时关闭，请选择其他方案。"],
+  'gerr_e_max_daily':["เกินวงเงินถอนสูงสุดต่อวัน {p1} USDT (วันนี้ถอนแล้ว {p2} · คงเหลือ {p3} USDT)","Daily withdrawal limit of {p1} USDT exceeded (withdrawn today {p2} · remaining {p3} USDT)","Vượt hạn mức rút tối đa mỗi ngày {p1} USDT (hôm nay đã rút {p2} · còn lại {p3} USDT)","លើសកម្រិតដកអតិបរមាប្រចាំថ្ងៃ {p1} USDT (ថ្ងៃនេះបានដក {p2} · នៅសល់ {p3} USDT)","တစ်ရက်လျှင် ထုတ်ယူနိုင်သည့် ကန့်သတ်ချက် {p1} USDT ကျော်လွန်နေသည် (ယနေ့ထုတ်ပြီး {p2} · ကျန် {p3} USDT)","ເກີນວົງເງິນຖອນສູງສຸດຕໍ່ວັນ {p1} USDT (ມື້ນີ້ຖອນແລ້ວ {p2} · ຄົງເຫຼືອ {p3} USDT)","Melebihi had pengeluaran harian {p1} USDT (dikeluarkan hari ini {p2} · baki {p3} USDT)","Melebihi batas penarikan harian {p1} USDT (sudah ditarik hari ini {p2} · sisa {p3} USDT)","超出每日最高提现额度 {p1} USDT（今日已提 {p2} · 剩余 {p3} USDT）"],
   'gerr_payout_invalid':["ชุด Payout ไม่ถูกต้อง","Invalid payout option","Gói Payout không hợp lệ","ជម្រើស Payout មិនត្រឹមត្រូវ","Payout ရွေးချယ်မှု မမှန်ကန်ပါ","ຊຸດ Payout ບໍ່ຖືກຕ້ອງ","Pilihan Payout tidak sah","Opsi Payout tidak valid","Payout 方案无效"],
   'mp_ui_0237':["🚀 15 วัน","🚀 15 days","🚀 15 ngày","🚀 15 ថ្ងៃ","🚀 ၁၅ ရက်","🚀 15 ວັນ","🚀 15 hari","🚀 15 hari","🚀 15 天"],
-  'mp_ui_0238':["รับ 80% · ตัด 20% Marketing Fee","Receive 80% · 20% Marketing Fee deducted","Nhận 80% · khấu trừ 20% Marketing Fee","ទទួលបាន 80% · កាត់ 20% Marketing Fee","၈၀% ရရှိ · Marketing Fee ၂၀% နုတ်ယူ","ຮັບ 80% · ຫັກ 20% Marketing Fee","Terima 80% · tolak 20% Marketing Fee","Terima 80% · potong 20% Marketing Fee","实收 80% · 扣除 20% 营销费"],
+  'mp_ui_0238':["รับ {p1}% · ตัด {p2}% Marketing Fee","Receive {p1}% · {p2}% Marketing Fee deducted","Nhận {p1}% · khấu trừ {p2}% Marketing Fee","ទទួលបាន {p1}% · កាត់ {p2}% Marketing Fee","{p1}% ရရှိ · Marketing Fee {p2}% နုတ်ယူ","ຮັບ {p1}% · ຫັກ {p2}% Marketing Fee","Terima {p1}% · tolak {p2}% Marketing Fee","Terima {p1}% · potong {p2}% Marketing Fee","实收 {p1}% · 扣除 {p2}% 营销费"],
   'mp_ui_0239':["🎁 ลูกค้าได้ FF <strong>50%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>50%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>50%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>50%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>50%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>50%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>50%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>50%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>50%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
   'mp_ui_0240':["<span class=\"bdg bdg-inf\">เร็วที่สุด</span>","<span class=\"bdg bdg-inf\">Fastest</span>","<span class=\"bdg bdg-inf\">Nhanh nhất</span>","<span class=\"bdg bdg-inf\">លឿនបំផុត</span>","<span class=\"bdg bdg-inf\">အမြန်ဆုံး</span>","<span class=\"bdg bdg-inf\">ໄວທີ່ສຸດ</span>","<span class=\"bdg bdg-inf\">Paling pantas</span>","<span class=\"bdg bdg-inf\">Tercepat</span>","<span class=\"bdg bdg-inf\">最快</span>"],
   'mp_ui_0241':["⚡ 30 วัน","⚡ 30 days","⚡ 30 ngày","⚡ 30 ថ្ងៃ","⚡ ၃၀ ရက်","⚡ 30 ວັນ","⚡ 30 hari","⚡ 30 hari","⚡ 30 天"],
-  'mp_ui_0242':["รับ 85% · ตัด 15% Marketing Fee","Receive 85% · 15% Marketing Fee deducted","Nhận 85% · khấu trừ 15% Marketing Fee","ទទួលបាន 85% · កាត់ 15% Marketing Fee","၈၅% ရရှိ · Marketing Fee ၁၅% နုတ်ယူ","ຮັບ 85% · ຫັກ 15% Marketing Fee","Terima 85% · tolak 15% Marketing Fee","Terima 85% · potong 15% Marketing Fee","实收 85% · 扣除 15% 营销费"],
+  'mp_ui_0242':["รับ {p1}% · ตัด {p2}% Marketing Fee","Receive {p1}% · {p2}% Marketing Fee deducted","Nhận {p1}% · khấu trừ {p2}% Marketing Fee","ទទួលបាន {p1}% · កាត់ {p2}% Marketing Fee","{p1}% ရရှိ · Marketing Fee {p2}% နုတ်ယူ","ຮັບ {p1}% · ຫັກ {p2}% Marketing Fee","Terima {p1}% · tolak {p2}% Marketing Fee","Terima {p1}% · potong {p2}% Marketing Fee","实收 {p1}% · 扣除 {p2}% 营销费"],
   'mp_ui_0243':["🎁 ลูกค้าได้ FF <strong>60%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>60%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>60%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>60%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>60%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>60%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>60%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>60%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>60%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
   'mp_ui_0244':["<span class=\"bdg bdg-orange\">รวดเร็ว</span>","<span class=\"bdg bdg-orange\">Quick</span>","<span class=\"bdg bdg-orange\">Nhanh</span>","<span class=\"bdg bdg-orange\">រហ័ស</span>","<span class=\"bdg bdg-orange\">မြန်ဆန်</span>","<span class=\"bdg bdg-orange\">ວ່ອງໄວ</span>","<span class=\"bdg bdg-orange\">Cepat</span>","<span class=\"bdg bdg-orange\">Cepat</span>","<span class=\"bdg bdg-orange\">快速</span>"],
   'mp_ui_0245':["⚡ 45 วัน","⚡ 45 days","⚡ 45 ngày","⚡ 45 ថ្ងៃ","⚡ ၄၅ ရက်","⚡ 45 ວັນ","⚡ 45 hari","⚡ 45 hari","⚡ 45 天"],
-  'mp_ui_0246':["รับ 90% · ตัด 10% Marketing Fee","Receive 90% · 10% Marketing Fee deducted","Nhận 90% · khấu trừ 10% Marketing Fee","ទទួលបាន 90% · កាត់ 10% Marketing Fee","၉၀% ရရှိ · Marketing Fee ၁၀% နုတ်ယူ","ຮັບ 90% · ຫັກ 10% Marketing Fee","Terima 90% · tolak 10% Marketing Fee","Terima 90% · potong 10% Marketing Fee","实收 90% · 扣除 10% 营销费"],
+  'mp_ui_0246':["รับ {p1}% · ตัด {p2}% Marketing Fee","Receive {p1}% · {p2}% Marketing Fee deducted","Nhận {p1}% · khấu trừ {p2}% Marketing Fee","ទទួលបាន {p1}% · កាត់ {p2}% Marketing Fee","{p1}% ရရှိ · Marketing Fee {p2}% နုတ်ယူ","ຮັບ {p1}% · ຫັກ {p2}% Marketing Fee","Terima {p1}% · tolak {p2}% Marketing Fee","Terima {p1}% · potong {p2}% Marketing Fee","实收 {p1}% · 扣除 {p2}% 营销费"],
   'mp_ui_0247':["🎁 ลูกค้าได้ FF <strong>80%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>80%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>80%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>80%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>80%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>80%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>80%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>80%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>80%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
   'mp_ui_0248':["<span class=\"bdg bdg-warn\">ได้เร็วกว่า</span>","<span class=\"bdg bdg-warn\">Earlier payout</span>","<span class=\"bdg bdg-warn\">Nhận sớm hơn</span>","<span class=\"bdg bdg-warn\">បានលឿនជាង</span>","<span class=\"bdg bdg-warn\">ပိုမြန်စွာရရှိ</span>","<span class=\"bdg bdg-warn\">ໄດ້ໄວກວ່າ</span>","<span class=\"bdg bdg-warn\">Lebih awal</span>","<span class=\"bdg bdg-warn\">Lebih cepat cair</span>","<span class=\"bdg bdg-warn\">到账更快</span>"],
   'mp_ui_0249':["🏆 60 วัน","🏆 60 days","🏆 60 ngày","🏆 60 ថ្ងៃ","🏆 ၆၀ ရက်","🏆 60 ວັນ","🏆 60 hari","🏆 60 hari","🏆 60 天"],
-  'mp_ui_0250':["รับ 100% · ไม่มีค่าธรรมเนียม","Receive 100% · no fees","Nhận 100% · không phí","ទទួលបាន 100% · គ្មានថ្លៃសេវា","၁၀၀% ရရှိ · ကြေးမရှိ","ຮັບ 100% · ບໍ່ມີຄ່າທຳນຽມ","Terima 100% · tiada yuran","Terima 100% · tanpa biaya","实收 100% · 无手续费"],
+  'mp_ui_0250':["รับ {p1}% · ไม่มีค่าธรรมเนียม","Receive {p1}% · no fees","Nhận {p1}% · không phí","ទទួលបាន {p1}% · គ្មានថ្លៃសេវា","{p1}% ရရှိ · ကြေးမရှိ","ຮັບ {p1}% · ບໍ່ມີຄ່າທຳນຽມ","Terima {p1}% · tiada yuran","Terima {p1}% · tanpa biaya","实收 {p1}% · 无手续费"],
   'mp_ui_0251':["🎁 ลูกค้าได้ FF <strong>100%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>100%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>100%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>100%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>100%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>100%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>100%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>100%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>100%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
   'mp_ui_0252':["<span class=\"bdg bdg-ok\">ได้เต็มจำนวน</span>","<span class=\"bdg bdg-ok\">Full amount</span>","<span class=\"bdg bdg-ok\">Nhận đủ</span>","<span class=\"bdg bdg-ok\">បានពេញចំនួន</span>","<span class=\"bdg bdg-ok\">အပြည့်အဝရရှိ</span>","<span class=\"bdg bdg-ok\">ໄດ້ເຕັມຈຳນວນ</span>","<span class=\"bdg bdg-ok\">Jumlah penuh</span>","<span class=\"bdg bdg-ok\">Jumlah penuh</span>","<span class=\"bdg bdg-ok\">全额到账</span>"],
   'mp_ui_0253':["📍 ราคา 1,000 USDT → คุณได้รับ 900 USDT (45 วัน)","📍 Price 1,000 USDT → you receive 900 USDT (45 days)","📍 Giá 1,000 USDT → bạn nhận 900 USDT (45 ngày)","📍 តម្លៃ 1,000 USDT → អ្នកទទួលបាន 900 USDT (45 ថ្ងៃ)","📍 ဈေးနှုန်း 1,000 USDT → သင် 900 USDT ရရှိမည် (၄၅ ရက်)","📍 ລາຄາ 1,000 USDT → ທ່ານໄດ້ຮັບ 900 USDT (45 ວັນ)","📍 Harga 1,000 USDT → anda menerima 900 USDT (45 hari)","📍 Harga 1,000 USDT → Anda menerima 900 USDT (45 hari)","📍 价格 1,000 USDT → 您实收 900 USDT（45 天）"],
@@ -4494,7 +4498,7 @@ const TCC_I18N = {
   'mp_ui_0301':["Customer Wallet ของฉัน (ทันที)","My Customer Wallet (instant)","Customer Wallet của tôi (ngay lập tức)","Customer Wallet របស់ខ្ញុំ (ភ្លាមៗ)","ကျွန်ုပ်၏ Customer Wallet (ချက်ချင်း)","Customer Wallet ຂອງຂ້ອຍ (ທັນທີ)","Customer Wallet saya (serta-merta)","Customer Wallet saya (instan)","我的 Customer Wallet（即时）"],
   'mp_ui_0302':["External Wallet Address (รอ Admin)","External Wallet Address (awaiting Admin)","External Wallet Address (chờ Admin)","External Wallet Address (រង់ចាំ Admin)","External Wallet Address (Admin စောင့်ရန်)","External Wallet Address (ລໍ Admin)","External Wallet Address (menunggu Admin)","External Wallet Address (menunggu Admin)","External Wallet Address（待管理员审核）"],
   'mp_ui_0303':["กรอก Address ปลายทาง","Enter the destination Address","Nhập Address đích","បញ្ចូល Address ទទួល","ပန်းတိုင် Address ထည့်ပါ","ກອກ Address ປາຍທາງ","Masukkan Address destinasi","Masukkan Address tujuan","输入目标地址"],
-  'mp_ui_0304':["⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ 10 USDT","⚠️ External withdraw awaits Admin approval before the actual transfer — minimum 10 USDT","⚠️ External withdraw chờ Admin duyệt trước khi chuyển thực tế — tối thiểu 10 USDT","⚠️ External withdraw រង់ចាំ Admin អនុម័តមុនផ្ទេរជាក់ស្តែង — អប្បបរមា 10 USDT","⚠️ External withdraw ကို တကယ်မလွှဲမီ Admin အတည်ပြုရန်စောင့်ရမည် — အနည်းဆုံး 10 USDT","⚠️ External withdraw ລໍ Admin ອະນຸມັດກ່ອນໂອນຈິງ — ຂັ້ນຕ່ຳ 10 USDT","⚠️ External withdraw menunggu kelulusan Admin sebelum pindahan sebenar — minimum 10 USDT","⚠️ External withdraw menunggu persetujuan Admin sebelum transfer sebenarnya — minimum 10 USDT","⚠️ External withdraw 需等待管理员批准后才会实际转出——最低 10 USDT"],
+  'mp_ui_0304':["⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ {p1} USDT","⚠️ External withdraw awaits Admin approval before the actual transfer — minimum {p1} USDT","⚠️ External withdraw chờ Admin duyệt trước khi chuyển thực tế — tối thiểu {p1} USDT","⚠️ External withdraw រង់ចាំ Admin អនុម័តមុនផ្ទេរជាក់ស្តែង — អប្បបរមា {p1} USDT","⚠️ External withdraw ကို တကယ်မလွှဲမီ Admin အတည်ပြုရန်စောင့်ရမည် — အနည်းဆုံး {p1} USDT","⚠️ External withdraw ລໍ Admin ອະນຸມັດກ່ອນໂອນຈິງ — ຂັ້ນຕ່ຳ {p1} USDT","⚠️ External withdraw menunggu kelulusan Admin sebelum pindahan sebenar — minimum {p1} USDT","⚠️ External withdraw menunggu persetujuan Admin sebelum transfer sebenarnya — minimum {p1} USDT","⚠️ External withdraw 需等待管理员批准后才会实际转出——最低 {p1} USDT"],
   'mp_ui_0305':["💸 ยืนยันการถอน","💸 Confirm withdrawal","💸 Xác nhận rút tiền","💸 បញ្ជាក់ការដក","💸 ငွေထုတ်ခြင်းအတည်ပြုရန်","💸 ຢືນຢັນການຖອນ","💸 Sahkan pengeluaran","💸 Konfirmasi penarikan","💸 确认提现"],
   'mp_ui_0306':["ยืนยันการดำเนินการ?","Confirm this action?","Xác nhận thực hiện?","បញ្ជាក់ការអនុវត្ត?","ဆောင်ရွက်ရန် အတည်ပြုမလား?","ຢືນຢັນການດຳເນີນການ?","Sahkan tindakan ini?","Konfirmasi tindakan ini?","确认执行此操作？"],
   'mp_ui_0307':["ยืนยัน","Confirm","Xác nhận","បញ្ជាក់","အတည်ပြုရန်","ຢືນຢັນ","Sahkan","Konfirmasi","确认"],
@@ -4862,7 +4866,7 @@ const TCC_I18N = {
   'mp_js_0329':["⚠️ ยังไม่มีที่อยู่ — กดเพื่อเพิ่ม","⚠️ No address yet — tap to add","⚠️ Chưa có địa chỉ — nhấn để thêm","⚠️ មិនទាន់មានអាសយដ្ឋាន — ចុចដើម្បីបន្ថែម","⚠️ လိပ်စာမရှိသေးပါ — ထည့်ရန်နှိပ်ပါ","⚠️ ຍັງບໍ່ມີທີ່ຢູ່ — ກົດເພື່ອເພີ່ມ","⚠️ Belum ada alamat — ketik untuk menambah","⚠️ Belum ada alamat — ketuk untuk menambah","⚠️ 暂无地址——点击添加"],
   'mp_js_0330':["ยังไม่มีที่อยู่","No address yet","Chưa có địa chỉ","មិនទាន់មានអាសយដ្ឋាន","လိပ်စာမရှိသေးပါ","ຍັງບໍ່ມີທີ່ຢູ່","Belum ada alamat","Belum ada alamat","暂无地址"],
   'mp_js_0331':["หลัก","Default","Mặc định","មេ","ပင်မ","ຫຼັກ","Utama","Utama","默认"],
-  'mp_js_0332':["จำนวนขั้นต่ำ 10 USDT","Minimum amount 10 USDT","Số lượng tối thiểu 10 USDT","ចំនួនអប្បបរមា 10 USDT","အနည်းဆုံးပမာဏ 10 USDT","ຈຳນວນຂັ້ນຕ່ຳ 10 USDT","Jumlah minimum 10 USDT","Jumlah minimum 10 USDT","最低金额 10 USDT"],
+  'mp_js_0332':["จำนวนขั้นต่ำ {p1} USDT","Minimum amount {p1} USDT","Số lượng tối thiểu {p1} USDT","ចំនួនអប្បបរមា {p1} USDT","အနည်းဆုံးပမာဏ {p1} USDT","ຈຳນວນຂັ້ນຕ່ຳ {p1} USDT","Jumlah minimum {p1} USDT","Jumlah minimum {p1} USDT","最低金额 {p1} USDT"],
   'mp_js_0333':["กรุณากรอก Transaction Hash","Please enter the Transaction Hash","Vui lòng nhập Transaction Hash","សូមបំពេញ Transaction Hash","Transaction Hash ဖြည့်ပါ","ກະລຸນາກອກ Transaction Hash","Sila isi Transaction Hash","Silakan isi Transaction Hash","请填写 Transaction Hash"],
   'mp_js_0334':["TX Hash ไม่ถูกต้อง","Invalid TX Hash","TX Hash không hợp lệ","TX Hash មិនត្រឹមត្រូវ","TX Hash မမှန်ကန်ပါ","TX Hash ບໍ່ຖືກຕ້ອງ","TX Hash tidak sah","TX Hash tidak valid","TX Hash 无效"],
   'mp_js_0335':["กำลังยืนยัน Deposit...","Confirming Deposit...","Đang xác nhận Deposit...","កំពុងបញ្ជាក់ Deposit...","Deposit အတည်ပြုနေသည်...","ກຳລັງຢືນຢັນ Deposit...","Mengesahkan Deposit...","Mengonfirmasi Deposit...","正在确认 Deposit..."],
@@ -4870,7 +4874,7 @@ const TCC_I18N = {
   'mp_js_0337':["กำลังโหลด Wallet Address...","Loading Wallet Address...","Đang tải Wallet Address...","កំពុងផ្ទុក Wallet Address...","Wallet Address တင်နေသည်...","ກຳລັງໂຫຼດ Wallet Address...","Memuatkan Wallet Address...","Memuat Wallet Address...","正在加载 Wallet Address..."],
   'mp_js_0338':["ไม่สามารถโหลดได้ กรุณาติดต่อ Admin","Cannot load — please contact Admin","Không thể tải — vui lòng liên hệ Admin","មិនអាចផ្ទុកបាន សូមទាក់ទង Admin","တင်၍မရပါ — Admin ကိုဆက်သွယ်ပါ","ບໍ່ສາມາດໂຫຼດໄດ້ ກະລຸນາຕິດຕໍ່ Admin","Tidak dapat dimuatkan — sila hubungi Admin","Tidak dapat dimuat — silakan hubungi Admin","无法加载，请联系管理员"],
   'mp_js_0339':["ไม่สามารถโหลด Address ได้","Cannot load the Address","Không thể tải Address","មិនអាចផ្ទុក Address បាន","Address တင်၍မရပါ","ບໍ່ສາມາດໂຫຼດ Address ໄດ້","Tidak dapat memuatkan Address","Tidak dapat memuat Address","无法加载 Address"],
-  'mp_js_0340':["ขั้นต่ำ 20 USDT","Minimum 20 USDT","Tối thiểu 20 USDT","អប្បបរមា 20 USDT","အနည်းဆုံး 20 USDT","ຂັ້ນຕ່ຳ 20 USDT","Minimum 20 USDT","Minimum 20 USDT","最低 20 USDT"],
+  'mp_js_0340':["ขั้นต่ำ {p1} USDT","Minimum {p1} USDT","Tối thiểu {p1} USDT","អប្បបរមា {p1} USDT","အနည်းဆုံး {p1} USDT","ຂັ້ນຕ່ຳ {p1} USDT","Minimum {p1} USDT","Minimum {p1} USDT","最低 {p1} USDT"],
   'mp_js_0341':["กรุณากรอก Wallet Address","Please enter the Wallet Address","Vui lòng nhập Wallet Address","សូមបំពេញ Wallet Address","Wallet Address ဖြည့်ပါ","ກະລຸນາກອກ Wallet Address","Sila isi Wallet Address","Silakan isi Wallet Address","请填写 Wallet Address"],
   'mp_js_0342':["กำลัง Withdraw...","Withdrawing...","Đang Withdraw...","កំពុង Withdraw...","Withdraw လုပ်နေသည်...","ກຳລັງ Withdraw...","Sedang Withdraw...","Sedang Withdraw...","正在 Withdraw..."],
   'mp_js_0343':["✅ ส่งคำขอถอน {p1} USDT แล้ว","✅ Withdrawal request for {p1} USDT sent","✅ Đã gửi yêu cầu rút {p1} USDT","✅ បានផ្ញើសំណើដក {p1} USDT","✅ {p1} USDT ထုတ်ယူရန်တောင်းဆိုမှုပို့ပြီး","✅ ສົ່ງຄຳຂໍຖອນ {p1} USDT ແລ້ວ","✅ Permohonan pengeluaran {p1} USDT dihantar","✅ Permintaan penarikan {p1} USDT terkirim","✅ 已提交 {p1} USDT 提现申请"],
@@ -5084,7 +5088,7 @@ const TCC_I18N = {
   'gerr_e004':["บัญชีถูก Suspend","The account has been Suspended","Tài khoản đã bị Suspend","គណនីត្រូវបាន Suspend","အကောင့်ကို Suspend လုပ်ထားသည်","ບັນຊີຖືກ Suspend","Akaun telah di-Suspend","Akun telah di-Suspend","账户已被 Suspend"],
   'gerr_e005':["บัญชีถูก Ban","The account has been Banned","Tài khoản đã bị Ban","គណនីត្រូវបាន Ban","အကောင့်ကို Ban လုပ်ထားသည်","ບັນຊີຖືກ Ban","Akaun telah di-Ban","Akun telah di-Ban","账户已被 Ban"],
   'gerr_e006':["ไม่พบ member_id","member_id not found","Không tìm thấy member_id","រកមិនឃើញ member_id","member_id မတွေ့ပါ","ບໍ່ພົບ member_id","member_id tidak ditemui","member_id tidak ditemukan","未找到 member_id"],
-  'gerr_e007':["จำนวนขั้นต่ำ 10 USDT","Minimum amount is 10 USDT","Số lượng tối thiểu là 10 USDT","ចំនួនអប្បបរមាគឺ 10 USDT","အနည်းဆုံးပမာဏမှာ 10 USDT ဖြစ်သည်","ຈຳນວນຂັ້ນຕ່ຳ 10 USDT","Jumlah minimum ialah 10 USDT","Jumlah minimum adalah 10 USDT","最低金额为 10 USDT"],
+  'gerr_e007':["จำนวนขั้นต่ำ {p1} USDT","Minimum amount is {p1} USDT","Số lượng tối thiểu là {p1} USDT","ចំនួនអប្បបរមាគឺ {p1} USDT","အနည်းဆုံးပမာဏမှာ {p1} USDT ဖြစ်သည်","ຈຳນວນຂັ້ນຕ່ຳ {p1} USDT","Jumlah minimum ialah {p1} USDT","Jumlah minimum adalah {p1} USDT","最低金额为 {p1} USDT"],
   'gerr_e008':["กรุณาระบุ Transaction Hash","Please provide the Transaction Hash","Vui lòng cung cấp Transaction Hash","សូមបញ្ជាក់ Transaction Hash","Transaction Hash ကို ဖော်ပြပါ","ກະລຸນາລະບຸ Transaction Hash","Sila nyatakan Transaction Hash","Silakan sertakan Transaction Hash","请提供 Transaction Hash"],
   'gerr_e009':["ไม่พบ Member","Member not found","Không tìm thấy Member","រកមិនឃើញ Member","Member မတွေ့ပါ","ບໍ່ພົບ Member","Member tidak ditemui","Member tidak ditemukan","未找到 Member"],
   'gerr_e010':["TX Hash นี้ถูกใช้ไปแล้ว — Duplicate deposit rejected","This TX Hash has already been used — Duplicate deposit rejected","TX Hash này đã được sử dụng — Duplicate deposit rejected","TX Hash នេះត្រូវបានប្រើរួចហើយ — Duplicate deposit rejected","ဤ TX Hash ကို အသုံးပြုပြီးဖြစ်သည် — Duplicate deposit rejected","TX Hash ນີ້ຖືກໃຊ້ແລ້ວ — Duplicate deposit rejected","TX Hash ini telah digunakan — Duplicate deposit rejected","TX Hash ini sudah digunakan — Duplicate deposit rejected","该 TX Hash 已被使用——Duplicate deposit rejected"],
@@ -6575,6 +6579,7 @@ function openBuy(pid){
   });
   selPlan_='A';
   openM('m-buy');
+  try{ applyPlanAvailability(); mpLoadSettings(true); }catch(e){}   // [v60] Plan ที่แอดมินปิด
   mpcBuyInit();   // [P4] ขนส่ง + ยอดรวม
   // [v_addr] โหลดที่อยู่จัดส่งสำหรับ checkout
   if (SESSION) loadBuyerAddresses();
@@ -6584,6 +6589,7 @@ function openBuy(pid){
   }
 }
 function selPlan(p,el){
+  if(_planIsOff(p)){ showToast(tccTF('gerr_plan_disabled',{p1:p}),'warn'); return; }   // [v60]
   selPlan_=p;
   // [v11 FIX] ใช้ .closest('.card') กรณี click ที่ text ด้านใน — el อาจเป็น child ไม่ใช่ card wrapper
   const card = el.closest ? el.closest('.card') || el : el;
@@ -8303,6 +8309,7 @@ async function submitProd() {
       initSProds();
     } else {
       if(res.payout_disabled){ refreshPayoutAvailability(); showToast(tccT('gerr_payout_disabled'),'warn'); }   // [v59] server ปฏิเสธ: ชุดถูกปิด
+      else if(res.plan_disabled){ mpLoadSettings(true); showToast(res.error||tccTF('gerr_plan_disabled',{p1:selFFPlan_}),'warn'); }   // [v60] Plan ถูกปิด
       else showToast(res.error||tccT('mp_js_0194'), 'err');
     }
   } catch(e) { hideLoad(); showToast('❌ '+e.message, 'err'); }
@@ -9258,7 +9265,86 @@ const FF_CONFIG_FE = {
 };
 let selFFPlan_ = 'A';  // Plan ที่ Seller เลือก (default A)
 
+// ═══ [v60] System Settings → ใช้งานจริง (อ่านจาก Config ผ่าน getConfig) ═══
+const _mpLim = { minDep:10, minWd:20, maxDaily:0 };   // ค่าตั้งต้น = ค่าเดิมในโค้ด
+const _PO_DEF_FEE = {7:30,15:20,30:15,45:10,60:0};
+window._planDisabled = window._planDisabled || [];
+let _mpSetTs = 0, _mpSetBusy = null;
+function _mpNum(v, d, min, max){
+  if(v===undefined||v===null||String(v).trim()==='') return d;
+  const n = Number(v);
+  if(!isFinite(n) || (min!==undefined && n<min) || (max!==undefined && n>max)) return d;
+  return n;
+}
+function _mpFalse(v){ const t=String(v==null?'':v).trim().toLowerCase(); return t==='false'||t==='0'||t==='off'||t==='no'; }
+function mpLoadSettings(force){
+  if(!force && Date.now()-_mpSetTs < 30000) return Promise.resolve();
+  if(_mpSetBusy) return _mpSetBusy;
+  _mpSetBusy = (async()=>{
+    try{
+      const cfg = await _apiFetchNorm({action:'getConfig'});
+      if(cfg && !cfg.error){
+        _mpLim.minDep   = _mpNum(cfg.min_deposit_usdt, 10, 0.000001, 1000000);
+        _mpLim.minWd    = _mpNum(cfg.min_withdraw_usdt, 20, 0.000001, 1000000);
+        _mpLim.maxDaily = _mpNum(cfg.max_withdraw_daily_usdt, 0, 0, 1e9);
+        window._planDisabled = ['A','B','C'].filter(p=>_mpFalse(cfg['ff_plan_'+p.toLowerCase()+'_enabled']));
+        [7,15,30,45,60].forEach(n=>{
+          const fee = _mpNum(cfg['payout_'+n+'d_fee_pct'], _PO_DEF_FEE[n], 0, 100);
+          if(FF_CONFIG_FE[n]) FF_CONFIG_FE[n].seller_pct = Math.round((1-fee/100)*1e6)/1e6;
+        });
+        _mpSetTs = Date.now();
+      }
+    }catch(e){ /* GAS ไม่พร้อม → ใช้ค่าเดิม ฝั่ง server ตรวจซ้ำอยู่ */ }
+    finally{ _mpSetBusy = null; }
+    try{ applyPayoutFees(); applyLimitTexts(); applyPlanAvailability(); updatePOPreview(); }catch(e){}
+  })();
+  return _mpSetBusy;
+}
+function _mpFmt(n){ return String(Math.round(Number(n)*100)/100); }
+function applyLimitTexts(){
+  const d=document.getElementById('dep-min-note'); if(d) d.innerHTML = tccTF('mp_ui_0171',{p1:_mpFmt(_mpLim.minDep)});
+  const w=document.getElementById('swd-min-note'); if(w) w.textContent = tccTF('mp_ui_0304',{p1:_mpFmt(_mpLim.minWd)});
+}
+function applyPayoutFees(){
+  document.querySelectorAll('#popt-cards .popt').forEach(c=>{
+    const po = Number(c.getAttribute('data-po'));
+    const cfg = FF_CONFIG_FE[po]; if(!cfg) return;
+    const recv = Math.round(cfg.seller_pct*10000)/100, fee = Math.round((100-recv)*100)/100;
+    const pctEl = c.querySelector('.popt-pct'); if(pctEl) pctEl.textContent = recv+'%';
+    const feeEl = c.querySelector('.popt-fee');
+    if(feeEl) feeEl.textContent = fee>0 ? tccTF('mp_ui_po7_fee',{p1:recv,p2:fee}) : tccTF('mp_ui_0250',{p1:recv});
+  });
+}
+function _planIsOff(p){ return (window._planDisabled||[]).includes(p); }
+function applyPlanAvailability(){
+  const buyCards = document.querySelectorAll('#buy-plans .card');
+  ['A','B','C'].forEach((p,i)=>{
+    [document.getElementById('ff-plan-'+p), buyCards[i]].forEach(el=>{
+      if(!el) return;
+      const off = _planIsOff(p);
+      el.classList.toggle('plan-off', off);
+      let tag = el.querySelector('.plan-off-tag');
+      if(off && !tag){
+        tag = document.createElement('div');
+        tag.className = 'plan-off-tag';
+        tag.setAttribute('data-i18n','mp_ui_po_off');
+        tag.textContent = tccT('mp_ui_po_off');
+        el.appendChild(tag);
+      } else if(!off && tag){ tag.remove(); }
+    });
+  });
+  const firstOk = ['A','B','C'].find(p=>!_planIsOff(p));
+  if(!firstOk) return;
+  if(_planIsOff(selFFPlan_)) selFFPlan(firstOk);
+  if(_planIsOff(selPlan_)){ const c = buyCards[['A','B','C'].indexOf(firstOk)]; if(c) selPlan(firstOk, c); }
+}
+window.addEventListener('tcc_lang_changed', ()=>{ try{ applyPayoutFees(); applyLimitTexts(); }catch(e){} });
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>{ applyPayoutFees(); applyLimitTexts(); mpLoadSettings(true); });
+else setTimeout(()=>{ applyPayoutFees(); applyLimitTexts(); mpLoadSettings(true); },0);
+
+
 function selFFPlan(plan) {
+  if(_planIsOff(plan)){ showToast(tccTF('gerr_plan_disabled',{p1:plan}),'warn'); return; }   // [v60]
   selFFPlan_ = plan;
   ['A','B','C'].forEach(k => {
     document.getElementById('ff-plan-'+k)?.classList.toggle('sel', k === plan);
@@ -9295,6 +9381,7 @@ function applyPayoutAvailability(){
   }
 }
 async function refreshPayoutAvailability(){
+  try{ mpLoadSettings(true); }catch(e){}   // [v60] Plan/Fee/Limit ล่าสุด
   try{
     const cfg = await _apiFetchNorm({action:'getConfig'});
     if(cfg && !cfg.error){
@@ -10265,6 +10352,7 @@ async function confirmBuy(){
           initOrders({force:true});
         } else {
           showToast(res.error||tccT('mp_js_0303'),'err');
+          if (res.plan_disabled) mpLoadSettings(true);   // [v60] Plan ที่เลือกเพิ่งถูกปิด → ปิดการ์ด + ย้ายไป Plan ที่เปิด
           // [P7] e111 = ประเทศนี้เพิ่งถูกปิด → โหลดสถานะใหม่ · สลับตลาด · ปิดหน้าต่างซื้อ (สินค้านี้ซื้อไม่ได้แล้ว)
           if (res.code === 'e111' || res.country_closed) mpcRecheck().then(sw => { if (sw) closeM('m-buy'); });
         }
@@ -10643,7 +10731,8 @@ async function doDeposit(){
   const network = document.getElementById('dep-network')?.value||'TRC20';
 
   // Validation
-  if(!amount||amount<10){showToast(tccT('mp_js_0332'),'warn');return;}
+  await mpLoadSettings(true);   // [v60] ขั้นต่ำฝากจาก Config
+  if(!amount||amount<_mpLim.minDep){showToast(tccTF('mp_js_0332',{p1:_mpFmt(_mpLim.minDep)}),'warn');return;}
   if(!txHash){showToast(tccT('mp_js_0333'),'warn');return;}
   if(txHash.length<10){showToast(tccT('mp_js_0334'),'warn');return;}
 
@@ -10725,7 +10814,8 @@ async function doWithdraw(){
   const amount=parseFloat(document.getElementById('wd-amount')?.value||0);
   const address=document.getElementById('wd-addr')?.value||'';
   const network=document.getElementById('wd-network')?.value||'TRC20';
-  if(!amount||amount<20){showToast(tccT('mp_js_0340'),'warn');return;}
+  await mpLoadSettings(true);   // [v60] ขั้นต่ำถอนจาก Config
+  if(!amount||amount<_mpLim.minWd){showToast(tccTF('mp_js_0340',{p1:_mpFmt(_mpLim.minWd)}),'warn');return;}
   if(!address){showToast(tccT('mp_js_0341'),'warn');return;}
   showLoad(tccT('mp_js_0342'));
   try{
@@ -11409,7 +11499,9 @@ async function doSellerWithdraw() {
   const address = (document.getElementById('swd-address')?.value || '').trim();
   const network = document.getElementById('swd-network')?.value || 'TRC20';
 
-  if (!amount || amount < 10) { showToast(tccT('mp_js_0332'),'warn'); return; }
+  await mpLoadSettings(true);   // [v60] external → ใช้ขั้นต่ำถอนจาก Config (ตรงกับ withdrawWallet) · customer → 10 เดิม
+  const _swdMin = destSel === 'external' ? _mpLim.minWd : 10;
+  if (!amount || amount < _swdMin) { showToast(tccTF(destSel === 'external' ? 'mp_js_0340' : 'mp_js_0332',{p1:_mpFmt(_swdMin)}),'warn'); return; }
   if (destSel === 'external' && !address) { showToast(tccT('mp_js_0341'),'warn'); return; }
 
   const sellerBal = Number(SESSION.seller_wallet_usdt || 0);
@@ -11514,7 +11606,8 @@ function renderPag(id,total,cur,cb){
   ).join('');
 }
 function cp(t){ navigator.clipboard.writeText(t).catch(()=>{}); showToast(tccT('mp_js_0388')); }
-function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';if(id==='m-addprod'){try{refreshPayoutAvailability();}catch(e){}}}
+function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';if(id==='m-addprod'){try{refreshPayoutAvailability();}catch(e){}}
+  if(id==='m-dep'||id==='m-wd'||id==='m-swd'){try{mpLoadSettings();}catch(e){}}}
 function closeM(id){document.getElementById(id).classList.remove('open');if(!document.querySelector('.mover.open'))document.body.style.overflow='';}
 document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
