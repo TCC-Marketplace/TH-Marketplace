@@ -210,6 +210,17 @@ textarea.fi{resize:vertical;min-height:70px;}
 
 /* SWITCH TOGGLE */
 .toggle-wrap{display:flex;align-items:center;gap:10px;}
+.info-wrap{position:relative;display:inline-block;vertical-align:middle;margin-left:6px;font-weight:400;}
+.info-ico{width:18px;height:18px;border-radius:50%;border:1px solid var(--inf,#1890ff);background:rgba(24,144,255,.12);color:var(--inf,#1890ff);font:700 11px/16px serif;font-style:italic;cursor:pointer;padding:0;}
+.info-ico:hover,.info-ico.on{background:var(--inf,#1890ff);color:#fff;}
+.info-pop{display:none;position:absolute;left:0;top:24px;z-index:60;width:340px;max-width:calc(100vw - 64px);background:var(--sur,#1a1f28);border:1px solid var(--inf,#1890ff);border-radius:10px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.5);font-size:12px;line-height:1.6;color:var(--t2,#b7bdc6);text-align:left;white-space:normal;}
+.info-pop.open{display:block;}
+.info-pop p{margin:0 0 8px;}
+.info-pop .info-ttl{font-weight:700;color:var(--t1,#fff);margin-bottom:6px;font-size:13px;}
+.info-pop .info-warn{color:var(--warn,#f0b90b);}
+.info-pop code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;font-size:11px;}
+.info-pop .info-tb{width:100%;border-collapse:collapse;margin:0 0 8px;}
+.info-pop .info-tb td{padding:2px 6px;border-bottom:1px solid var(--bdr,#2b3139);}
 .toggle{position:relative;width:44px;height:24px;cursor:pointer;}
 .toggle input{opacity:0;width:0;height:0;}
 .toggle-slider{position:absolute;inset:0;background:var(--card);border-radius:50px;transition:.3s;border:1px solid var(--bdr);}
@@ -1402,32 +1413,32 @@ textarea.fi{resize:vertical;min-height:70px;}
   <div class="ptitle"><h2>⚙️ System <span>Settings</span></h2></div>
   <div class="g2">
     <div class="card">
-      <div style="font-weight:600;margin-bottom:1rem;">🎁 Funding Free Plans</div>
+      <div style="font-weight:600;margin-bottom:1rem;">🎁 Funding Free Plans <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Funding Free Plans — วิธีใช้</div><p>สวิตช์ A / B / C บันทึกลง Config key <code>ff_plan_a/b/c_enabled</code> ทันทีที่สลับ</p><p class="info-warn">⚠️ ขณะนี้ GAS และหน้า Marketplace ยังไม่ได้อ่านค่านี้ ปิดสวิตช์แล้วลูกค้ายังเลือก Plan นั้นได้ตามเดิม</p><p>สัดส่วนจริงกำหนดตายตัวในโค้ด GAS (<code>FF_CONFIG</code>): A 10%×10 · B 25%×4 · C 50%×2</p></div></span></div>
       <div id="ff-plan-toggles"></div>
       <div class="d"></div>
-      <div style="font-weight:600;margin-bottom:1rem;">💰 ขีดจำกัด Wallet</div>
+      <div style="font-weight:600;margin-bottom:1rem;">💰 ขีดจำกัด Wallet <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">ขีดจำกัด Wallet — วิธีใช้</div><p>ช่องนี้บันทึกลง Config (<code>min_deposit_usdt</code>, <code>min_withdraw_usdt</code>, <code>max_withdraw_daily_usdt</code>) ด้วยปุ่ม 💾 บันทึก</p><p class="info-warn">⚠️ ขณะนี้ระบบใช้ค่าคงที่ในโค้ด GAS: ฝากขั้นต่ำ 10, ถอนขั้นต่ำ 20 USDT และยังไม่มีการตรวจ "ถอนสูงสุด/วัน" การแก้ตัวเลขตรงนี้จึงยังไม่เปลี่ยนพฤติกรรม</p></div></span></div>
       <div class="fg"><label class="fl">Minimum Deposit (USDT)</label><input type="number" class="fi" data-key="min_deposit_usdt" value="10"></div>
       <div class="fg"><label class="fl">Minimum Withdrawal (USDT)</label><input type="number" class="fi" data-key="min_withdraw_usdt" value="20"></div>
       <div class="fg"><label class="fl">Maximum Withdrawal / Day (USDT)</label><input type="number" class="fi" data-key="max_withdraw_daily_usdt" value="50000"></div>
       <button class="btn btn-gold" onclick="doSaveSettings(this)">💾 บันทึก</button>
     </div>
     <div class="card">
-      <div style="font-weight:600;margin-bottom:1rem;">🤝 Referral Settings</div>
+      <div style="font-weight:600;margin-bottom:1rem;">🤝 Referral Settings <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Referral Settings — วิธีใช้</div><p>ช่องนี้บันทึกลง Config (<code>referral_commission_pct</code>, <code>referral_seller_commission_pct</code>)</p><p class="info-warn">⚠️ ขณะนี้ค่าคอมมิชชันคำนวณจากค่าคงที่ใน GAS: Team 10% ของยอด, Level A 15% / Level B 10% / ผู้แนะนำ 10% ของส่วน Team การแก้ตัวเลขตรงนี้ยังไม่เปลี่ยนยอดที่จ่ายจริง</p></div></span></div>
       <div class="fg"><label class="fl">Buyer Commission Rate (%)</label><input type="number" class="fi" data-key="referral_commission_pct" value="10"></div>
       <div class="fg"><label class="fl">Seller Commission Rate (%)</label><input type="number" class="fi" data-key="referral_seller_commission_pct" value="10"></div>
       <div class="fg"><label class="fl">Commission Source</label>
         <select class="fi"><option selected>TCC Fund</option></select>
         <div class="txs tm mt2">Commission จ่ายจาก TCC Fund เสมอ</div></div>
       <div class="d"></div>
-      <div style="font-weight:600;margin-bottom:1rem;">🏪 Seller Payout Fee</div>
-      <div class="fg"><label class="fl">7-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_7d_fee_pct" value="30"><div class="txs tm mt2">Seller ได้รับ 70% — 30% Marketing Fee (ค่าตั้งต้นเท่านั้น: ยอดจริงคำนวณจากโค้ด GAS)</div></div>
+      <div style="font-weight:600;margin-bottom:1rem;">🏪 Seller Payout Fee <span class="bdg bdg-warn" style="margin-left:6px;">บันทึกอย่างเดียว</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">Seller Payout Fee — วิธีใช้</div><p>ยอดที่ Seller ได้รับจริง กำหนดตายตัวในโค้ด GAS (<code>PAYOUT_PCT_MAP</code>):</p><table class="info-tb"><tr><td>7 วัน</td><td>ได้ 70% · หัก 30%</td></tr><tr><td>15 วัน</td><td>ได้ 80% · หัก 20%</td></tr><tr><td>30 วัน</td><td>ได้ 85% · หัก 15%</td></tr><tr><td>45 วัน</td><td>ได้ 90% · หัก 10%</td></tr><tr><td>60 วัน</td><td>ได้ 100% · ไม่หัก</td></tr></table><p class="info-warn">⚠️ ช่อง Fee (%) ด้านล่างเป็นค่าอ้างอิงในชีต Config เท่านั้น ระบบไม่ได้อ่านไปคำนวณ การแก้ตัวเลขจะไม่เปลี่ยนยอดจ่ายจริง หากต้องการเปลี่ยน % ต้องแก้ <code>PAYOUT_PCT_MAP</code> และ <code>FF_CONFIG</code> ในโค้ด GAS (และ index) แล้ว deploy ใหม่</p><p>วันจ่าย Seller = วันสั่งซื้อ + จำนวนวันของชุดที่เลือก</p></div></span></div>
+      <div class="fg"><label class="fl">7-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_7d_fee_pct" value="30"><div class="txs tm mt2">Seller ได้รับ 70% — 30% Marketing Fee (ค่าอ้างอิงเท่านั้น — ไม่กระทบยอดจ่ายจริง)</div></div>
       <div class="fg"><label class="fl">45-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_45d_fee_pct" value="10"><div class="txs tm mt2">Seller ได้รับ 90% — 10% เข้า Market Fee Wallet</div></div>
       <div class="fg"><label class="fl">60-Day Payout Fee (%)</label><input type="number" class="fi" data-key="payout_60d_fee_pct" value="0"><div class="txs tm mt2">Seller ได้รับ 100% — ไม่มีค่าธรรมเนียม</div></div>
       <button class="btn btn-gold" onclick="doSaveSettings(this)">💾 บันทึก</button>
     </div>
   </div>
   <div class="card" style="margin-top:1rem;">
-    <div style="font-weight:600;margin-bottom:.25rem;">💸 เปิด/ปิด Payout Option ของ Seller</div>
+    <div style="font-weight:600;margin-bottom:.25rem;">💸 เปิด/ปิด Payout Option ของ Seller <span class="bdg bdg-ok" style="margin-left:6px;">มีผลจริง</span><span class="info-wrap"><button type="button" class="info-ico" aria-label="รายละเอียดการใช้งาน" onclick="toggleInfo(this,event)">i</button><div class="info-pop"><div class="info-ttl">เปิด/ปิด Payout Option — วิธีใช้</div><p>สลับสวิตช์เพื่อเปิด/ปิดชุด Payout ที่ Seller เลือกได้ตอนลงสินค้า บันทึกลง Config key <code>payout_{n}d_enabled</code> ทันที</p><p><b>ปิดแล้ว:</b> การ์ดชุดนั้นในฟอร์มลงสินค้าจางและกดไม่ได้ · GAS ปฏิเสธการลงสินค้าใหม่/เปลี่ยนไปชุดนั้น</p><p><b>ไม่กระทบ:</b> สินค้าและออเดอร์เดิมที่ใช้ชุดนั้น ทำงานและจ่ายเงินต่อตามปกติ · Seller ยังแก้ไขสินค้าเดิมโดยคงชุดเดิมได้</p><p>ต้องเปิดอย่างน้อย 1 ชุดเสมอ</p></div></span></div>
     <div class="txs tm mb2">ปิดชุดไหน Seller จะลงสินค้าใหม่หรือเปลี่ยนไปใช้ชุดนั้นไม่ได้ · สินค้าและออเดอร์เดิมที่ใช้ชุดนั้นอยู่ทำงานต่อตามปกติ · บันทึกทันทีเมื่อสลับสวิตช์</div>
     <div id="payout-toggles"></div>
   </div>
@@ -3059,6 +3070,20 @@ async function togglePayoutOption(po, chk){
     showToast('❌ บันทึก Payout Option ไม่สำเร็จ: '+e.message,'err');
   }finally{ chk.disabled=false; }
 }
+
+function toggleInfo(btn,ev){
+  if(ev) ev.stopPropagation();
+  const pop=btn.nextElementSibling;
+  const willOpen=!pop.classList.contains('open');
+  document.querySelectorAll('.info-pop.open').forEach(x=>x.classList.remove('open'));
+  document.querySelectorAll('.info-ico.on').forEach(x=>x.classList.remove('on'));
+  if(willOpen){ pop.classList.add('open'); btn.classList.add('on'); }
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest&&e.target.closest('.info-pop')) return;
+  document.querySelectorAll('.info-pop.open').forEach(x=>x.classList.remove('open'));
+  document.querySelectorAll('.info-ico.on').forEach(x=>x.classList.remove('on'));
+});
 
 function renderFFToggles(plans){
   const el=document.getElementById('ff-plan-toggles');
