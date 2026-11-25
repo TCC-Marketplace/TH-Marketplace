@@ -728,6 +728,8 @@ textarea.fi{resize:vertical;min-height:80px;}
 /* PAYOUT OPTION */
 .popt{border:2px solid var(--bdr);border-radius:var(--rl);padding:1.25rem;cursor:pointer;transition:all .2s;}
 .popt.sel{border-color:var(--gold);background:rgba(240,185,11,.06);}
+.popt.popt-off{opacity:.45;filter:grayscale(.6);cursor:not-allowed;pointer-events:none;position:relative;}
+.popt .popt-off-tag{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--err);}
 .popt-pct{font-family:var(--fm);font-size:1.8rem;font-weight:700;color:var(--ok);}
 /* FF Plan Cards [v2] */
 .ff-plan-card{border:2px solid var(--bdr);border-radius:var(--r);padding:10px;cursor:pointer;transition:all .2s;text-align:center;}
@@ -3902,28 +3904,35 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="fg">
       <label class="fl">Payout Option *</label>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="popt-cards">
-        <div class="popt" onclick="selPO(15,this)">
+        <div class="popt" data-po="7" onclick="selPO(7,this)">
+          <div style="font-weight:700;" data-i18n="mp_ui_po7_title">🚀 7 วัน</div>
+          <div class="popt-pct" style="color:#ff4d6d;">70%</div>
+          <div class="txs tm mt2" data-i18n="mp_ui_po7_fee">รับ 70% · ตัด 30% Marketing Fee</div>
+          <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_po7_ff">🎁 ลูกค้าได้ FF <strong>25%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
+          <div class="mt2" data-i18n-html="mp_ui_po7_badge"><span class="bdg bdg-err">เร็วมากที่สุด</span></div>
+        </div>
+        <div class="popt" data-po="15" onclick="selPO(15,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0237">🚀 15 วัน</div>
           <div class="popt-pct" style="color:#1890ff;">80%</div>
           <div class="txs tm mt2" data-i18n="mp_ui_0238">รับ 80% · ตัด 20% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0239">🎁 ลูกค้าได้ FF <strong>50%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0240"><span class="bdg bdg-inf">เร็วที่สุด</span></div>
         </div>
-        <div class="popt" onclick="selPO(30,this)">
+        <div class="popt" data-po="30" onclick="selPO(30,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0241">⚡ 30 วัน</div>
           <div class="popt-pct" style="color:#FF8C00;">85%</div>
           <div class="txs tm mt2" data-i18n="mp_ui_0242">รับ 85% · ตัด 15% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0243">🎁 ลูกค้าได้ FF <strong>60%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0244"><span class="bdg bdg-orange">รวดเร็ว</span></div>
         </div>
-        <div class="popt sel" onclick="selPO(45,this)">
+        <div class="popt sel" data-po="45" onclick="selPO(45,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0245">⚡ 45 วัน</div>
           <div class="popt-pct">90%</div>
           <div class="txs tm mt2" data-i18n="mp_ui_0246">รับ 90% · ตัด 10% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0247">🎁 ลูกค้าได้ FF <strong>80%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0248"><span class="bdg bdg-warn">ได้เร็วกว่า</span></div>
         </div>
-        <div class="popt" onclick="selPO(60,this)">
+        <div class="popt" data-po="60" style="grid-column:1/-1;" onclick="selPO(60,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0249">🏆 60 วัน</div>
           <div class="popt-pct">100%</div>
           <div class="txs tm mt2" data-i18n="mp_ui_0250">รับ 100% · ไม่มีค่าธรรมเนียม</div>
@@ -4411,6 +4420,13 @@ const TCC_I18N = {
   'mp_ui_0234':["คลิกหรือลากไฟล์มาวาง · JPG, PNG, WebP · สูงสุด 5MB/รูป","Click or drag a file here · JPG, PNG, WebP · up to 5MB per image","Nhấp hoặc kéo thả tệp vào đây · JPG, PNG, WebP · tối đa 5MB/ảnh","ចុច ឬអូសឯកសារមកទីនេះ · JPG, PNG, WebP · អតិបរមា 5MB/រូប","ဖိုင်ကို နှိပ်ပါ သို့မဟုတ် ဤနေရာသို့ဆွဲထည့်ပါ · JPG, PNG, WebP · တစ်ပုံလျှင် 5MB အထိ","ຄລິກ ຫຼື ລາກໄຟລ໌ມາວາງ · JPG, PNG, WebP · ສູງສຸດ 5MB/ຮູບ","Klik atau seret fail ke sini · JPG, PNG, WebP · maksimum 5MB/gambar","Klik atau seret file ke sini · JPG, PNG, WebP · maksimal 5MB/foto","点击或拖拽文件到此处 · JPG、PNG、WebP · 每张最大 5MB"],
   'mp_ui_0235':["🎬 วิดีโอสินค้า <span class=\"tm tsm\">(ไม่บังคับ)</span>","🎬 Product video <span class=\"tm tsm\">(optional)</span>","🎬 Video sản phẩm <span class=\"tm tsm\">(không bắt buộc)</span>","🎬 វីដេអូទំនិញ <span class=\"tm tsm\">(មិនបង្ខំ)</span>","🎬 ကုန်ပစ္စည်းဗီဒီယို <span class=\"tm tsm\">(မဖြစ်မနေမဟုတ်)</span>","🎬 ວິດີໂອສິນຄ້າ <span class=\"tm tsm\">(ບໍ່ບັງຄັບ)</span>","🎬 Video produk <span class=\"tm tsm\">(pilihan)</span>","🎬 Video produk <span class=\"tm tsm\">(opsional)</span>","🎬 商品视频 <span class=\"tm tsm\">（选填）</span>"],
   'mp_ui_0236':["วางลิงก์ YouTube หรือ URL ไฟล์วิดีโอ (.mp4)","Paste a YouTube link or a video file URL (.mp4)","Dán liên kết YouTube hoặc URL tệp video (.mp4)","បិទភ្ជាប់តំណ YouTube ឬ URL ឯកសារវីដេអូ (.mp4)","YouTube လင့်ခ် သို့မဟုတ် ဗီဒီယိုဖိုင် URL (.mp4) ကို ကူးထည့်ပါ","ວາງລິ້ງ YouTube ຫຼື URL ໄຟລ໌ວິດີໂອ (.mp4)","Tampal pautan YouTube atau URL fail video (.mp4)","Tempel tautan YouTube atau URL file video (.mp4)","粘贴 YouTube 链接或视频文件 URL (.mp4)"],
+  'mp_ui_po7_title':["🚀 7 วัน","🚀 7 days","🚀 7 ngày","🚀 7 ថ្ងៃ","🚀 ၇ ရက်","🚀 7 ວັນ","🚀 7 hari","🚀 7 hari","🚀 7 天"],
+  'mp_ui_po7_fee':["รับ 70% · ตัด 30% Marketing Fee","Receive 70% · 30% Marketing Fee deducted","Nhận 70% · khấu trừ 30% Marketing Fee","ទទួលបាន 70% · កាត់ 30% Marketing Fee","၇၀% ရရှိ · Marketing Fee ၃၀% နုတ်ယူ","ຮັບ 70% · ຫັກ 30% Marketing Fee","Terima 70% · tolak 30% Marketing Fee","Terima 70% · potong 30% Marketing Fee","实收 70% · 扣除 30% 营销费"],
+  'mp_ui_po7_ff':["🎁 ลูกค้าได้ FF <strong>25%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>25%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>25%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>25%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>25%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>25%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>25%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>25%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>25%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
+  'mp_ui_po7_badge':["<span class=\"bdg bdg-err\">เร็วมากที่สุด</span>","<span class=\"bdg bdg-err\">Ultra fast</span>","<span class=\"bdg bdg-err\">Siêu nhanh</span>","<span class=\"bdg bdg-err\">លឿនខ្លាំងបំផុត</span>","<span class=\"bdg bdg-err\">အလွန်မြန်ဆန်</span>","<span class=\"bdg bdg-err\">ໄວຫຼາຍທີ່ສຸດ</span>","<span class=\"bdg bdg-err\">Sangat pantas</span>","<span class=\"bdg bdg-err\">Super cepat</span>","<span class=\"bdg bdg-err\">极速</span>"],
+  'mp_ui_po_off':["ปิดชั่วคราว","Temporarily closed","Tạm đóng","បិទជាបណ្តោះអាសន្ន","ယာယီပိတ်ထားသည်","ປິດຊົ່ວຄາວ","Ditutup sementara","Ditutup sementara","暂时关闭"],
+  'gerr_payout_disabled':["ชุด Payout นี้ถูกปิดชั่วคราวโดยแอดมิน กรุณาเลือกชุดอื่น","This payout option is temporarily closed by the admin. Please choose another one.","Gói Payout này đang tạm đóng bởi quản trị viên. Vui lòng chọn gói khác.","ជម្រើស Payout នេះត្រូវបានអ្នកគ្រប់គ្រងបិទជាបណ្តោះអាសន្ន សូមជ្រើសរើសជម្រើសផ្សេង","ဤ Payout ရွေးချယ်မှုကို အက်ဒမင်က ယာယီပိတ်ထားသည်။ အခြားတစ်ခု ရွေးချယ်ပါ။","ຊຸດ Payout ນີ້ຖືກແອດມິນປິດຊົ່ວຄາວ ກະລຸນາເລືອກຊຸດອື່ນ","Pilihan Payout ini ditutup sementara oleh admin. Sila pilih yang lain.","Opsi Payout ini ditutup sementara oleh admin. Silakan pilih yang lain.","该 Payout 方案已被管理员暂时关闭，请选择其他方案。"],
+  'gerr_payout_invalid':["ชุด Payout ไม่ถูกต้อง","Invalid payout option","Gói Payout không hợp lệ","ជម្រើស Payout មិនត្រឹមត្រូវ","Payout ရွေးချယ်မှု မမှန်ကန်ပါ","ຊຸດ Payout ບໍ່ຖືກຕ້ອງ","Pilihan Payout tidak sah","Opsi Payout tidak valid","Payout 方案无效"],
   'mp_ui_0237':["🚀 15 วัน","🚀 15 days","🚀 15 ngày","🚀 15 ថ្ងៃ","🚀 ၁၅ ရက်","🚀 15 ວັນ","🚀 15 hari","🚀 15 hari","🚀 15 天"],
   'mp_ui_0238':["รับ 80% · ตัด 20% Marketing Fee","Receive 80% · 20% Marketing Fee deducted","Nhận 80% · khấu trừ 20% Marketing Fee","ទទួលបាន 80% · កាត់ 20% Marketing Fee","၈၀% ရရှိ · Marketing Fee ၂၀% နုတ်ယူ","ຮັບ 80% · ຫັກ 20% Marketing Fee","Terima 80% · tolak 20% Marketing Fee","Terima 80% · potong 20% Marketing Fee","实收 80% · 扣除 20% 营销费"],
   'mp_ui_0239':["🎁 ลูกค้าได้ FF <strong>50%</strong> ของราคา<br><span style=\"color:var(--t3);\">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Customer receives FF <strong>50%</strong> of the price<br><span style=\"color:var(--t3);\">Installments: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Khách nhận FF <strong>50%</strong> giá sản phẩm<br><span style=\"color:var(--t3);\">Chia kỳ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 អតិថិជនទទួលបាន FF <strong>50%</strong> នៃតម្លៃ<br><span style=\"color:var(--t3);\">ចែកបង់៖ A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ဝယ်သူသည် ဈေးနှုန်း၏ FF <strong>50%</strong> ရရှိမည်<br><span style=\"color:var(--t3);\">အရစ်ကျ - A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 ລູກຄ້າໄດ້ FF <strong>50%</strong> ຂອງລາຄາ<br><span style=\"color:var(--t3);\">ແບ່ງຈ່າຍ: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan menerima FF <strong>50%</strong> daripada harga<br><span style=\"color:var(--t3);\">Ansuran: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 Pelanggan mendapat FF <strong>50%</strong> dari harga<br><span style=\"color:var(--t3);\">Cicilan: A 10%×10 · B 25%×4 · C 50%×2</span>","🎁 客户获得价格 <strong>50%</strong> 的 FF<br><span style=\"color:var(--t3);\">分期：A 10%×10 · B 25%×4 · C 50%×2</span>"],
@@ -8150,6 +8166,7 @@ function openEditProd(prodId) {
   if(vidInput){ vidInput.value = p.video_url||''; updateVideoPreview(); }
   // prefill payout_option
   const _po = Number(p.payout_option) || 45;
+  _editingPO = _po;
   const _poCard = document.querySelector(`#popt-cards .popt[onclick*="selPO(${_po},"]`);
   if(_poCard){ document.querySelectorAll('#popt-cards .popt').forEach(c=>c.classList.remove('sel')); _poCard.classList.add('sel'); selPO(_po, _poCard); }
   // [v33 FIX] prefill ff_selected_plan — เดิมไม่ได้ set selFFPlan_ ตอนแก้ไข
@@ -8238,6 +8255,7 @@ async function submitProd() {
     return true;
   });
 
+  if(_poIsBlocked(selPO_)){ showToast(tccT('gerr_payout_disabled'),'warn'); return; }   // [v59]
   closeM('m-addprod');
   showLoad(_editingProdId ? tccT('mp_js_0206') : tccT('mp_js_0207'));
   try {
@@ -8283,7 +8301,10 @@ async function submitProd() {
       }
       showToast(toastMsg);
       initSProds();
-    } else { showToast(res.error||tccT('mp_js_0194'), 'err'); }
+    } else {
+      if(res.payout_disabled){ refreshPayoutAvailability(); showToast(tccT('gerr_payout_disabled'),'warn'); }   // [v59] server ปฏิเสธ: ชุดถูกปิด
+      else showToast(res.error||tccT('mp_js_0194'), 'err');
+    }
   } catch(e) { hideLoad(); showToast('❌ '+e.message, 'err'); }
 }
 
@@ -9025,7 +9046,7 @@ async function initSW() {
   if (bkEl) {
     const byPlan = ana.payoutByPlan || {};
     const byFee  = ana.feeByPlan   || {};
-    const planKeys = Object.keys(byPlan).sort();
+    const planKeys = Object.keys(byPlan).sort((a,b)=>(parseInt(a,10)||0)-(parseInt(b,10)||0));
     if (planKeys.length === 0) {
       bkEl.innerHTML = '';
     } else {
@@ -9136,7 +9157,7 @@ async function initSA() {
   ).join('') || ('<div class="tm tsm">'+tccT('mp_js_0242')+'</div>');
 
   // [v49] Payout History — แสดงทุก order เรียงใหม่→เก่า
-  const PAYOUT_PCT_MAP_FE = {'15':0.8,'30':0.85,'45':0.9,'60':1.0};
+  const PAYOUT_PCT_MAP_FE = {'7':0.7,'15':0.8,'30':0.85,'45':0.9,'60':1.0};
   const sortedOrds = [...ords].sort((a,b) =>
     (b.created_at||'').localeCompare(a.created_at||'')).slice(0,10);
 
@@ -9204,6 +9225,12 @@ function tryParseJSON(str) { try { return JSON.parse(str); } catch(e) { return n
 // Plan A/B/C ใช้ 10%×10 / 25%×4 / 50%×2 เหมือนกันทุก Payout → sum = ff_amount เสมอ
 // ff_rate ต่างกันตาม Payout → ff_amount ต่างกัน → ยอดต่อรอบต่างกัน
 const FF_CONFIG_FE = {
+  7: { ff_rate:0.25, seller_pct:0.70,
+    plans:{
+      A:{pct_per_round:0.10,rounds:10,interval_days:30,get label(){return tccT('mp_js_0247');}},
+      B:{pct_per_round:0.25,rounds:4,interval_days:15,get label(){return tccT('mp_js_0248');}},
+      C:{pct_per_round:0.50,rounds:2,interval_days:30,get label(){return tccT('mp_js_0249');}}
+    }},
   15: { ff_rate:0.50, seller_pct:0.80,
     plans:{
       A:{pct_per_round:0.10,rounds:10,interval_days:30,get label(){return tccT('mp_js_0247');}},
@@ -9238,7 +9265,50 @@ function selFFPlan(plan) {
   });
 }
 
+// ─── [v59] Admin เปิด/ปิดชุด Payout — Config key payout_{n}d_enabled ('false' = ปิด) ───
+window._payoutDisabled = window._payoutDisabled || [];
+let _editingPO = null;   // ชุด Payout เดิมของสินค้าที่กำลังแก้ไข (คงชุดเดิมได้แม้ถูกปิด — ตรงกับกฎฝั่ง GAS)
+function _poIsBlocked(po){
+  po = Number(po);
+  if(!(window._payoutDisabled||[]).includes(po)) return false;
+  return !(_editingProdId && po === _editingPO);
+}
+function applyPayoutAvailability(){
+  const cards = document.querySelectorAll('#popt-cards .popt');
+  cards.forEach(c=>{
+    const po = Number(c.getAttribute('data-po'));
+    const off = _poIsBlocked(po);
+    c.classList.toggle('popt-off', off);
+    let tag = c.querySelector('.popt-off-tag');
+    if(off && !tag){
+      tag = document.createElement('div');
+      tag.className = 'popt-off-tag';
+      tag.setAttribute('data-i18n','mp_ui_po_off');
+      tag.textContent = tccT('mp_ui_po_off');
+      c.appendChild(tag);
+    } else if(!off && tag){ tag.remove(); }
+  });
+  // ชุดที่เลือกอยู่ถูกปิด → ย้ายไปชุดแรกที่ยังเปิด
+  if(_poIsBlocked(selPO_)){
+    const firstOk = Array.from(cards).find(c=>!c.classList.contains('popt-off'));
+    if(firstOk) selPO(Number(firstOk.getAttribute('data-po')), firstOk);
+  }
+}
+async function refreshPayoutAvailability(){
+  try{
+    const cfg = await _apiFetchNorm({action:'getConfig'});
+    if(cfg && !cfg.error){
+      window._payoutDisabled = [7,15,30,45,60].filter(n=>{
+        const v = String(cfg['payout_'+n+'d_enabled']==null ? '' : cfg['payout_'+n+'d_enabled']).trim().toLowerCase();
+        return v==='false' || v==='0' || v==='off';
+      });
+    }
+  }catch(e){ /* GAS ไม่พร้อม → ใช้ค่าเดิม ฝั่ง server ยังตรวจซ้ำอยู่ */ }
+  applyPayoutAvailability();
+}
+
 function selPO(d, el) {
+  if(_poIsBlocked(d)){ showToast(tccT('gerr_payout_disabled'),'warn'); return; }
   selPO_ = d;
   document.querySelectorAll('#popt-cards .popt').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
@@ -11444,7 +11514,7 @@ function renderPag(id,total,cur,cb){
   ).join('');
 }
 function cp(t){ navigator.clipboard.writeText(t).catch(()=>{}); showToast(tccT('mp_js_0388')); }
-function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function openM(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';if(id==='m-addprod'){try{refreshPayoutAvailability();}catch(e){}}}
 function closeM(id){document.getElementById(id).classList.remove('open');if(!document.querySelector('.mover.open'))document.body.style.overflow='';}
 document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
