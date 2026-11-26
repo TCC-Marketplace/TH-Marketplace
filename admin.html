@@ -1368,6 +1368,8 @@ textarea.fi{resize:vertical;min-height:70px;}
       <select class="fi" id="cty-addr"><option value="th_5level">th_5level (ตำบล/อำเภอ/จังหวัด/รหัส 5 หลัก)</option><option value="generic_3level">generic_3level (ระดับ 3/2/1 + postal)</option></select></div>
     <div class="fg"><label class="fl">Postal regex</label><input class="fi" id="cty-postal" placeholder="^\d{5}$"></div>
     <div class="fg"><label class="fl">รหัสโทรศัพท์</label><input class="fi" id="cty-phone" placeholder="+66"></div>
+    <div class="fg"><label class="fl">Phone regex (เบอร์แบบ E.164 เช่น +84912345678)</label><input class="fi" id="cty-phone-rx" placeholder="^\+84\d{9,10}$"><div class="txs tm" style="margin-top:4px;">เว้นว่าง = ตรวจรูปแบบ E.164 ทั่วไป (+ ตามด้วยเลข 8–15 หลัก)</div></div>
+    <div class="fg"><label class="fl">ฟิลด์ที่ต้องกรอก (required_fields)</label><input class="fi" id="cty-req" placeholder="subdistrict,district,province,postal_code"><div class="txs tm" style="margin-top:4px;">คั่นด้วย , — ใช้ได้เฉพาะ subdistrict, district, province, postal_code · เว้นว่าง = บังคับเฉพาะ province (ค่าเดิม)</div></div>
     <div class="fg"><label class="fl">ลำดับแสดงผล</label><input class="fi" id="cty-sort" type="number" min="0"></div>
     <div class="fg"><label class="fl">สถานะตลาด</label>
       <select class="fi" id="cty-status"><option value="active">active (เปิดตลาด)</option><option value="inactive">inactive (ปิดตลาด)</option></select>
@@ -4190,7 +4192,7 @@ function openCountryModal(code){
   set('cty-name-th',c&&c.name_th); set('cty-name-en',c&&c.name_en);
   set('cty-lang',c?c.default_lang:'th'); set('cty-cur',c&&c.currency_code); set('cty-fx',c&&c.fx_to_usdt);
   set('cty-addr',c?c.address_schema:'generic_3level'); set('cty-postal',c&&c.postal_regex);
-  set('cty-phone',c&&c.phone_prefix); set('cty-sort',c?c.sort:(MPC.countries.length+1));
+  set('cty-phone',c&&c.phone_prefix); set('cty-phone-rx',c&&c.phone_regex); set('cty-req',c&&c.required_fields); set('cty-sort',c?c.sort:(MPC.countries.length+1));
   set('cty-status',c?String(c.status).toLowerCase():'active');
   openM('m-country');
 }
@@ -4234,11 +4236,15 @@ async function saveCountry(){
   const code=v('cty-code').toUpperCase();
   if(!/^[A-Z]{2}$/.test(code)){ showToast('รหัสประเทศต้องเป็น ISO2 2 ตัวอักษร','err'); return; }
   const fx=Number(v('cty-fx')); if(!(fx>0)){ showToast('FX ต้องมากกว่า 0','err'); return; }
+  { const rf=v('cty-req').replace(/\s+/g,'').split(',').filter(Boolean);   // [P7]
+    if(rf.some(x=>['subdistrict','district','province','postal_code'].indexOf(x)===-1)){ showToast('required_fields ใช้ได้เฉพาะ subdistrict, district, province, postal_code','err'); return; }
+    const pr=v('cty-phone-rx'); if(pr){ try{ new RegExp(pr); }catch(e){ showToast('Phone regex ไม่ถูกต้อง','err'); return; } } }
   const prev=MPC.countries.find(x=>String(x.country_code)===code)||null;
   const want=v('cty-status'), prevSt=prev?String(prev.status).toLowerCase():'';
   const payload={country_code:code,name_th:v('cty-name-th'),name_en:v('cty-name-en'),
     default_lang:v('cty-lang'),currency_code:v('cty-cur').toUpperCase(),fx_to_usdt:fx,address_schema:v('cty-addr'),
-    postal_regex:v('cty-postal'),phone_prefix:v('cty-phone'),sort:Number(v('cty-sort'))||0};
+    postal_regex:v('cty-postal'),phone_prefix:v('cty-phone'),sort:Number(v('cty-sort'))||0,
+    phone_regex:v('cty-phone-rx'),required_fields:v('cty-req').replace(/\s+/g,'')};
   // ประเทศเดิม: บันทึกข้อมูลก่อน แล้วเปลี่ยนสถานะผ่านขั้นตอนเปิด/ปิด (ผลกระทบ + เหตุผล + ชุดทดสอบ) · ประเทศใหม่: ส่ง status ไปกับการสร้าง (server รันชุดทดสอบก่อนเปิดให้)
   const statusChange=!!prev && want!==prevSt;
   if(!prev) payload.status=want;
