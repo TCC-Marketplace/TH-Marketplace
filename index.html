@@ -2554,16 +2554,16 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         <span class="mmn-trigger-arrow">▼</span>
       </div>
       <div id="dash-nav">
-        <div onclick="dTab('wallet');mmnClose('💳 Wallet')" id="dt-wallet" class="dash-tab active">💳 Wallet</div>
-        <div onclick="dTab('shop');mmnClose('🛍 ช้อปปิ้ง')" id="dt-shop" class="dash-tab" style="position:relative;"><span data-i18n="mp_ui_0017">🛍 ช้อปปิ้ง</span><span id="dt-shop-cart-badge" style="display:none;position:absolute;top:6px;right:10px;background:var(--err);color:#fff;font-size:8px;font-weight:700;min-width:14px;height:14px;border-radius:7px;padding:0 3px;align-items:center;justify-content:center;border:1.5px solid var(--bg);"></span></div>
-        <div onclick="dTab('orders');mmnClose('📦 My Orders')" id="dt-orders" class="dash-tab">📦 My Orders</div>
-        <div onclick="dTab('address');mmnClose('📍 ที่อยู่จัดส่ง')" id="dt-address" class="dash-tab" data-i18n="mp_ui_0018">📍 ที่อยู่จัดส่ง</div>
-        <div onclick="dTab('funding');mmnClose('🎁 Funding Free')" id="dt-funding" class="dash-tab">🎁 Funding Free</div>
-        <div onclick="dTab('referrals');mmnClose('🤝 Referrals')" id="dt-referrals" class="dash-tab">🤝 Referrals</div>
-        <div onclick="dTab('commission');mmnClose('💰 Commission')" id="dt-commission" class="dash-tab">💰 Commission</div>
-        <div onclick="dTab('notifications');mmnClose('🔔 การแจ้งเตือน')" id="dt-notifications" class="dash-tab" data-i18n="mp_ui_0001">🔔 การแจ้งเตือน</div>
-        <div onclick="dTab('profile');mmnClose('👤 โปรไฟล์')" id="dt-profile" class="dash-tab" data-i18n="mp_ui_0019">👤 โปรไฟล์</div>
-        <div onclick="dTab('btcfund');mmnClose('₿ TCC Bitcoin Fund')" id="dt-btcfund" class="dash-tab" style="border-left:2px solid rgba(240,185,11,0.4);margin-top:8px;">₿ TCC Bitcoin Fund</div>
+        <div onclick="dTab('wallet');mmnClose()" id="dt-wallet" class="dash-tab active">💳 Wallet</div>
+        <div onclick="dTab('shop');mmnClose()" id="dt-shop" class="dash-tab" style="position:relative;"><span data-i18n="mp_ui_0017">🛍 ช้อปปิ้ง</span><span id="dt-shop-cart-badge" style="display:none;position:absolute;top:6px;right:10px;background:var(--err);color:#fff;font-size:8px;font-weight:700;min-width:14px;height:14px;border-radius:7px;padding:0 3px;align-items:center;justify-content:center;border:1.5px solid var(--bg);"></span></div>
+        <div onclick="dTab('orders');mmnClose()" id="dt-orders" class="dash-tab">📦 My Orders</div>
+        <div onclick="dTab('address');mmnClose()" id="dt-address" class="dash-tab" data-i18n="mp_ui_0018">📍 ที่อยู่จัดส่ง</div>
+        <div onclick="dTab('funding');mmnClose()" id="dt-funding" class="dash-tab">🎁 Funding Free</div>
+        <div onclick="dTab('referrals');mmnClose()" id="dt-referrals" class="dash-tab">🤝 Referrals</div>
+        <div onclick="dTab('commission');mmnClose()" id="dt-commission" class="dash-tab">💰 Commission</div>
+        <div onclick="dTab('notifications');mmnClose()" id="dt-notifications" class="dash-tab" data-i18n="mp_ui_0001">🔔 การแจ้งเตือน</div>
+        <div onclick="dTab('profile');mmnClose()" id="dt-profile" class="dash-tab" data-i18n="mp_ui_0019">👤 โปรไฟล์</div>
+        <div onclick="dTab('btcfund');mmnClose()" id="dt-btcfund" class="dash-tab" style="border-left:2px solid rgba(240,185,11,0.4);margin-top:8px;">₿ TCC Bitcoin Fund</div>
       </div>
     </div>
   </div>
@@ -2611,12 +2611,15 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <div id="waddr-guest" style="text-align:center;padding:1rem 0;color:var(--t3);font-size:13px;" data-i18n="mp_ui_0025">
             เข้าสู่ระบบเพื่อดู Wallet Address
           </div>
-          <!-- member: แสดง address จาก SESSION -->
+          <!-- member: เลขกระเป๋าฝากรายสมาชิก — ดึงจาก GAS EasyTrade (DepositWallets) เฉพาะ BSC / SOL · ยังไม่มี → กด "สร้างเลขกระเป๋า" -->
           <div id="waddr-member" style="display:none;">
-            <div class="tsm tm mb2 mt2">TRC20</div>
-            <div class="waddr mb4" id="waddr-trc20-row"><span id="waddr-trc20">—</span><span class="cpbtn" onclick="cp(document.getElementById('waddr-trc20').textContent)">Copy</span></div>
-            <div class="tsm tm mb2">BEP20</div>
-            <div class="waddr" id="waddr-bep20-row"><span id="waddr-bep20">—</span><span class="cpbtn" onclick="cp(document.getElementById('waddr-bep20').textContent)">Copy</span></div>
+            <div class="tsm tm mb2 mt2">BSC (BEP20)</div>
+            <div class="waddr mb2" id="waddr-bsc-row"><span id="waddr-bsc">—</span><span class="cpbtn" id="waddr-copy-bsc" onclick="depCopy('BSC')">Copy</span></div>
+            <button type="button" class="btn btn-gold btn-sm mb4" id="waddr-create-bsc" style="display:none;" onclick="createDepWallet('BSC')" data-i18n="mp_ui_0372">➕ สร้างเลขกระเป๋า</button>
+            <div class="tsm tm mb2 mt2">SOL (Solana)</div>
+            <div class="waddr mb2" id="waddr-sol-row"><span id="waddr-sol">—</span><span class="cpbtn" id="waddr-copy-sol" onclick="depCopy('SOL')">Copy</span></div>
+            <button type="button" class="btn btn-gold btn-sm mb4" id="waddr-create-sol" style="display:none;" onclick="createDepWallet('SOL')" data-i18n="mp_ui_0372">➕ สร้างเลขกระเป๋า</button>
+            <div class="tsm tm mt2" data-i18n="mp_ui_0373">โอนเฉพาะ USDT ผ่านเครือข่ายที่ระบุเท่านั้น · เงินจะเข้า TCC Platform ก่อน แล้วกด “โอนเข้า MP” เพื่อใช้ใน Marketplace</div>
           </div>
         </div>
       </div>
@@ -3385,9 +3388,9 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         <div class="fg"><label class="fl" data-i18n="mp_ui_0117">ชื่อร้านค้า *</label><input class="fi" placeholder="ชื่อร้านของคุณ" data-i18n-placeholder="mp_ui_0118"></div>
         <div class="fg"><label class="fl" data-i18n="mp_ui_0119">หมวดหมู่ *</label>
           <select class="fi" id="sa-cat-inp"><option value="" data-i18n="mp_ui_0059">⏳ กำลังโหลด...</option></select></div>
-        <div class="fg"><label class="fl">🌏 ประเทศร้านค้า *</label>
+        <div class="fg"><label class="fl" data-i18n="mp_ui_0358">🌏 ประเทศร้านค้า *</label>
           <select class="fi" id="sa-country-inp"><option value="">⏳ ...</option></select>
-          <div class="tsm tm mt2">1 ร้านต่อ 1 ประเทศ — ขายและจัดส่งในประเทศนี้ และเปลี่ยนภายหลังไม่ได้</div></div>
+          <div class="tsm tm mt2" data-i18n="mp_ui_0359">1 ร้านต่อ 1 ประเทศ — ขายและจัดส่งในประเทศนี้ และเปลี่ยนภายหลังไม่ได้</div></div>
         <div class="fg"><label class="fl" data-i18n="mp_ui_0120">คำอธิบายร้าน</label><textarea class="fi" rows="3" placeholder="บอกเล่าเกี่ยวกับร้านของคุณ..." data-i18n-placeholder="mp_ui_0121"></textarea></div>
         <div class="fg"><label class="fl" data-i18n="mp_ui_0122">โลโก้ร้านค้า</label>
           <div class="uarea" onclick="document.getElementById('sa-logo-input').click()">
@@ -3681,8 +3684,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="fg">
       <label class="fl">Network</label>
       <select class="fi" id="dep-network" onchange="updDepAddr()">
-        <option value="TRC20">TRC20 (TRON) — Fee ≈ 1 USDT</option>
-        <option value="BEP20">BEP20 (BSC) — Fee ≈ 0.5 USDT</option>
+        <option value="BSC">BSC (BEP20)</option>
+        <option value="SOL">SOL (Solana)</option>
       </select>
     </div>
 
@@ -3692,11 +3695,12 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <div class="tsm tm" style="margin-bottom:8px;" data-i18n="mp_ui_0170">โอน USDT มายังที่อยู่นี้</div>
       <div class="waddr" style="justify-content:center;font-size:11px;word-break:break-all;">
         <span id="dep-addr-disp" data-i18n="mp_ui_0095">กำลังโหลด...</span>
-        <span class="cpbtn" onclick="cp(document.getElementById('dep-addr-disp').textContent)">Copy</span>
+        <span class="cpbtn" id="dep-addr-copy" onclick="depCopy(document.getElementById('dep-network')?.value||'BSC')">Copy</span>
       </div>
+      <button type="button" class="btn btn-gold btn-sm mt2" id="dep-addr-create" style="display:none;" onclick="createDepWallet(document.getElementById('dep-network')?.value||'BSC')" data-i18n="mp_ui_0372">➕ สร้างเลขกระเป๋า</button>
     </div>
 
-    <div class="alrt alrt-i tsm" style="margin-bottom:1rem;" id="dep-min-note">
+    <div class="alrt alrt-i tsm" style="margin-bottom:1rem;" id="dep-min-note" data-i18n-html="mp_ui_0369">
       ℹ️ ยืนยัน 12 confirmations · ขั้นต่ำ <strong>10 USDT</strong> · หลังโอนแล้วกรอก TX Hash ด้านล่าง
     </div>
 
@@ -3884,12 +3888,12 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <div class="fg"><label class="fl">Stock</label><input type="number" class="fi" id="prod-stock" value="1"></div>
       <div class="fg"><label class="fl" data-i18n="mp_ui_0226">เวลาจัดส่ง</label><select class="fi" id="prod-delivery"><option data-i18n="mp_ui_0227" value="1-3 วัน">1-3 วัน</option><option selected data-i18n="mp_ui_0228" value="3-7 วัน">3-7 วัน</option><option data-i18n="mp_ui_0229" value="7-14 วัน">7-14 วัน</option><option data-i18n="mp_ui_0230" value="14-30 วัน">14-30 วัน</option></select></div>
     </div>
-    <div class="fg"><label class="fl">🌏 ประเทศตลาด</label>
+    <div class="fg"><label class="fl" data-i18n="mp_ui_0360">🌏 ประเทศตลาด</label>
       <div id="prod-country-lbl" class="fi" style="opacity:.85;cursor:not-allowed;">—</div>
-      <div class="tsm tm mt2">ล็อกตามประเทศร้านของคุณ — ผู้ซื้อในประเทศนี้เท่านั้นที่เห็นสินค้า</div></div>
-    <div class="fg"><label class="fl">🚚 ขนส่งที่ร้านรองรับ</label>
+      <div class="tsm tm mt2" data-i18n="mp_ui_0361">ล็อกตามประเทศร้านของคุณ — ผู้ซื้อในประเทศนี้เท่านั้นที่เห็นสินค้า</div></div>
+    <div class="fg"><label class="fl" data-i18n="mp_ui_0362">🚚 ขนส่งที่ร้านรองรับ</label>
       <div id="prod-carriers-box" style="display:flex;flex-wrap:wrap;gap:8px;"><span class="tsm tm">⏳ ...</span></div>
-      <div class="tsm tm mt2">ไม่เลือกเลย = รองรับทุกขนส่งของประเทศ</div></div>
+      <div class="tsm tm mt2" data-i18n="mp_ui_0363">ไม่เลือกเลย = รองรับทุกขนส่งของประเทศ</div></div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0231">คำอธิบายสินค้า</label><textarea class="fi" rows="3" placeholder="อธิบายสินค้าของคุณ..." data-i18n-placeholder="mp_ui_0232"></textarea></div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0233">รูปภาพสินค้า (สูงสุด 10 รูป)</label>
       <div class="uarea" id="prod-img-area" onclick="document.getElementById('prod-img-input').click()" ondragover="event.preventDefault();this.classList.add('uarea-active')" ondragleave="this.classList.remove('uarea-active')" ondrop="handleImgDrop(event,'prod-img-input','prod-img-preview')">
@@ -3910,35 +3914,35 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         <div class="popt" data-po="7" onclick="selPO(7,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_po7_title">🚀 7 วัน</div>
           <div class="popt-pct" style="color:#ff4d6d;">70%</div>
-          <div class="txs tm mt2 popt-fee">รับ 70% · ตัด 30% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee" data-i18n="mp_ui_0364">รับ 70% · ตัด 30% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_po7_ff">🎁 ลูกค้าได้ FF <strong>25%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_po7_badge"><span class="bdg bdg-err">เร็วมากที่สุด</span></div>
         </div>
         <div class="popt" data-po="15" onclick="selPO(15,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0237">🚀 15 วัน</div>
           <div class="popt-pct" style="color:#1890ff;">80%</div>
-          <div class="txs tm mt2 popt-fee">รับ 80% · ตัด 20% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee" data-i18n="mp_ui_0365">รับ 80% · ตัด 20% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0239">🎁 ลูกค้าได้ FF <strong>50%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0240"><span class="bdg bdg-inf">เร็วที่สุด</span></div>
         </div>
         <div class="popt" data-po="30" onclick="selPO(30,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0241">⚡ 30 วัน</div>
           <div class="popt-pct" style="color:#FF8C00;">85%</div>
-          <div class="txs tm mt2 popt-fee">รับ 85% · ตัด 15% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee" data-i18n="mp_ui_0366">รับ 85% · ตัด 15% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0243">🎁 ลูกค้าได้ FF <strong>60%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0244"><span class="bdg bdg-orange">รวดเร็ว</span></div>
         </div>
         <div class="popt sel" data-po="45" onclick="selPO(45,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0245">⚡ 45 วัน</div>
           <div class="popt-pct">90%</div>
-          <div class="txs tm mt2 popt-fee">รับ 90% · ตัด 10% Marketing Fee</div>
+          <div class="txs tm mt2 popt-fee" data-i18n="mp_ui_0367">รับ 90% · ตัด 10% Marketing Fee</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0247">🎁 ลูกค้าได้ FF <strong>80%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0248"><span class="bdg bdg-warn">ได้เร็วกว่า</span></div>
         </div>
         <div class="popt" data-po="60" style="grid-column:1/-1;" onclick="selPO(60,this)">
           <div style="font-weight:700;" data-i18n="mp_ui_0249">🏆 60 วัน</div>
           <div class="popt-pct">100%</div>
-          <div class="txs tm mt2 popt-fee">รับ 100% · ไม่มีค่าธรรมเนียม</div>
+          <div class="txs tm mt2 popt-fee" data-i18n="mp_ui_0368">รับ 100% · ไม่มีค่าธรรมเนียม</div>
           <div class="mt2" style="font-size:10px;color:var(--ok);line-height:1.5;" data-i18n-html="mp_ui_0251">🎁 ลูกค้าได้ FF <strong>100%</strong> ของราคา<br><span style="color:var(--t3);">แบ่งจ่าย: A 10%×10 · B 25%×4 · C 50%×2</span></div>
           <div class="mt2" data-i18n-html="mp_ui_0252"><span class="bdg bdg-ok">ได้เต็มจำนวน</span></div>
         </div>
@@ -4007,7 +4011,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="mtitle" data-i18n="mp_ui_0260">✏️ แก้ไขข้อมูลร้านค้า</div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0261">ชื่อร้านค้า</label><input class="fi" id="shop-name-inp" value="TechStore Pro"></div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0262">หมวดหมู่</label><select class="fi" id="shop-cat-inp"><option value="" data-i18n="mp_ui_0059">⏳ กำลังโหลด...</option></select></div>
-    <div class="fg"><label class="fl" data-i18n="mp_ui_0263">คำอธิบายร้านค้า</label><textarea class="fi" rows="3" id="shop-desc-inp">ร้านขายสินค้าเทคโนโลยีชั้นนำ...</textarea></div>
+    <div class="fg"><label class="fl" data-i18n="mp_ui_0263">คำอธิบายร้านค้า</label><textarea class="fi" rows="3" id="shop-desc-inp" placeholder="ร้านขายสินค้าเทคโนโลยีชั้นนำ..." data-i18n-placeholder="mp_ui_0371"></textarea></div>
     <div class="fg"><label class="fl" data-i18n="mp_ui_0122">โลโก้ร้านค้า</label>
       <div class="uarea" onclick="document.getElementById('shop-logo-input').click()">
         <input type="file" id="shop-logo-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImgFiles(this.files,'shop-logo-preview',1)">
@@ -4067,11 +4071,11 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       <input class="fi" id="addr-line2" autocomplete="address-line2" maxlength="200" placeholder="ห้อง ชั้น อาคาร (ถ้ามี)" data-i18n-placeholder="mp_ui_0351">
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="fg"><label class="fl" id="addr-lbl-subdistrict" for="addr-subdistrict">แขวง/ตำบล</label><input class="fi" id="addr-subdistrict" autocomplete="address-level3" maxlength="100" placeholder="แขวง/ตำบล"></div>
-      <div class="fg"><label class="fl" id="addr-lbl-district" for="addr-district">เขต/อำเภอ</label><input class="fi" id="addr-district" autocomplete="address-level2" maxlength="100" placeholder="เขต/อำเภอ"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-subdistrict" for="addr-subdistrict" data-i18n="mp_ui_0281">แขวง/ตำบล</label><input class="fi" id="addr-subdistrict" data-i18n-placeholder="mp_ui_0281" autocomplete="address-level3" maxlength="100" placeholder="แขวง/ตำบล"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-district" for="addr-district" data-i18n="mp_ui_0282">เขต/อำเภอ</label><input class="fi" id="addr-district" data-i18n-placeholder="mp_ui_0282" autocomplete="address-level2" maxlength="100" placeholder="เขต/อำเภอ"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="fg"><label class="fl" id="addr-lbl-province" for="addr-province">จังหวัด</label><input class="fi" id="addr-province" autocomplete="address-level1" maxlength="100" placeholder="จังหวัด"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-province" for="addr-province" data-i18n="mp_ui_0284">จังหวัด</label><input class="fi" id="addr-province" data-i18n-placeholder="mp_ui_0284" autocomplete="address-level1" maxlength="100" placeholder="จังหวัด"></div>
       <div class="fg"><label class="fl" id="addr-lbl-postal" for="addr-postal" data-i18n="mp_ui_0285">รหัสไปรษณีย์</label><input class="fi" id="addr-postal" autocomplete="postal-code" inputmode="numeric" placeholder="10xxx" maxlength="5"></div>
     </div>
     <div class="fg">
@@ -4178,7 +4182,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
       </div>
     </div>
     <div class="clbl mt2" id="swd-bal-disp" style="font-size:12px;color:var(--t2);">Seller Wallet: — USDT</div>
-    <div class="alrt alrt-w tsm mt2" id="swd-min-note">⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ 10 USDT</div>
+    <div class="alrt alrt-w tsm mt2" id="swd-min-note" data-i18n="mp_ui_0370">⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ 10 USDT</div>
     <button class="btn btn-gold w100 mt4" onclick="doSellerWithdraw()" data-i18n="mp_ui_0305">💸 ยืนยันการถอน</button>
   </div>
 </div>
@@ -5326,6 +5330,30 @@ const TCC_I18N = {
   'tx_ff':["Funding Free รอบที่ {n} — {o}","Funding Free round {n} — {o}","Funding Free đợt {n} — {o}","Funding Free ជុំទី {n} — {o}","Funding Free အကြိမ် {n} — {o}","Funding Free ຮອບທີ {n} — {o}","Funding Free pusingan {n} — {o}","Funding Free putaran {n} — {o}","Funding Free 第 {n} 期 — {o}"],
   'tx_ffn':["Funding Free รอบ {n} order={o}","Funding Free round {n} order={o}","Funding Free đợt {n} order={o}","Funding Free ជុំ {n} order={o}","Funding Free အကြိမ် {n} order={o}","Funding Free ຮອບ {n} order={o}","Funding Free pusingan {n} order={o}","Funding Free putaran {n} order={o}","Funding Free 第 {n} 期 order={o}"],
   'tx_sale':["รับเงินจากออเดอร์ order={o}","Received from order order={o}","Nhận tiền từ đơn hàng order={o}","ទទួលប្រាក់ពីការបញ្ជាទិញ order={o}","အော်ဒါမှ ငွေလက်ခံရရှိ order={o}","ຮັບເງິນຈາກອໍເດີ order={o}","Terima bayaran daripada pesanan order={o}","Terima dana dari pesanan order={o}","订单收款 order={o}"],
+  'mp_ui_0358':["🌏 ประเทศร้านค้า *", "🌏 Shop country *", "🌏 Quốc gia cửa hàng *", "🌏 ប្រទេសហាង *", "🌏 ဆိုင်တည်ရှိရာနိုင်ငံ *", "🌏 ປະເທດຮ້ານຄ້າ *", "🌏 Negara kedai *", "🌏 Negara toko *", "🌏 店铺所在国家 *"],
+  'mp_ui_0359':["1 ร้านต่อ 1 ประเทศ — ขายและจัดส่งในประเทศนี้ และเปลี่ยนภายหลังไม่ได้", "1 shop per country — sell and ship within this country; cannot be changed later", "1 cửa hàng cho 1 quốc gia — bán và giao hàng trong quốc gia này và không thể thay đổi sau này", "១ ហាងសម្រាប់ ១ ប្រទេស — លក់ និងដឹកជញ្ជូនក្នុងប្រទេសនេះ ហើយមិនអាចប្តូរបានក្រោយមក", "တစ်နိုင်ငံလျှင် ဆိုင်တစ်ဆိုင် — ဤနိုင်ငံအတွင်း ရောင်းချပြီး ပို့ဆောင်မည်၊ နောက်ပိုင်း ပြောင်း၍မရပါ", "1 ຮ້ານຕໍ່ 1 ປະເທດ — ຂາຍ ແລະ ຈັດສົ່ງໃນປະເທດນີ້ ແລະ ປ່ຽນພາຍຫຼັງບໍ່ໄດ້", "1 kedai bagi 1 negara — jual dan hantar dalam negara ini, dan tidak boleh ditukar kemudian", "1 toko per 1 negara — menjual dan mengirim di negara ini, dan tidak dapat diubah kemudian", "每个国家限开 1 家店铺 — 仅在该国销售和发货，设置后不可更改"],
+  'mp_ui_0360':["🌏 ประเทศตลาด", "🌏 Market country", "🌏 Quốc gia thị trường", "🌏 ប្រទេសទីផ្សារ", "🌏 ဈေးကွက်နိုင်ငံ", "🌏 ປະເທດຕະຫຼາດ", "🌏 Negara pasaran", "🌏 Negara pasar", "🌏 市场国家"],
+  'mp_ui_0361':["ล็อกตามประเทศร้านของคุณ — ผู้ซื้อในประเทศนี้เท่านั้นที่เห็นสินค้า", "Locked to your shop country — only buyers in this country can see the product", "Cố định theo quốc gia cửa hàng của bạn — chỉ người mua ở quốc gia này mới thấy sản phẩm", "ចាក់សោតាមប្រទេសហាងរបស់អ្នក — មានតែអ្នកទិញក្នុងប្រទេសនេះប៉ុណ្ណោះដែលឃើញទំនិញ", "သင့်ဆိုင်၏နိုင်ငံအတိုင်း သတ်မှတ်ထားသည် — ဤနိုင်ငံရှိ ဝယ်သူများသာ ကုန်ပစ္စည်းကို မြင်ရမည်", "ລັອກຕາມປະເທດຮ້ານຂອງທ່ານ — ສະເພາະຜູ້ຊື້ໃນປະເທດນີ້ເທົ່ານັ້ນທີ່ເຫັນສິນຄ້າ", "Dikunci mengikut negara kedai anda — hanya pembeli di negara ini boleh melihat produk", "Dikunci sesuai negara toko Anda — hanya pembeli di negara ini yang dapat melihat produk", "已锁定为您店铺所在国家 — 仅该国买家可见商品"],
+  'mp_ui_0362':["🚚 ขนส่งที่ร้านรองรับ", "🚚 Carriers your shop supports", "🚚 Đơn vị vận chuyển cửa hàng hỗ trợ", "🚚 ក្រុមហ៊ុនដឹកជញ្ជូនដែលហាងគាំទ្រ", "🚚 ဆိုင်မှ ပံ့ပိုးသော ပို့ဆောင်ရေးကုမ္ပဏီများ", "🚚 ຂົນສົ່ງທີ່ຮ້ານຮອງຮັບ", "🚚 Penghantar yang disokong kedai", "🚚 Kurir yang didukung toko", "🚚 店铺支持的物流"],
+  'mp_ui_0363':["ไม่เลือกเลย = รองรับทุกขนส่งของประเทศ", "Select none = all carriers in the country are supported", "Không chọn gì = hỗ trợ tất cả đơn vị vận chuyển của quốc gia", "មិនជ្រើសរើសសោះ = គាំទ្រក្រុមហ៊ុនដឹកជញ្ជូនទាំងអស់របស់ប្រទេស", "မရွေးပါက = နိုင်ငံ၏ ပို့ဆောင်ရေးကုမ္ပဏီအားလုံးကို ပံ့ပိုးမည်", "ບໍ່ເລືອກເລີຍ = ຮອງຮັບທຸກຂົນສົ່ງຂອງປະເທດ", "Tidak pilih langsung = semua penghantar negara disokong", "Tidak memilih apa pun = semua kurir di negara ini didukung", "不选择 = 支持该国所有物流"],
+  'mp_ui_0364':["รับ 70% · ตัด 30% Marketing Fee", "Receive 70% · 30% Marketing Fee deducted", "Nhận 70% · khấu trừ 30% Marketing Fee", "ទទួលបាន 70% · កាត់ 30% Marketing Fee", "70% ရရှိ · Marketing Fee 30% နုတ်ယူ", "ຮັບ 70% · ຫັກ 30% Marketing Fee", "Terima 70% · tolak 30% Marketing Fee", "Terima 70% · potong 30% Marketing Fee", "实收 70% · 扣除 30% 营销费"],
+  'mp_ui_0365':["รับ 80% · ตัด 20% Marketing Fee", "Receive 80% · 20% Marketing Fee deducted", "Nhận 80% · khấu trừ 20% Marketing Fee", "ទទួលបាន 80% · កាត់ 20% Marketing Fee", "80% ရရှိ · Marketing Fee 20% နုတ်ယူ", "ຮັບ 80% · ຫັກ 20% Marketing Fee", "Terima 80% · tolak 20% Marketing Fee", "Terima 80% · potong 20% Marketing Fee", "实收 80% · 扣除 20% 营销费"],
+  'mp_ui_0366':["รับ 85% · ตัด 15% Marketing Fee", "Receive 85% · 15% Marketing Fee deducted", "Nhận 85% · khấu trừ 15% Marketing Fee", "ទទួលបាន 85% · កាត់ 15% Marketing Fee", "85% ရရှိ · Marketing Fee 15% နုတ်ယူ", "ຮັບ 85% · ຫັກ 15% Marketing Fee", "Terima 85% · tolak 15% Marketing Fee", "Terima 85% · potong 15% Marketing Fee", "实收 85% · 扣除 15% 营销费"],
+  'mp_ui_0367':["รับ 90% · ตัด 10% Marketing Fee", "Receive 90% · 10% Marketing Fee deducted", "Nhận 90% · khấu trừ 10% Marketing Fee", "ទទួលបាន 90% · កាត់ 10% Marketing Fee", "90% ရရှိ · Marketing Fee 10% နုတ်ယူ", "ຮັບ 90% · ຫັກ 10% Marketing Fee", "Terima 90% · tolak 10% Marketing Fee", "Terima 90% · potong 10% Marketing Fee", "实收 90% · 扣除 10% 营销费"],
+  'mp_ui_0368':["รับ 100% · ไม่มีค่าธรรมเนียม", "Receive 100% · no fees", "Nhận 100% · không phí", "ទទួលបាន 100% · គ្មានថ្លៃសេវា", "100% ရရှိ · ကြေးမရှိ", "ຮັບ 100% · ບໍ່ມີຄ່າທຳນຽມ", "Terima 100% · tiada yuran", "Terima 100% · tanpa biaya", "实收 100% · 无手续费"],
+  'mp_ui_0369':["ℹ️ ยืนยัน 12 confirmations · ขั้นต่ำ <strong>10 USDT</strong> · หลังโอนแล้วกรอก TX Hash ด้านล่าง", "ℹ️ Confirm 12 confirmations · minimum <strong>10 USDT</strong> · after transferring, enter the TX Hash below", "ℹ️ Xác nhận 12 confirmations · tối thiểu <strong>10 USDT</strong> · sau khi chuyển, nhập TX Hash bên dưới", "ℹ️ ផ្ទៀងផ្ទាត់ 12 confirmations · អប្បបរមា <strong>10 USDT</strong> · បន្ទាប់ពីផ្ទេរ សូមបញ្ចូល TX Hash ខាងក្រោម", "ℹ️ 12 confirmations အတည်ပြု · အနည်းဆုံး <strong>10 USDT</strong> · လွှဲပြီးပါက အောက်တွင် TX Hash ထည့်ပါ", "ℹ️ ຢືນຢັນ 12 confirmations · ຂັ້ນຕ່ຳ <strong>10 USDT</strong> · ຫຼັງໂອນແລ້ວ ກອກ TX Hash ດ້ານລຸ່ມ", "ℹ️ Pengesahan 12 confirmations · minimum <strong>10 USDT</strong> · selepas pindahan, masukkan TX Hash di bawah", "ℹ️ Konfirmasi 12 confirmations · minimum <strong>10 USDT</strong> · setelah transfer, isi TX Hash di bawah", "ℹ️ 需 12 个确认 · 最低 <strong>10 USDT</strong> · 转账后请在下方填写 TX Hash"],
+  'mp_ui_0370':["⚠️ External withdraw รอ Admin อนุมัติก่อนโอนจริง — ขั้นต่ำ 10 USDT", "⚠️ External withdraw awaits Admin approval before the actual transfer — minimum 10 USDT", "⚠️ External withdraw chờ Admin duyệt trước khi chuyển thực tế — tối thiểu 10 USDT", "⚠️ External withdraw រង់ចាំ Admin អនុម័តមុនផ្ទេរជាក់ស្តែង — អប្បបរមា 10 USDT", "⚠️ External withdraw ကို တကယ်မလွှဲမီ Admin အတည်ပြုရန်စောင့်ရမည် — အနည်းဆုံး 10 USDT", "⚠️ External withdraw ລໍ Admin ອະນຸມັດກ່ອນໂອນຈິງ — ຂັ້ນຕ່ຳ 10 USDT", "⚠️ External withdraw menunggu kelulusan Admin sebelum pindahan sebenar — minimum 10 USDT", "⚠️ External withdraw menunggu persetujuan Admin sebelum transfer sebenarnya — minimum 10 USDT", "⚠️ External withdraw 需等待管理员批准后才会实际转出——最低 10 USDT"],
+  'mp_ui_0371':["ร้านขายสินค้าเทคโนโลยีชั้นนำ...", "Leading technology products store...", "Cửa hàng sản phẩm công nghệ hàng đầu...", "ហាងលក់ផលិតផលបច្ចេកវិទ្យាឈានមុខ...", "ထိပ်တန်း နည်းပညာကုန်ပစ္စည်း ဆိုင်...", "ຮ້ານຂາຍຜະລິດຕະພັນເທັກໂນໂລຊີຊັ້ນນຳ...", "Kedai produk teknologi terkemuka...", "Toko produk teknologi terkemuka...", "领先的科技产品店铺..."],
+  'mp_ui_0372':["➕ สร้างเลขกระเป๋า","➕ Create wallet address","➕ Tạo địa chỉ ví","➕ បង្កើតអាសយដ្ឋានកាបូប","➕ ပိုက်ဆံအိတ်လိပ်စာ ဖန်တီးမည်","➕ ສ້າງທີ່ຢູ່ກະເປົາ","➕ Cipta alamat dompet","➕ Buat alamat dompet","➕ 生成钱包地址"],
+  'mp_ui_0373':["โอนเฉพาะ USDT ผ่านเครือข่ายที่ระบุเท่านั้น · เงินจะเข้า TCC Platform ก่อน แล้วกด “โอนเข้า MP” เพื่อใช้ใน Marketplace","Send USDT only, on the network shown · Funds arrive in TCC Platform first, then tap “Transfer to MP” to use them in the Marketplace","Chỉ gửi USDT qua đúng mạng được hiển thị · Tiền vào TCC Platform trước, sau đó nhấn “Chuyển vào MP” để dùng trên Marketplace","ផ្ញើតែ USDT តាមបណ្តាញដែលបានបង្ហាញប៉ុណ្ណោះ · ប្រាក់នឹងចូល TCC Platform មុន បន្ទាប់មកចុច “ផ្ទេរចូល MP” ដើម្បីប្រើនៅ Marketplace","ပြထားသော ကွန်ရက်ဖြင့် USDT သာ ပို့ပါ · ငွေသည် TCC Platform သို့ အရင်ဝင်ပြီး Marketplace တွင်သုံးရန် “MP သို့ လွှဲရန်” ကို နှိပ်ပါ","ໂອນສະເພາະ USDT ຜ່ານເຄືອຂ່າຍທີ່ລະບຸເທົ່ານັ້ນ · ເງິນເຂົ້າ TCC Platform ກ່ອນ ແລ້ວກົດ “ໂອນເຂົ້າ MP” ເພື່ອໃຊ້ໃນ Marketplace","Hantar USDT sahaja melalui rangkaian yang dipaparkan · Dana masuk ke TCC Platform dahulu, kemudian tekan “Pindah ke MP” untuk guna di Marketplace","Kirim USDT saja melalui jaringan yang ditampilkan · Dana masuk ke TCC Platform dahulu, lalu tekan “Transfer ke MP” untuk dipakai di Marketplace","仅限通过所示网络转入 USDT · 资金先进入 TCC Platform，再点击“转入 MP”即可在市场使用"],
+  'mp_js_0631':["กรุณาเลือกประเทศร้านค้า", "Please select the shop country", "Vui lòng chọn quốc gia cửa hàng", "សូមជ្រើសរើសប្រទេសហាង", "ကျေးဇူးပြု၍ ဆိုင်တည်ရှိရာနိုင်ငံကို ရွေးပါ", "ກະລຸນາເລືອກປະເທດຮ້ານຄ້າ", "Sila pilih negara kedai", "Silakan pilih negara toko", "请选择店铺所在国家"],
+  'mp_js_0632':["ยังไม่มีเลขกระเป๋า","No address yet","Chưa có địa chỉ","មិនទាន់មានអាសយដ្ឋាន","လိပ်စာ မရှိသေးပါ","ຍັງບໍ່ມີທີ່ຢູ່","Belum ada alamat","Belum ada alamat","暂无地址"],
+  'mp_js_0633':["กำลังสร้าง...","Creating...","Đang tạo...","កំពុងបង្កើត...","ဖန်တီးနေသည်...","ກຳລັງສ້າງ...","Mencipta...","Membuat...","生成中..."],
+  'mp_js_0634':["สร้างเลขกระเป๋าสำเร็จ","Wallet address created","Đã tạo địa chỉ ví","បានបង្កើតអាសយដ្ឋានកាបូបរួចរាល់","ပိုက်ဆံအိတ်လိပ်စာ ဖန်တီးပြီးပါပြီ","ສ້າງທີ່ຢູ່ກະເປົາສຳເລັດ","Alamat dompet berjaya dicipta","Alamat dompet berhasil dibuat","钱包地址已生成"],
+  'mp_js_0635':["สร้างเลขกระเป๋าไม่สำเร็จ กรุณาลองใหม่หรือติดต่อ Admin","Could not create the address — please retry or contact Admin","Không thể tạo địa chỉ — vui lòng thử lại hoặc liên hệ Admin","មិនអាចបង្កើតអាសយដ្ឋានបាន សូមព្យាយាមម្តងទៀត ឬទាក់ទង Admin","လိပ်စာ ဖန်တီး၍မရပါ — ထပ်ကြိုးစားပါ သို့မဟုတ် Admin ကိုဆက်သွယ်ပါ","ບໍ່ສາມາດສ້າງທີ່ຢູ່ໄດ້ ກະລຸນາລອງໃໝ່ ຫຼື ຕິດຕໍ່ Admin","Tidak dapat mencipta alamat — sila cuba lagi atau hubungi Admin","Tidak dapat membuat alamat — silakan coba lagi atau hubungi Admin","无法生成地址，请重试或联系管理员"],
+  'mp_js_0636':["ขณะนี้ไม่มีเลขกระเป๋าว่าง กรุณาติดต่อ Admin","No wallet addresses are available right now — please contact Admin","Hiện không còn địa chỉ ví trống — vui lòng liên hệ Admin","បច្ចុប្បន្នគ្មានអាសយដ្ឋានកាបូបទំនេរទេ សូមទាក់ទង Admin","လောလောဆယ် အားနေသော လိပ်စာ မရှိပါ — Admin ကိုဆက်သွယ်ပါ","ຕອນນີ້ບໍ່ມີທີ່ຢູ່ກະເປົາວ່າງ ກະລຸນາຕິດຕໍ່ Admin","Tiada alamat dompet kosong buat masa ini — sila hubungi Admin","Saat ini tidak ada alamat dompet kosong — silakan hubungi Admin","目前没有可用的钱包地址，请联系管理员"],
+  'gerr_e_pending':["รายการนี้กำลังดำเนินการอยู่ — กรุณารอสักครู่แล้วตรวจสอบประวัติก่อนทำซ้ำ", "This request is already being processed — please wait a moment and check your history before trying again", "Yêu cầu này đang được xử lý — vui lòng đợi giây lát và kiểm tra lịch sử trước khi thực hiện lại", "សំណើនេះកំពុងដំណើរការ — សូមរង់ចាំបន្តិច ហើយពិនិត្យប្រវត្តិមុនពេលធ្វើម្តងទៀត", "ဤလုပ်ဆောင်ချက်ကို လုပ်ဆောင်နေဆဲဖြစ်သည် — ခဏစောင့်ပြီး ထပ်မလုပ်မီ မှတ်တမ်းကို စစ်ဆေးပါ", "ລາຍການນີ້ກຳລັງດຳເນີນການຢູ່ — ກະລຸນາລໍຖ້າຈັກໜ້ອຍ ແລ້ວກວດສອບປະຫວັດກ່ອນເຮັດຊ້ຳ", "Permintaan ini sedang diproses — sila tunggu sebentar dan semak sejarah sebelum cuba lagi", "Permintaan ini sedang diproses — mohon tunggu sebentar dan periksa riwayat sebelum mengulang", "该请求正在处理中——请稍候，并在重试前先查看历史记录"],
+  'gerr_e124':["ปิดไม่ได้: ต้องมีประเทศที่เปิดให้บริการอย่างน้อย 1 ประเทศ (ประเทศนี้เป็นประเทศสุดท้ายที่เปิดอยู่)", "Cannot close: at least 1 country must stay open (this is the last open country)", "Không thể đóng: phải có ít nhất 1 quốc gia đang mở (đây là quốc gia cuối cùng còn mở)", "មិនអាចបិទបាន៖ ត្រូវមានប្រទេសយ៉ាងតិច ១ បើកសេវា (នេះជាប្រទេសចុងក្រោយដែលនៅបើក)", "ပိတ်၍မရပါ- ဝန်ဆောင်မှုဖွင့်ထားသော နိုင်ငံ အနည်းဆုံး ၁ နိုင်ငံ ရှိရမည် (ဤနိုင်ငံသည် နောက်ဆုံးဖွင့်ထားသောနိုင်ငံဖြစ်သည်)", "ປິດບໍ່ໄດ້: ຕ້ອງມີປະເທດທີ່ເປີດໃຫ້ບໍລິການຢ່າງໜ້ອຍ 1 ປະເທດ (ປະເທດນີ້ເປັນປະເທດສຸດທ້າຍທີ່ເປີດຢູ່)", "Tidak boleh ditutup: sekurang-kurangnya 1 negara mesti kekal dibuka (ini negara terakhir yang dibuka)", "Tidak dapat ditutup: minimal 1 negara harus tetap dibuka (ini negara terakhir yang dibuka)", "无法关闭：至少需保留 1 个开放的国家（这是最后一个开放的国家）"],
   'nat_th':["ไทย","Thai","Thái Lan","ថៃ","ထိုင်း","ໄທ","Thai","Thailand","泰国"]
 };
 const LANG_IDX={th:0,en:1,vi:2,kh:3,mm:4,la:5,ms:6,id:7,zh:8};
@@ -5642,7 +5670,13 @@ window.tccMpRerender=function(){
   try{ if(typeof renderNav==='function') renderNav(); }catch(e){ console.warn('i18n renderNav',e); }
   try{ if(typeof renderBell==='function') renderBell(); }catch(e){ console.warn('i18n renderBell',e); }
   try{ if(typeof tccRefreshProfileI18n==='function') tccRefreshProfileI18n(); }catch(e){}
+  try{ if(typeof renderDepWallets==='function') renderDepWallets(); }catch(e){}   // [DEP-WALLET v1] ข้อความสถานะเลขกระเป๋าตามภาษา
   try{ if(typeof mpcRenderSelect==='function') mpcRenderSelect(); }catch(e){}   // [P4] ชื่อประเทศตามภาษา
+  // [i18n-FIX] ส่วนที่ JS เขียนทับ (guard _mpSet จะไม่รีเซ็ต) → วาดซ้ำตามภาษาปัจจุบัน
+  try{ if(typeof window.mmnSync==='function') window.mmnSync(); }catch(e){}
+  try{ if(typeof applyLimitTexts==='function') applyLimitTexts(); }catch(e){}
+  try{ if(typeof applyPayoutFees==='function') applyPayoutFees(); }catch(e){}
+  try{ if(typeof mpcAddrApplySchema==='function') mpcAddrApplySchema(); }catch(e){}
       try{ if(typeof mpcfgFillSACountry==='function' && document.getElementById('sa-country-inp') && document.getElementById('sa-country-inp').options.length>1) mpcfgFillSACountry(); }catch(e){}   // [P5]
   const pg=(typeof curPage!=='undefined')?curPage:'';
   if(!pg||pg==='shop-chat'||pg==='kyc-wizard') return;
@@ -8505,6 +8539,11 @@ async function filterSOrd(st, btn) {
 // ═══════════════════════════════════════════════════════════════════════
 // [P3 Multi-Country] Seller: config ประเทศ/ขนส่ง, สมัครร้าน, ติ๊กขนส่งสินค้า, ส่งของตามประเทศ
 // ═══════════════════════════════════════════════════════════════════════
+function _mpcCarrierName(code, raw) {
+  raw = String(raw == null ? '' : raw);
+  if (String(code).toUpperCase() === 'OTHER' || /อื่นๆ\s*\(ระบุเอง\)/.test(raw)) return tccT('mp_ui_0293');
+  return (typeof tccPickI18n === 'function') ? tccPickI18n(raw) : raw;
+}
 var MPCFG = { countries: [], carriers: [], loaded: false, _p: null, allClosed: false, at: 0 };   // [P7] allClosed = มีประเทศในชีตแต่ปิดหมด · at = เวลาที่โหลด config ล่าสุด
 function mpcfgLoad() {
   if (MPCFG._p) return MPCFG._p;
@@ -8513,7 +8552,12 @@ function mpcfgLoad() {
       MPCFG.countries = r.countries || []; MPCFG.carriers = r.carriers || []; MPCFG.loaded = true;
       MPCFG.allClosed = !!r.all_closed; MPCFG.at = Date.now();   // [P7]
       // เติมขนส่งต่างประเทศเข้า CARRIER_CONFIG (ถ้ายังไม่มี) ให้ป้ายชื่อ/ลิงก์ติดตามเดิมใช้ได้ทุกจุด
-      MPCFG.carriers.forEach(k => { if (!CARRIER_CONFIG[k.carrier_code]) CARRIER_CONFIG[k.carrier_code] = { label: k.label, url: k.tracking_url_tpl || null }; });
+      // [i18n-FIX] ป้ายขนส่งจากชีต (อาจเป็นไทย เช่น '📦 อื่นๆ (ระบุเอง)') → แปลตามภาษา / รองรับ JSON _i18n ที่แอดมินแปลไว้
+      MPCFG.carriers.forEach(k => {
+        const raw = k.label;
+        try { Object.defineProperty(k, 'label', { configurable: true, enumerable: true, get() { return _mpcCarrierName(k.carrier_code, raw); } }); } catch (e) {}
+      });
+      MPCFG.carriers.forEach(k => { if (!CARRIER_CONFIG[k.carrier_code]) CARRIER_CONFIG[k.carrier_code] = { get label() { return k.label; }, url: k.tracking_url_tpl || null }; });
     } else MPCFG._p = null;
     return MPCFG;
   }).catch(() => { MPCFG._p = null; return MPCFG; });
@@ -9336,7 +9380,7 @@ async function submitSA() {
   const desc     = document.querySelector('#p-seller-apply textarea.fi')?.value.trim();
   const countryCode = document.getElementById('sa-country-inp')?.value || '';   // [P3]
   if (!shopName) { showToast(tccT('mp_js_0243'), 'warn'); return; }
-  if (!countryCode) { showToast('กรุณาเลือกประเทศร้านค้า', 'warn'); return; }
+  if (!countryCode) { showToast(tccT('mp_js_0631'), 'warn'); return; }
   const pending = (_imgStore['sa-logo-preview']||[]).filter(i=>i.uploading);
   if (pending.length) { showToast(tccT('mp_js_0244'), 'warn'); return; }
   const logoUrl = getImgUrls('sa-logo-preview')[0] || '';
@@ -9831,6 +9875,7 @@ async function loadSession(){
     console.log('[loadSession v40] cache hit — skip GAS call, synced', Math.round((Date.now()-_lastSync)/1000), 's ago');
     // [v47 FIX 1] cache hit ยังต้องโหลด TCC Main Balance เสมอ
     if(typeof loadMainBalance==='function') loadMainBalance();
+    if(typeof loadDepositWallets==='function') loadDepositWallets();   // [DEP-WALLET v1]
     return;
   }
 
@@ -9988,11 +10033,8 @@ function updateAuthUI(){
     const waddrMember = document.getElementById('waddr-member');
     if(waddrGuest)  waddrGuest.style.display  = 'none';
     if(waddrMember) waddrMember.style.display = '';
-    // populate address จาก DEP_ADDR (platform deposit address)
-    const trc20El = document.getElementById('waddr-trc20');
-    const bep20El = document.getElementById('waddr-bep20');
-    if(trc20El) trc20El.textContent = DEP_ADDR.TRC20 || tccT('mp_js_0256');
-    if(bep20El) bep20El.textContent = DEP_ADDR.BEP20 || tccT('mp_js_0256');
+    // [DEP-WALLET v1] วาดเลขกระเป๋าฝากรายสมาชิก (BSC/SOL) จาก DEP_ADDR — ตัวโหลดจริง = loadDepositWallets() (GAS EasyTrade)
+    renderDepWallets();
     // [FIX v5] profile info — อัปเดตจาก SESSION
     const profEmailEl  = document.getElementById('prof-email');
     const profRoleEl   = document.getElementById('prof-role');
@@ -10044,6 +10086,7 @@ function updateAuthUI(){
     toggleHomeSections();
     // ── Bridge: โหลด TCC Main Balance หลัง login ──
     if(typeof loadMainBalance==='function') loadMainBalance();
+    if(typeof loadDepositWallets==='function') loadDepositWallets();   // [DEP-WALLET v1] เลขกระเป๋าฝาก (BSC/SOL) จาก EasyTrade
     if(typeof schRefresh==='function') schRefresh();   // [SCH v1] เปลี่ยน/ล็อกอินบัญชี → เตรียม token แชทใหม่
     // ── [v21 FIX A] โหลด MP Wallet Balance หลัง login ──────────────────
     // [v21 FIX A] เดิมเช็ค getElementById('p-wallet') ซึ่งไม่มีอยู่จริง (element คือ p-dashboard)
@@ -10118,6 +10161,7 @@ function updateAuthUI(){
     if(kycNameElG) kycNameElG.textContent = '—';
     if(kycDocElG)  kycDocElG.textContent  = '—';
     if(kycNatElG)  kycNatElG.textContent  = '—';
+    resetDepWallets();   // [DEP-WALLET v1] logout → ล้างเลขกระเป๋าของบัญชีเดิม ไม่ให้บัญชีถัดไปเห็น
     if(typeof bnUpdateRole==='function') bnUpdateRole();
     // ── toggle home sections ──
     toggleHomeSections();
@@ -11088,7 +11132,7 @@ async function doDeposit(){
   if(!SESSION){showToast(tccT('mp_js_0076'),'warn');return;}
   const amount  = parseFloat(document.getElementById('dep-amount')?.value||0);
   const txHash  = (document.getElementById('dep-txhash')?.value||'').trim();
-  const network = document.getElementById('dep-network')?.value||'TRC20';
+  const network = document.getElementById('dep-network')?.value||'BSC';
 
   // Validation
   await mpLoadSettings(true);   // [v60] ขั้นต่ำฝากจาก Config
@@ -11128,44 +11172,45 @@ async function doDeposit(){
   }catch(e){hideLoad();showToast(tccTF('mp_js_0404',{p1:e.message}),'err');}
 }
 
-// ─── DEPOSIT ADDRESS SWITCHER ───
-// ✅ [FIXED] DEP_ADDR — โหลดจาก Config sheet (ไม่มี fallback hardcode)
-let DEP_ADDR={
-  TRC20:'',
-  BEP20:''
-};
-function updDepAddr(){
-  const net=document.getElementById('dep-network')?.value||'TRC20';
-  const addrEl=document.getElementById('dep-addr-disp');
-  const addr = DEP_ADDR[net] || DEP_ADDR.TRC20;
-  if(addrEl) addrEl.textContent = addr || tccT('mp_js_0337');
+// ─── DEPOSIT ADDRESS (รายสมาชิก) ───
+// [DEP-WALLET v1] เลขกระเป๋าฝากดึงจาก GAS EasyTrade (ชีต DepositWallets) ผ่าน apiPostMain — ชุดเดียวกับยอด TCC Main
+//   • เปิดเฉพาะ BSC (BEP20) และ SOL ให้ตรง DEPOSIT_ENABLED ฝั่ง EasyTrade (TRC20 ปิด)
+//   • เงินฝากเข้า TCC Platform ก่อน แล้วสมาชิกกด "โอนเข้า MP" → ห้ามใช้ address กลางร่วมกัน (1 address = 1 uid)
+//   • อ่าน: getDepositWallet (ไม่ assign) · สร้าง: assignDepositWallet (กดเองเท่านั้น, เรียกซ้ำได้ address เดิม)
+//   • ตัวโหลด loadDepositWallets / createDepWallet อยู่ท้ายบล็อก loadMainBalance (ต้องอยู่ถัดจาก GAS_MAIN_URL / apiPostMain)
+const DEP_NETS=['BSC','SOL'];
+let DEP_ADDR={ BSC:'', SOL:'' };
+let _depW={ uid:'', busy:false, p:null, retry:0, creating:{}, st:{} };   // st[net] = 'ok' | 'error' (ไม่มี = กำลังโหลด)
+function _depView(net){
+  const addr=DEP_ADDR[net]||'';
+  if(!SESSION) return { txt:'—', copy:false, create:false, busy:false };
+  if(addr) return { txt:addr, copy:true, create:false, busy:false };
+  if(_depW.creating[net]) return { txt:tccT('mp_js_0633'), copy:false, create:true, busy:true };
+  const st=_depW.st[net];
+  if(st==='error') return { txt:tccT('mp_js_0338'), copy:false, create:false, busy:false };
+  if(st==='ok')    return { txt:tccT('mp_js_0632'), copy:false, create:true,  busy:false };
+  return { txt:tccT('mp_js_0256'), copy:false, create:false, busy:false };
 }
-async function loadDepositAddresses(){
-  try{
-    const cfg=await apiCached('config_pub',{action:'getConfig'},300000);
-    if(cfg&&!cfg.error){
-      if(cfg.deposit_addr_trc20) DEP_ADDR.TRC20=cfg.deposit_addr_trc20;
-      if(cfg.deposit_addr_bep20) DEP_ADDR.BEP20=cfg.deposit_addr_bep20;
-      updDepAddr();
-      // [FIX v5] อัปเดต Wallet Address card ถ้า member login อยู่
-      if(SESSION){
-        const trc20El = document.getElementById('waddr-trc20');
-        const bep20El = document.getElementById('waddr-bep20');
-        if(trc20El) trc20El.textContent = DEP_ADDR.TRC20 || '—';
-        if(bep20El) bep20El.textContent = DEP_ADDR.BEP20 || '—';
-      }
-    }
-  }catch(e){
-    // GAS ไม่พร้อม — แสดง error ใน wallet address card
-    if(SESSION){
-      const trc20El = document.getElementById('waddr-trc20');
-      const bep20El = document.getElementById('waddr-bep20');
-      if(trc20El) trc20El.textContent = tccT('mp_js_0338');
-      if(bep20El) bep20El.textContent = tccT('mp_js_0338');
-    }
-    const addrEl = document.getElementById('dep-addr-disp');
-    if(addrEl) addrEl.textContent = tccT('mp_js_0339');
-  }
+function _depPaint(txtEl, copyEl, createEl, v){
+  if(txtEl)    txtEl.textContent=v.txt;
+  if(copyEl)   copyEl.style.display=v.copy?'':'none';
+  if(createEl){ createEl.style.display=v.create?'':'none'; createEl.disabled=!!v.busy; createEl.style.opacity=v.busy?'.6':''; }
+}
+function renderDepWallets(){
+  DEP_NETS.forEach(net=>{
+    const k=net.toLowerCase();
+    _depPaint(document.getElementById('waddr-'+k), document.getElementById('waddr-copy-'+k), document.getElementById('waddr-create-'+k), _depView(net));
+  });
+  const sel=document.getElementById('dep-network');
+  const net=DEP_NETS.includes(sel?.value)?sel.value:'BSC';
+  _depPaint(document.getElementById('dep-addr-disp'), document.getElementById('dep-addr-copy'), document.getElementById('dep-addr-create'), _depView(net));
+}
+function updDepAddr(){ renderDepWallets(); }   // เรียกจาก onchange ของ dep-network
+function depCopy(net){ const a=DEP_ADDR[net]; if(a) cp(a); }
+function resetDepWallets(){
+  DEP_ADDR={ BSC:'', SOL:'' };
+  _depW={ uid:'', busy:false, p:null, retry:0, creating:{}, st:{} };
+  renderDepWallets();
 }
 
 // ─── REAL WITHDRAW ───
@@ -11675,7 +11720,7 @@ async function initHome(){
   const nb = document.getElementById('nb');
   if(nb) nb.textContent = SESSION ? D.balance.toLocaleString() : '—';
   initHomeProducts();            // ไม่ await — ไม่บล็อก deposit address / notifications
-  loadDepositAddresses();
+  if(SESSION) loadDepositWallets();   // [DEP-WALLET v1] ต้องมี session token (EasyTrade) — guest ไม่โหลด
   if(SESSION){
     loadNotifications();
     // [FIX-CHATUNREAD] chatCheckUnread ประกาศอยู่ใน <script> บล็อกหลัง initApp → ถ้ายังไม่พร้อม (session cache hit) ให้รอ load
@@ -11691,7 +11736,6 @@ swrOn(/^products_/, ()=>{
   try{ shopLoaded=false; if(curPage==='shop') initShop(); }catch(e){}
 });
 swrOn(/^notifs_/,   ()=>{ try{ loadNotifications(); }catch(e){} });
-swrOn(/^config_pub$/,()=>{ try{ loadDepositAddresses(); }catch(e){} });
 swrOn(/^cats$/,     ()=>{ try{ loadCategories(); }catch(e){} });
 swrOn(/^orders_/,   ()=>{ try{ if(curPage==='dashboard'&&curDTab==='orders') initOrders(); }catch(e){} });
 swrOn(/^ff_/,       ()=>{ try{ if(curPage==='dashboard'&&curDTab==='funding') initFF(); }catch(e){} });
@@ -12093,6 +12137,70 @@ async function _loadMainBalanceRun(){
     _mainBalRetry = 0;
   }catch(e){ console.warn('[loadMainBalance]', e.message); _mainBalRetryLater(); }
   finally{ _loadMainBusy = false; }
+}
+
+// ── [DEP-WALLET v1] โหลดเลขกระเป๋าฝากของสมาชิก (BSC/SOL) จาก GAS EasyTrade ─────────────
+// ใช้ apiPostMain + token เดียวกับ loadMainBalance · action getDepositWallet = อ่านอย่างเดียว (ไม่กินกระเป๋าจาก pool)
+// คืน {address} ถ้าเคยสร้างแล้ว หรือ null ถ้ายังไม่มี → UI แสดงปุ่ม "สร้างเลขกระเป๋า"
+function loadDepositWallets(force){
+  if(!SESSION?.uid) return Promise.resolve();
+  const uid=String(SESSION.uid);
+  if(_depW.uid!==uid){                      // เปลี่ยนบัญชี → ล้างของเดิมก่อน
+    DEP_ADDR={ BSC:'', SOL:'' };
+    _depW={ uid, busy:false, p:null, retry:0, creating:{}, st:{} };
+  }
+  const W=_depW;
+  if(W.busy) return W.p;                    // กำลังโหลดอยู่ → ใช้ promise เดิม (กันยิงซ้ำ)
+  if(!force && DEP_NETS.every(n=>W.st[n]==='ok')){ renderDepWallets(); return Promise.resolve(); }
+  W.busy=true;
+  renderDepWallets();
+  W.p=(async()=>{
+    try{
+      await Promise.all(DEP_NETS.map(async net=>{
+        try{
+          const res=await apiPostMain({action:'getDepositWallet', data:{ uid, network:net }}, { timeoutMs:20000 });
+          if(!res?.ok) throw new Error(res?.error||'getDepositWallet failed');
+          if(W!==_depW) return;             // สลับบัญชี/logout ระหว่างโหลด → ทิ้งผล
+          const addr=String(res.data?.address||'').trim();
+          if(addr) DEP_ADDR[net]=addr;
+          W.st[net]='ok';
+        }catch(e){
+          console.warn('[loadDepositWallets]', net, e.message);
+          if(W===_depW) W.st[net]='error';
+        }
+      }));
+    } finally { W.busy=false; }
+    if(W===_depW && DEP_NETS.some(n=>W.st[n]==='error') && W.retry<2){   // GAS ช้า/token ยังไม่พร้อม → ลองใหม่ (4 วิ, 8 วิ) เหมือน loadMainBalance
+      W.retry++; setTimeout(()=>loadDepositWallets(true), 4000*W.retry);
+    }
+    renderDepWallets();
+  })();
+  return W.p;
+}
+
+// ── [DEP-WALLET v1] สมาชิกกด "สร้างเลขกระเป๋า" → assignDepositWallet (BSC/SOL เท่านั้น) ─────────────
+// EasyTrade เป็น idempotent: ถ้า uid มี address ใน network นั้นแล้ว จะคืน address เดิม ไม่ assign ซ้ำ
+async function createDepWallet(net){
+  net=DEP_NETS.includes(net)?net:'BSC';
+  if(!SESSION?.uid){ showToast(tccT('mp_js_0076'),'warn'); return; }
+  if(_depW.creating[net] || DEP_ADDR[net]) return;
+  const uid=String(SESSION.uid);
+  const W=_depW;
+  W.creating[net]=true; renderDepWallets();
+  try{
+    const res=await apiPostMain({action:'assignDepositWallet', data:{ uid, network:net }}, { timeoutMs:45000 });
+    if(!res?.ok) throw new Error(res?.error||'assignDepositWallet failed');
+    const addr=String(res.data?.address||'').trim();
+    if(!addr) throw new Error('empty address');
+    if(W===_depW){ DEP_ADDR[net]=addr; W.st[net]='ok'; }
+    showToast(tccT('mp_js_0634'));
+  }catch(e){
+    console.warn('[createDepWallet]', net, e.message);
+    showToast(String(e.message).includes('ไม่มีกระเป๋าว่าง') ? tccT('mp_js_0636') : tccT('mp_js_0635'), 'err');
+  }finally{
+    delete W.creating[net];
+    renderDepWallets();
+  }
 }
 
 // [v14 FIX] loadSession เป็น async — ต้อง await ก่อน initHome()
@@ -13883,12 +13991,21 @@ window.initBtcFund = function(){
 })();
 
 // ── Member Mobile Nav helper ──────────────────────────────────────────
+// [i18n-FIX] ป้ายหัวเมนู = ข้อความของแท็บที่ active ณ ตอนนี้ (ตามภาษาปัจจุบัน) — เดิมรับ label ไทยที่ hardcode ใน onclick
+function mmnLabelFromActive(){
+  const t = document.querySelector('#member-mobile-nav .dash-tab.active');
+  if(!t) return '';
+  const c = t.cloneNode(true);
+  c.querySelectorAll('[id$="-badge"]').forEach(x=>x.remove());
+  return (c.textContent||'').replace(/\s+/g,' ').trim();
+}
 function mmnClose(label){
   const nav = document.getElementById('member-mobile-nav');
   const lbl = document.getElementById('mmn-label');
   if(nav){ nav.classList.remove('open'); }
-  if(lbl && label){ lbl.textContent = label; }
+  if(lbl){ const v = mmnLabelFromActive() || label; if(v) lbl.textContent = v; }
 }
+window.mmnSync = function(){ const lbl=document.getElementById('mmn-label'); const v=mmnLabelFromActive(); if(lbl && v) lbl.textContent=v; };
 
 // ════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════
