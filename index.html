@@ -670,6 +670,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 /* FORM */
 .fg{margin-bottom:1.25rem;}
 .fl{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;display:block;}
+.fl.req::after{content:" *";}   /* [P7] ฟิลด์บังคับตามประเทศ */
 .fi{width:100%;background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:10px 14px;color:var(--t1);font-family:var(--fb);font-size:14px;transition:border-color .15s;}
 .fi:focus{outline:none;border-color:var(--gold);}
 .fi::placeholder{color:var(--t3);}
@@ -4025,32 +4026,28 @@ tr:hover td{background:rgba(243,186,47,0.02);}
     <div class="mtitle" id="edit-addr-title" data-i18n="mp_ui_0266">📍 เพิ่มที่อยู่จัดส่ง</div>
 
     <div class="fg">
-      <label class="fl" data-i18n="mp_ui_0267">ชื่อที่อยู่ (Label)</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
-        <button class="btn btn-ghost btn-sm addr-lbl-btn" onclick="setAddrLabel('🏠 บ้าน',this)" data-i18n="mp_ui_0268">🏠 บ้าน</button>
-        <button class="btn btn-ghost btn-sm addr-lbl-btn" onclick="setAddrLabel('🏢 ที่ทำงาน',this)" data-i18n="mp_ui_0269">🏢 ที่ทำงาน</button>
-        <button class="btn btn-ghost btn-sm addr-lbl-btn" onclick="setAddrLabel('📦 คลังสินค้า',this)" data-i18n="mp_ui_0270">📦 คลัง</button>
-        <button class="btn btn-ghost btn-sm addr-lbl-btn" onclick="setAddrLabel('🏨 โรงแรม/อื่นๆ',this)" data-i18n="mp_ui_0271">🏨 อื่นๆ</button>
+      <label class="fl" for="addr-country" data-i18n="mp_ui_0346">ประเทศ *</label>
+      <select class="fi" id="addr-country" autocomplete="country" onchange="mpcAddrCountryChanged()"><option value="TH">🇹🇭 TH</option></select>
+    </div>
+    <div class="fg">
+      <label class="fl" for="addr-recipient" data-i18n="mp_ui_0273">ชื่อผู้รับ *</label>
+      <input class="fi" id="addr-recipient" autocomplete="name" maxlength="80" placeholder="ชื่อ-นามสกุลผู้รับ" data-i18n-placeholder="mp_ui_0274">
+    </div>
+    <div class="fg">
+      <label class="fl" for="addr-phone" data-i18n="mp_ui_0275">เบอร์โทรศัพท์ *</label>
+      <div style="display:flex;gap:8px;">
+        <select class="fi" id="addr-phone-cc" autocomplete="off" style="width:116px;flex:none;"><option value="+66">🇹🇭 +66</option></select>
+        <input class="fi" id="addr-phone" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="20" placeholder="xxxxxxxxx" style="flex:1;min-width:0;">
       </div>
-      <input class="fi" id="addr-label" placeholder="ชื่อที่อยู่ เช่น 🏠 บ้าน" data-i18n-placeholder="mp_ui_0272">
-    </div>
-    <div class="fg">
-      <label class="fl" data-i18n="mp_ui_0273">ชื่อผู้รับ *</label>
-      <input class="fi" id="addr-recipient" placeholder="ชื่อ-นามสกุลผู้รับ" data-i18n-placeholder="mp_ui_0274">
-    </div>
-    <div class="fg">
-      <label class="fl" data-i18n="mp_ui_0275">เบอร์โทรศัพท์ *</label>
-      <input class="fi" id="addr-phone" placeholder="0xx-xxx-xxxx" type="tel" maxlength="15">
-    </div>
-    <div class="fg">
-      <label class="fl" data-i18n="mp_ui_0346">ประเทศ *</label>
-      <select class="fi" id="addr-country" onchange="mpcAddrCountryChanged()"><option value="TH">🇹🇭 TH</option></select>
     </div>
 
     <div class="fg">
-      <label class="fl" data-i18n="mp_ui_0276">🔍 ค้นหาสถานที่ (OpenStreetMap)</label>
-      <input class="fi" id="addr-search" placeholder="พิมพ์ชื่อสถานที่ เช่น Central World, ถนนพระราม 9..." data-i18n-placeholder="mp_ui_0277">
-      <div id="addr-autocomplete-list" style="background:var(--card);border:1px solid var(--bdg);border-radius:8px;margin-top:4px;display:none;max-height:180px;overflow-y:auto;"></div>
+      <label class="fl" for="addr-search" data-i18n="mp_ui_0276">🔍 ค้นหาสถานที่ (OpenStreetMap)</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input class="fi" id="addr-search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="addr-autocomplete-list" autocomplete="off" placeholder="พิมพ์ชื่อสถานที่ เช่น Central World, ถนนพระราม 9..." data-i18n-placeholder="mp_ui_0277" style="flex:1;min-width:180px;">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="mpcUseMyLocation()" data-i18n="mp_ui_0354">📍 ใช้ตำแหน่งปัจจุบัน</button>
+      </div>
+      <div id="addr-autocomplete-list" role="listbox" style="background:var(--card);border:1px solid var(--bdg);border-radius:8px;margin-top:4px;display:none;max-height:180px;overflow-y:auto;"></div>
     </div>
 
     <div id="addr-map-preview">
@@ -4059,18 +4056,38 @@ tr:hover td{background:rgba(243,186,47,0.02);}
         <span>ค้นหาสถานที่เพื่อแสดงแผนที่</span>
       </div>
     </div>
+    <div id="addr-geo-confirm" role="status" style="display:none;margin-top:8px;padding:10px 12px;border:1px solid var(--gold);border-radius:8px;font-size:12px;line-height:1.5;"></div>
 
     <div class="fg mt4">
-      <label class="fl" data-i18n="mp_ui_0279">ที่อยู่รายละเอียด *</label>
-      <input class="fi" id="addr-line" placeholder="บ้านเลขที่ ถนน ซอย หมู่บ้าน" data-i18n-placeholder="mp_ui_0280">
+      <label class="fl" for="addr-line" data-i18n="mp_ui_0279">ที่อยู่รายละเอียด *</label>
+      <input class="fi" id="addr-line" autocomplete="address-line1" maxlength="200" placeholder="บ้านเลขที่ ถนน ซอย หมู่บ้าน" data-i18n-placeholder="mp_ui_0280">
+    </div>
+    <div class="fg">
+      <label class="fl" for="addr-line2" data-i18n="mp_ui_0350">ที่อยู่เพิ่มเติม (ห้อง/ชั้น/อาคาร)</label>
+      <input class="fi" id="addr-line2" autocomplete="address-line2" maxlength="200" placeholder="ห้อง ชั้น อาคาร (ถ้ามี)" data-i18n-placeholder="mp_ui_0351">
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="fg"><label class="fl" id="addr-lbl-subdistrict">แขวง/ตำบล</label><input class="fi" id="addr-subdistrict" placeholder="แขวง/ตำบล"></div>
-      <div class="fg"><label class="fl" id="addr-lbl-district">เขต/อำเภอ</label><input class="fi" id="addr-district" placeholder="เขต/อำเภอ"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-subdistrict" for="addr-subdistrict">แขวง/ตำบล</label><input class="fi" id="addr-subdistrict" autocomplete="address-level3" maxlength="100" placeholder="แขวง/ตำบล"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-district" for="addr-district">เขต/อำเภอ</label><input class="fi" id="addr-district" autocomplete="address-level2" maxlength="100" placeholder="เขต/อำเภอ"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="fg"><label class="fl" id="addr-lbl-province">จังหวัด *</label><input class="fi" id="addr-province" placeholder="จังหวัด"></div>
-      <div class="fg"><label class="fl" data-i18n="mp_ui_0285">รหัสไปรษณีย์</label><input class="fi" id="addr-postal" placeholder="10xxx" maxlength="5"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-province" for="addr-province">จังหวัด</label><input class="fi" id="addr-province" autocomplete="address-level1" maxlength="100" placeholder="จังหวัด"></div>
+      <div class="fg"><label class="fl" id="addr-lbl-postal" for="addr-postal" data-i18n="mp_ui_0285">รหัสไปรษณีย์</label><input class="fi" id="addr-postal" autocomplete="postal-code" inputmode="numeric" placeholder="10xxx" maxlength="5"></div>
+    </div>
+    <div class="fg">
+      <label class="fl" for="addr-note" data-i18n="mp_ui_0352">หมายเหตุถึงผู้จัดส่ง</label>
+      <input class="fi" id="addr-note" maxlength="300" placeholder="เช่น ฝากไว้กับ รปภ. / โทรก่อนส่ง" data-i18n-placeholder="mp_ui_0353">
+    </div>
+
+    <div class="fg">
+      <label class="fl" for="addr-label" data-i18n="mp_ui_0267">ชื่อที่อยู่ (Label)</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+        <button type="button" class="btn btn-ghost btn-sm addr-lbl-btn" data-code="home" onclick="setAddrLabel('home',this)" data-i18n="mp_ui_0268">🏠 บ้าน</button>
+        <button type="button" class="btn btn-ghost btn-sm addr-lbl-btn" data-code="work" onclick="setAddrLabel('work',this)" data-i18n="mp_ui_0269">🏢 ที่ทำงาน</button>
+        <button type="button" class="btn btn-ghost btn-sm addr-lbl-btn" data-code="warehouse" onclick="setAddrLabel('warehouse',this)" data-i18n="mp_ui_0270">📦 คลัง</button>
+        <button type="button" class="btn btn-ghost btn-sm addr-lbl-btn" data-code="other" onclick="setAddrLabel('other',this)" data-i18n="mp_ui_0271">🏨 อื่นๆ</button>
+      </div>
+      <input class="fi" id="addr-label" maxlength="40" oninput="mpcAddrLabelTyped()" placeholder="ชื่อที่อยู่ เช่น 🏠 บ้าน" data-i18n-placeholder="mp_ui_0272">
     </div>
 
     <div class="fc g8 mt2" style="align-items:center;">
@@ -4431,6 +4448,8 @@ const TCC_I18N = {
   'gerr_plan_disabled':["FF Plan {p1} ถูกปิดชั่วคราวโดยแอดมิน กรุณาเลือก Plan อื่น","FF Plan {p1} is temporarily closed by the admin. Please choose another plan.","Gói FF Plan {p1} đang tạm đóng bởi quản trị viên. Vui lòng chọn gói khác.","FF Plan {p1} ត្រូវបានបិទជាបណ្តោះអាសន្នដោយអ្នកគ្រប់គ្រង។ សូមជ្រើសរើស Plan ផ្សេង។","FF Plan {p1} ကို အက်ဒမင်က ယာယီပိတ်ထားသည်။ အခြား Plan ကို ရွေးချယ်ပါ။","FF Plan {p1} ຖືກປິດຊົ່ວຄາວໂດຍແອດມິນ. ກະລຸນາເລືອກ Plan ອື່ນ.","FF Plan {p1} ditutup sementara oleh admin. Sila pilih Plan lain.","FF Plan {p1} ditutup sementara oleh admin. Silakan pilih Plan lain.","FF 方案 {p1} 已被管理员暂时关闭，请选择其他方案。"],
   'gerr_e_max_daily':["เกินวงเงินถอนสูงสุดต่อวัน {p1} USDT (วันนี้ถอนแล้ว {p2} · คงเหลือ {p3} USDT)","Daily withdrawal limit of {p1} USDT exceeded (withdrawn today {p2} · remaining {p3} USDT)","Vượt hạn mức rút tối đa mỗi ngày {p1} USDT (hôm nay đã rút {p2} · còn lại {p3} USDT)","លើសកម្រិតដកអតិបរមាប្រចាំថ្ងៃ {p1} USDT (ថ្ងៃនេះបានដក {p2} · នៅសល់ {p3} USDT)","တစ်ရက်လျှင် ထုတ်ယူနိုင်သည့် ကန့်သတ်ချက် {p1} USDT ကျော်လွန်နေသည် (ယနေ့ထုတ်ပြီး {p2} · ကျန် {p3} USDT)","ເກີນວົງເງິນຖອນສູງສຸດຕໍ່ວັນ {p1} USDT (ມື້ນີ້ຖອນແລ້ວ {p2} · ຄົງເຫຼືອ {p3} USDT)","Melebihi had pengeluaran harian {p1} USDT (dikeluarkan hari ini {p2} · baki {p3} USDT)","Melebihi batas penarikan harian {p1} USDT (sudah ditarik hari ini {p2} · sisa {p3} USDT)","超出每日最高提现额度 {p1} USDT（今日已提 {p2} · 剩余 {p3} USDT）"],
   'gerr_e_addr_limit':["เพิ่มที่อยู่ได้สูงสุด {p1} รายการ กรุณาลบที่อยู่เดิมก่อน","You can save up to {p1} addresses. Please delete an old one first.","Bạn chỉ có thể lưu tối đa {p1} địa chỉ. Vui lòng xóa địa chỉ cũ trước.","អ្នកអាចរក្សាទុកអាសយដ្ឋានបានអតិបរមា {p1}។ សូមលុបអាសយដ្ឋានចាស់ជាមុនសិន។","လိပ်စာ အများဆုံး {p1} ခုသာ သိမ်းဆည်းနိုင်သည်။ ကျေးဇူးပြု၍ အဟောင်းကို အရင်ဖျက်ပါ။","ບັນທຶກທີ່ຢູ່ໄດ້ສູງສຸດ {p1} ລາຍການ. ກະລຸນາລົບທີ່ຢູ່ເກົ່າກ່ອນ.","Anda boleh menyimpan sehingga {p1} alamat. Sila padam alamat lama dahulu.","Anda dapat menyimpan hingga {p1} alamat. Silakan hapus alamat lama terlebih dahulu.","最多可保存 {p1} 个地址，请先删除旧地址。"],
+  'gerr_e_addr_req':["ต้องระบุ {p1}", "{p1} is required", "Cần nhập {p1}", "ត្រូវបញ្ចូល {p1}", "{p1} လိုအပ်ပါသည်", "ຕ້ອງລະບຸ {p1}", "{p1} diperlukan", "{p1} wajib diisi", "必须填写 {p1}"],
+  'gerr_e_addr_phone':["เบอร์โทรไม่ถูกต้องสำหรับประเทศ {p1}", "Invalid phone number for {p1}", "Số điện thoại không hợp lệ cho {p1}", "លេខទូរស័ព្ទមិនត្រឹមត្រូវសម្រាប់ {p1}", "{p1} အတွက် ဖုန်းနံပါတ် မမှန်ကန်ပါ", "ເບີໂທບໍ່ຖືກຕ້ອງສຳລັບ {p1}", "Nombor telefon tidak sah untuk {p1}", "Nomor telepon tidak valid untuk {p1}", "{p1} 的电话号码格式不正确"],
   'gerr_payout_invalid':["ชุด Payout ไม่ถูกต้อง","Invalid payout option","Gói Payout không hợp lệ","ជម្រើស Payout មិនត្រឹមត្រូវ","Payout ရွေးချယ်မှု မမှန်ကန်ပါ","ຊຸດ Payout ບໍ່ຖືກຕ້ອງ","Pilihan Payout tidak sah","Opsi Payout tidak valid","Payout 方案无效"],
   'mp_ui_0237':["🚀 15 วัน","🚀 15 days","🚀 15 ngày","🚀 15 ថ្ងៃ","🚀 ၁၅ ရက်","🚀 15 ວັນ","🚀 15 hari","🚀 15 hari","🚀 15 天"],
   'mp_ui_0238':["รับ {p1}% · ตัด {p2}% Marketing Fee","Receive {p1}% · {p2}% Marketing Fee deducted","Nhận {p1}% · khấu trừ {p2}% Marketing Fee","ទទួលបាន {p1}% · កាត់ {p2}% Marketing Fee","{p1}% ရရှိ · Marketing Fee {p2}% နုတ်ယူ","ຮັບ {p1}% · ຫັກ {p2}% Marketing Fee","Terima {p1}% · tolak {p2}% Marketing Fee","Terima {p1}% · potong {p2}% Marketing Fee","实收 {p1}% · 扣除 {p2}% 营销费"],
@@ -5231,10 +5250,26 @@ const TCC_I18N = {
   'mp_js_0620':["ประเทศ {p1} ปิดให้บริการแล้ว ระบบสลับไปตลาด {p2} ให้อัตโนมัติ","{p1} is no longer open. Switched to the {p2} market automatically.","{p1} đã ngừng phục vụ. Hệ thống tự động chuyển sang thị trường {p2}.","{p1} បានបិទសេវាកម្មហើយ។ ប្រព័ន្ធបានប្តូរទៅទីផ្សារ {p2} ដោយស្វ័យប្រវត្តិ។","{p1} ကို ဝန်ဆောင်မှု ပိတ်လိုက်ပါပြီ။ စနစ်က {p2} ဈေးကွက်သို့ အလိုအလျောက် ပြောင်းပေးလိုက်ပါသည်။","{p1} ປິດໃຫ້ບໍລິການແລ້ວ. ລະບົບປ່ຽນໄປຕະຫຼາດ {p2} ໃຫ້ອັດຕະໂນມັດ.","{p1} tidak lagi dibuka. Sistem bertukar ke pasaran {p2} secara automatik.","{p1} sudah ditutup. Sistem otomatis berpindah ke pasar {p2}.","{p1} 已暂停服务，系统已自动切换到 {p2} 市场。"],
   'mp_js_0621':["ประเทศของร้านคุณ ({p1}) ปิดให้บริการชั่วคราว — ผู้ซื้อสั่งซื้อใหม่ไม่ได้ และคุณเพิ่ม/แก้ไขสินค้าไม่ได้ · ออเดอร์ที่ค้างอยู่ยังจัดส่งและรับเงินได้ตามปกติ","Your shop's country ({p1}) is temporarily closed — buyers can't place new orders and you can't add or edit products. Existing orders can still be shipped and paid out as usual.","Quốc gia của shop ({p1}) đang tạm ngừng phục vụ — người mua không thể đặt đơn mới và bạn không thể thêm/sửa sản phẩm. Các đơn đang xử lý vẫn được giao và thanh toán bình thường.","ប្រទេសរបស់ហាងអ្នក ({p1}) បានបិទសេវាកម្មជាបណ្តោះអាសន្ន — អ្នកទិញមិនអាចបញ្ជាទិញថ្មីបានទេ ហើយអ្នកមិនអាចបន្ថែម ឬកែប្រែផលិតផលបានទេ។ ការបញ្ជាទិញដែលនៅសល់នៅតែអាចដឹកជញ្ជូន និងទទួលប្រាក់បានជាធម្មតា។","သင့်ဆိုင်၏ နိုင်ငံ ({p1}) ကို ယာယီ ပိတ်ထားသည် — ဝယ်သူများ အော်ဒါအသစ် မမှာနိုင်ပါ၊ သင်လည်း ကုန်ပစ္စည်း ထည့်ရန်/ပြင်ရန် မရပါ။ လက်ကျန်အော်ဒါများကို ပုံမှန်အတိုင်း ပို့ဆောင်ပြီး ငွေလက်ခံနိုင်ပါသည်။","ປະເທດຂອງຮ້ານທ່ານ ({p1}) ປິດໃຫ້ບໍລິການຊົ່ວຄາວ — ຜູ້ຊື້ສັ່ງຊື້ໃໝ່ບໍ່ໄດ້ ແລະ ທ່ານເພີ່ມ/ແກ້ໄຂສິນຄ້າບໍ່ໄດ້ · ອໍເດີທີ່ຄ້າງຢູ່ຍັງຈັດສົ່ງ ແລະ ຮັບເງິນໄດ້ຕາມປົກກະຕິ.","Negara kedai anda ({p1}) ditutup sementara — pembeli tidak boleh membuat pesanan baharu dan anda tidak boleh menambah/mengedit produk. Pesanan sedia ada masih boleh dihantar dan dibayar seperti biasa.","Negara toko Anda ({p1}) ditutup sementara — pembeli tidak bisa memesan baru dan Anda tidak bisa menambah/mengedit produk. Pesanan yang sedang berjalan tetap bisa dikirim dan dibayarkan seperti biasa.","您店铺所在国家（{p1}）暂时停止服务——买家无法下新订单，您也无法添加或编辑商品。已有订单仍可正常发货和结算。"],
   'mp_js_0622':["ระบบตอบช้า — รายการอาจถูกบันทึกแล้ว กรุณาตรวจสอบประวัติก่อนทำซ้ำ","The server was slow to respond — your request may already have been recorded. Please check your history before trying again.","Hệ thống phản hồi chậm — giao dịch có thể đã được ghi nhận. Vui lòng kiểm tra lịch sử trước khi thử lại.","ប្រព័ន្ធឆ្លើយតបយឺត — ប្រតិបត្តិការអាចត្រូវបានកត់ត្រារួចហើយ សូមពិនិត្យប្រវត្តិមុនពេលព្យាយាមម្តងទៀត","စနစ်မှ တုံ့ပြန်မှု နှေးနေပါသည် — သင့်လုပ်ဆောင်ချက်ကို မှတ်တမ်းတင်ပြီးဖြစ်နိုင်ပါသည်။ ထပ်မလုပ်မီ မှတ်တမ်းကို စစ်ဆေးပါ။","ລະບົບຕອບຊ້າ — ລາຍການອາດຖືກບັນທຶກແລ້ວ ກະລຸນາກວດປະຫວັດກ່ອນເຮັດຊ້ຳ","Sistem lambat bertindak balas — transaksi mungkin sudah direkodkan. Sila semak sejarah sebelum mencuba lagi.","Sistem lambat merespons — transaksi mungkin sudah tercatat. Silakan periksa riwayat sebelum mencoba lagi.","系统响应较慢——您的操作可能已被记录。请先查看历史记录，再重试。"],
+  'mp_js_0623':["อ่านตำแหน่งปัจจุบันไม่ได้ — ตรวจสอบสิทธิ์ตำแหน่งของเบราว์เซอร์", "Couldn't get your location — check the browser's location permission", "Không lấy được vị trí — kiểm tra quyền vị trí của trình duyệt", "មិនអាចទទួលបានទីតាំង — សូមពិនិត្យការអនុញ្ញាតទីតាំងរបស់កម្មវិធីអ៊ីនធឺណិត", "တည်နေရာ မရနိုင်ပါ — ဘရောက်ဇာ၏ တည်နေရာ ခွင့်ပြုချက်ကို စစ်ပါ", "ອ່ານຕຳແໜ່ງບໍ່ໄດ້ — ກວດສອບສິດຕຳແໜ່ງຂອງບຣາວເຊີ", "Tidak dapat mendapatkan lokasi — semak kebenaran lokasi pelayar", "Tidak bisa mengambil lokasi — periksa izin lokasi browser", "无法获取位置——请检查浏览器的定位权限"],
+  'mp_js_0624':["⚠️ หมุดอยู่นอกประเทศที่เลือก ({p1}) — ตรวจสอบประเทศ หรือเลื่อนหมุดใหม่", "⚠️ The pin is outside the selected country ({p1}) — check the country or move the pin", "⚠️ Ghim nằm ngoài quốc gia đã chọn ({p1}) — kiểm tra quốc gia hoặc di chuyển ghim", "⚠️ ម្ជុលនៅក្រៅប្រទេសដែលបានជ្រើស ({p1}) — សូមពិនិត្យប្រទេស ឬផ្លាស់ទីម្ជុលឡើងវិញ", "⚠️ ပင်သည် ရွေးထားသော နိုင်ငံ ({p1}) ပြင်ပတွင် ရှိနေသည် — နိုင်ငံကို စစ်ပါ သို့မဟုတ် ပင်ကို ရွှေ့ပါ", "⚠️ ໝຸດຢູ່ນອກປະເທດທີ່ເລືອກ ({p1}) — ກວດສອບປະເທດ ຫຼື ຍ້າຍໝຸດໃໝ່", "⚠️ Pin berada di luar negara yang dipilih ({p1}) — semak negara atau alihkan pin", "⚠️ Pin berada di luar negara yang dipilih ({p1}) — periksa negara atau geser pin", "⚠️ 图钉位于所选国家（{p1}）之外——请检查国家或重新移动图钉"],
+  'mp_js_0625':["📍 ที่อยู่ตามตำแหน่งหมุด", "📍 Address at the pin", "📍 Địa chỉ tại vị trí ghim", "📍 អាសយដ្ឋានតាមទីតាំងម្ជុល", "📍 ပင်တည်နေရာရှိ လိပ်စာ", "📍 ທີ່ຢູ່ຕາມຕຳແໜ່ງໝຸດ", "📍 Alamat di lokasi pin", "📍 Alamat di lokasi pin", "📍 图钉位置的地址"],
+  'mp_js_0626':["เบอร์โทรไม่ถูกต้องสำหรับรหัส {p1}", "Invalid phone number for {p1}", "Số điện thoại không hợp lệ với mã {p1}", "លេខទូរស័ព្ទមិនត្រឹមត្រូវសម្រាប់លេខកូដ {p1}", "{p1} အတွက် ဖုန်းနံပါတ် မမှန်ကန်ပါ", "ເບີໂທບໍ່ຖືກຕ້ອງສຳລັບລະຫັດ {p1}", "Nombor telefon tidak sah untuk {p1}", "Nomor telepon tidak valid untuk {p1}", "{p1} 的电话号码格式不正确"],
+  'mp_js_0627':["กรุณากรอก {p1}", "Please enter {p1}", "Vui lòng nhập {p1}", "សូមបញ្ចូល {p1}", "{p1} ကို ထည့်ပါ", "ກະລຸນາປ້ອນ {p1}", "Sila masukkan {p1}", "Harap isi {p1}", "请填写 {p1}"],
+  'mp_js_0628':["กำลังหาที่อยู่ตามหมุด...", "Looking up the address…", "Đang tìm địa chỉ…", "កំពុងស្វែងរកអាសយដ្ឋាន…", "လိပ်စာ ရှာနေသည်…", "ກຳລັງຊອກຫາທີ່ຢູ່…", "Mencari alamat…", "Mencari alamat…", "正在查找地址…"],
+  'mp_js_0629':["ไม่พบที่อยู่ตรงหมุดนี้ — กรอกเองหรือเลื่อนหมุดใหม่", "No address found at this pin — fill it in or move the pin", "Không tìm thấy địa chỉ tại ghim này — hãy nhập tay hoặc di chuyển ghim", "រកមិនឃើញអាសយដ្ឋានត្រង់ម្ជុលនេះ — សូមបញ្ចូលដោយខ្លួនឯង ឬផ្លាស់ទីម្ជុល", "ဤပင်တွင် လိပ်စာ မတွေ့ပါ — ကိုယ်တိုင်ထည့်ပါ သို့မဟုတ် ပင်ကို ရွှေ့ပါ", "ບໍ່ພົບທີ່ຢູ່ຕາມໝຸດນີ້ — ປ້ອນເອງ ຫຼື ຍ້າຍໝຸດໃໝ່", "Tiada alamat dijumpai di pin ini — isi sendiri atau alihkan pin", "Alamat tidak ditemukan di pin ini — isi manual atau geser pin", "此图钉处未找到地址——请手动填写或重新移动图钉"],
+  'mp_js_0630':["เติมที่อยู่จากหมุดแล้ว — ตรวจสอบช่องด้านล่างอีกครั้ง", "Address filled from the pin — please review the fields below", "Đã điền địa chỉ từ ghim — vui lòng kiểm tra lại các ô bên dưới", "បានបំពេញអាសយដ្ឋានពីម្ជុល — សូមពិនិត្យប្រអប់ខាងក្រោមម្តងទៀត", "ပင်မှ လိပ်စာ ဖြည့်ပြီး — အောက်ပါအကွက်များကို ပြန်စစ်ပါ", "ເຕີມທີ່ຢູ່ຈາກໝຸດແລ້ວ — ກວດສອບຊ່ອງລຸ່ມອີກຄັ້ງ", "Alamat diisi dari pin — sila semak medan di bawah", "Alamat terisi dari pin — periksa kembali kolom di bawah", "已根据图钉填写地址——请再次检查下方各项"],
   // ── [P6] ขนส่งที่ผู้ซื้อเลือก / ค่าส่งเฉพาะร้าน ──
   'mp_ui_0347':["ขนส่งที่ผู้ซื้อเลือก","Carrier chosen by buyer","Đơn vị vận chuyển người mua chọn","ក្រុមហ៊ុនដឹកជញ្ជូនដែលអ្នកទិញបានជ្រើស","ဝယ်သူရွေးချယ်သော ပို့ဆောင်ရေး","ຂົນສົ່ງທີ່ຜູ້ຊື້ເລືອກ","Penghantar pilihan pembeli","Kurir pilihan pembeli","买家选择的物流"],
   'mp_ui_0348':["ค่าส่งเฉพาะร้าน (USDT)","Shop's own fee (USDT)","Phí riêng của shop (USDT)","ថ្លៃដឹករបស់ហាង (USDT)","ဆိုင်ကိုယ်ပိုင် ပို့ခ (USDT)","ຄ່າສົ່ງສະເພາະຮ້ານ (USDT)","Yuran kedai (USDT)","Ongkir khusus toko (USDT)","店铺专属运费 (USDT)"],
   'mp_ui_0349':["ขณะนี้ระบบปิดให้บริการทุกประเทศชั่วคราว — กรุณากลับมาใหม่ภายหลัง","All markets are temporarily closed — please check back later.","Hiện tất cả thị trường đang tạm ngừng phục vụ — vui lòng quay lại sau.","ទីផ្សារទាំងអស់បានបិទជាបណ្តោះអាសន្ន — សូមត្រឡប់មកវិញនៅពេលក្រោយ។","ဈေးကွက်အားလုံးကို ယာယီ ပိတ်ထားသည် — နောက်မှ ပြန်လည်ကြည့်ရှုပါ။","ຕະຫຼາດທັງໝົດປິດໃຫ້ບໍລິການຊົ່ວຄາວ — ກະລຸນາກັບມາໃໝ່ພາຍຫຼັງ.","Semua pasaran ditutup buat sementara — sila cuba lagi kemudian.","Semua pasar sedang ditutup sementara — silakan kembali lagi nanti.","所有市场暂时关闭，请稍后再来。"],
+  'mp_ui_0350':["ที่อยู่เพิ่มเติม (ห้อง/ชั้น/อาคาร)", "Address line 2 (unit / floor / building)", "Địa chỉ bổ sung (phòng / tầng / tòa nhà)", "អាសយដ្ឋានបន្ថែម (បន្ទប់ / ជាន់ / អគារ)", "နောက်ထပ်လိပ်စာ (အခန်း / ထပ် / အဆောက်အအုံ)", "ທີ່ຢູ່ເພີ່ມເຕີມ (ຫ້ອງ / ຊັ້ນ / ອາຄານ)", "Alamat tambahan (unit / tingkat / bangunan)", "Alamat tambahan (unit / lantai / gedung)", "地址第二行（房间/楼层/大楼）"],
+  'mp_ui_0351':["ห้อง ชั้น อาคาร (ถ้ามี)", "Unit, floor, building (optional)", "Phòng, tầng, tòa nhà (nếu có)", "បន្ទប់ ជាន់ អគារ (បើមាន)", "အခန်း၊ ထပ်၊ အဆောက်အအုံ (ရှိလျှင်)", "ຫ້ອງ ຊັ້ນ ອາຄານ (ຖ້າມີ)", "Unit, tingkat, bangunan (jika ada)", "Unit, lantai, gedung (jika ada)", "房间、楼层、大楼（选填）"],
+  'mp_ui_0352':["หมายเหตุถึงผู้จัดส่ง", "Note for the courier", "Ghi chú cho người giao hàng", "កំណត់ចំណាំសម្រាប់អ្នកដឹក", "ပို့ဆောင်သူသို့ မှတ်ချက်", "ໝາຍເຫດເຖິງຜູ້ຈັດສົ່ງ", "Nota untuk kurier", "Catatan untuk kurir", "给配送员的备注"],
+  'mp_ui_0353':["เช่น ฝากไว้กับ รปภ. / โทรก่อนส่ง", "e.g. leave with the guard / call before delivery", "VD: gửi bảo vệ / gọi trước khi giao", "ឧ. ផ្ញើនឹងអ្នកយាម / ទូរស័ព្ទមុនដឹក", "ဥပမာ - အစောင့်ထံ ထားခဲ့ပါ / မပို့မီ ဖုန်းခေါ်ပါ", "ເຊັ່ນ ຝາກໄວ້ກັບຍາມ / ໂທກ່ອນສົ່ງ", "cth: tinggalkan dengan pengawal / telefon sebelum hantar", "mis. titip ke satpam / telepon sebelum antar", "例如：交给保安 / 送货前请致电"],
+  'mp_ui_0354':["📍 ใช้ตำแหน่งปัจจุบัน", "📍 Use my current location", "📍 Dùng vị trí hiện tại", "📍 ប្រើទីតាំងបច្ចុប្បន្ន", "📍 လက်ရှိတည်နေရာ သုံးမည်", "📍 ໃຊ້ຕຳແໜ່ງປັດຈຸບັນ", "📍 Guna lokasi semasa", "📍 Gunakan lokasi saat ini", "📍 使用当前位置"],
+  'mp_ui_0355':["รหัสโทรศัพท์ประเทศ", "Phone country code", "Mã quốc gia điện thoại", "លេខកូដប្រទេសទូរស័ព្ទ", "ဖုန်းနိုင်ငံကုဒ်", "ລະຫັດໂທລະສັບປະເທດ", "Kod negara telefon", "Kode negara telepon", "电话国家区号"],
+  'mp_ui_0356':["ใช้ที่อยู่นี้", "Use this address", "Dùng địa chỉ này", "ប្រើអាសយដ្ឋាននេះ", "ဤလိပ်စာကို သုံးမည်", "ໃຊ້ທີ່ຢູ່ນີ້", "Guna alamat ini", "Gunakan alamat ini", "使用此地址"],
+  'mp_ui_0357':["คงค่าเดิม", "Keep current", "Giữ nguyên", "រក្សាតម្លៃដើម", "မူလအတိုင်း ထားမည်", "ຄົງຄ່າເດີມ", "Kekalkan", "Biarkan", "保持不变"],
   // ── [SCH v1] Support Chat (แชทซัพพอร์ต) — mp_sch_NNNN ──
   'mp_sch_0001':["⚠️ กรุณาเข้าสู่ระบบก่อนใช้แชท","⚠️ Please log in before using chat","⚠️ Vui lòng đăng nhập trước khi dùng chat","⚠️ សូមចូលគណនីមុនពេលប្រើការជជែក","⚠️ ချက်တင်မသုံးမီ ကျေးဇူးပြု၍ လော့ဂ်အင်ဝင်ပါ","⚠️ ກະລຸນາເຂົ້າສູ່ລະບົບກ່ອນໃຊ້ແຊັດ","⚠️ Sila log masuk sebelum menggunakan sembang","⚠️ Silakan masuk terlebih dahulu sebelum menggunakan chat","⚠️ 使用聊天前请先登录"],
   'mp_sch_0002':["💬 แจ้งเลข Order {p1} ในแชทกับซัพพอร์ตได้เลย","💬 Just tell support your Order {p1} in the chat","💬 Hãy báo mã Order {p1} cho bộ phận hỗ trợ trong chat","💬 សូមប្រាប់លេខ Order {p1} ទៅក្រុមគាំទ្រក្នុងការជជែក","💬 ချက်တင်ထဲတွင် Order {p1} ကို ဆက်သွယ်ရေးအဖွဲ့သို့ ပြောပြနိုင်ပါသည်","💬 ແຈ້ງເລກ Order {p1} ໃຫ້ທີມຊ່ວຍເຫຼືອໃນແຊັດໄດ້ເລີຍ","💬 Sila maklumkan nombor Order {p1} kepada sokongan dalam sembang","💬 Sampaikan nomor Order {p1} ke tim dukungan melalui chat","💬 请在聊天中向客服提供订单号 {p1}"],
@@ -6981,7 +7016,7 @@ function filterOrd(st, btn){
           <span class="mob-card-val tsm" style="text-align:right;line-height:1.6;">
             <span style="font-weight:600;">${mpcfgEsc(o.ship_name)}</span><br>
             <a href="tel:${_telSafe(o.ship_phone)}" style="color:var(--gold);text-decoration:none;">${mpcfgEsc(o.ship_phone)}</a><br>
-            ${mpcfgEsc([o.ship_address, o.ship_province, o.ship_postal].filter(Boolean).join(' '))}
+            ${_shipAddrHtml(o, true)}
           </span>
         </div>` : ''}
         ${(o.tracking_number) ? (() => {
@@ -7031,7 +7066,7 @@ function openOD(oid){
       </div>
       <div class="fc btwn" style="font-size:13px;line-height:1.6;align-items:flex-start;gap:8px;">
         <span class="tm" style="flex-shrink:0;">${tccT('mp_js_0091')}</span>
-        <span style="text-align:right;">${mpcfgEsc([o.ship_address, o.ship_province, o.ship_postal].filter(Boolean).join(' '))}</span>
+        <span style="text-align:right;">${_shipAddrHtml(o, true)}</span>
       </div>
     </div>` : '';
 
@@ -8390,7 +8425,7 @@ async function filterSOrd(st, btn) {
     const shipHtml = o.ship_name ? `<div class="ship-info-box">
       <div class="si-row"><span class="si-label">${tccT('mp_js_0089')}</span><span>${mpcfgEsc(o.ship_name)}</span></div>
       <div class="si-row"><span class="si-label">${tccT('mp_js_0090')}</span><span><a href="tel:${_telSafe(o.ship_phone)}" style="color:var(--gold);">${mpcfgEsc(o.ship_phone)}</a></span></div>
-      <div class="si-row"><span class="si-label">${tccT('mp_js_0091')}</span><span>${mpcfgEsc([o.ship_address, o.ship_province, o.ship_postal].filter(Boolean).join(' '))}</span></div>
+      <div class="si-row"><span class="si-label">${tccT('mp_js_0091')}</span><span>${_shipAddrHtml(o, true)}</span></div>
     </div>` : '<span class="tsm tm">—</span>';
     return `<tr>
       <td class="mono tg">${o.order_id}</td>
@@ -8454,7 +8489,7 @@ async function filterSOrd(st, btn) {
         </div>
         ${o.ship_name ? `<div class="mob-card-row" style="align-items:flex-start;">
           <span class="mob-card-label">${tccT('mp_js_0085')}</span>
-          <span class="mob-card-val tsm">${mpcfgEsc(o.ship_name)} · <a href="tel:${_telSafe(o.ship_phone)}" style="color:var(--gold);">${mpcfgEsc(o.ship_phone)}</a><br>${mpcfgEsc([o.ship_address, o.ship_province].filter(Boolean).join(' '))}</span>
+          <span class="mob-card-val tsm">${mpcfgEsc(o.ship_name)} · <a href="tel:${_telSafe(o.ship_phone)}" style="color:var(--gold);">${mpcfgEsc(o.ship_phone)}</a><br>${_shipAddrHtml(o, false)}</span>
         </div>` : ''}
         <div class="mob-card-row">
           <span class="mob-card-label">${tccT('mp_js_0431')}</span>
@@ -8489,6 +8524,15 @@ function mpcfgFlag(cc) {
   return /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)) : '🏳️';
 }
 // [v62] ใช้กับ href="tel:" / ค่าใน inline handler — ตัดทุกอย่างที่ไม่ใช่ตัวอักษรปลอดภัย (escape อย่างเดียวไม่พอใน attribute ที่เป็น JS)
+// [P7] ที่อยู่จัดส่งของออเดอร์ + หมายเหตุถึงผู้จัดส่ง (อ่านจาก ship_addr_json — ออเดอร์เก่าที่ไม่มีคอลัมน์นี้แสดงเหมือนเดิม)
+function _shipNote(o) {
+  try { const j = o && o.ship_addr_json ? JSON.parse(o.ship_addr_json) : null; return j && j.delivery_note ? String(j.delivery_note) : ''; } catch (e) { return ''; }
+}
+function _shipAddrHtml(o, withPostal) {
+  const base = mpcfgEsc((withPostal ? [o.ship_address, o.ship_province, o.ship_postal] : [o.ship_address, o.ship_province]).filter(Boolean).join(' '));
+  const n = _shipNote(o);
+  return base + (n ? '<br><span class="tsm tm">📝 ' + mpcfgEsc(n) + '</span>' : '');
+}
 function _telSafe(v) { return String(v == null ? '' : v).replace(/[^+0-9]/g, ''); }
 // ค่าที่ส่งเข้า inline handler: JSON string literal แล้ว escape เป็น HTML entity (เบราว์เซอร์ decode ก่อนรัน JS → เหลือ string literal ที่ปิดถูกต้อง)
 function _jsArg(v) { return mpcfgEsc(JSON.stringify(String(v == null ? '' : v))); }
@@ -8840,27 +8884,117 @@ function mpcPostalMax(c) {
   const m = c && c.postal_regex ? String(c.postal_regex).match(/\{(\d+)(?:,(\d+))?\}/) : null;
   return m ? Number(m[2] || m[1]) : 10;
 }
+// [P7] ฟิลด์บังคับตามประเทศ (Countries.required_fields) — ค่าว่าง = บังคับเฉพาะ province เหมือนเดิม
+const MPC_REQ_ALL = ['subdistrict', 'district', 'province', 'postal_code'];
+const MPC_REQ_EL  = { subdistrict: 'addr-subdistrict', district: 'addr-district', province: 'addr-province', postal_code: 'addr-postal' };
+const MPC_REQ_LBL = { subdistrict: 'addr-lbl-subdistrict', district: 'addr-lbl-district', province: 'addr-lbl-province', postal_code: 'addr-lbl-postal' };
+function mpcReqFields(cc) {
+  const c = mpcCountry(cc);
+  const l = String((c && c.required_fields) || '').split(',').map(x => x.trim()).filter(x => MPC_REQ_ALL.indexOf(x) !== -1);
+  return l.length ? l : ['province'];
+}
 function mpcAddrApplySchema(cc) {
   cc = String(cc || mpcCur()).toUpperCase();
   const c = mpcCountry(cc);
   const th = !c || c.address_schema === 'th_5level';   // ยังไม่มี config → โครงสร้างไทยเดิม
   const L = th ? [tccT('mp_ui_0281'), tccT('mp_ui_0282'), tccT('mp_ui_0283')] : [tccT('mp_js_0613'), tccT('mp_js_0614'), tccT('mp_js_0615')];
-  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-  const ph = (id, v) => { const e = document.getElementById(id); if (e) e.placeholder = String(v).replace(/\s*\*$/, ''); };
+  const strip = v => String(v).replace(/\s*\*$/, '');   // ดาวบังคับมาจากคลาส .req ตาม required_fields
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = strip(v); };
+  const ph = (id, v) => { const e = document.getElementById(id); if (e) e.placeholder = strip(v); };
   set('addr-lbl-subdistrict', L[0]); set('addr-lbl-district', L[1]); set('addr-lbl-province', L[2]);
   ph('addr-subdistrict', L[0]); ph('addr-district', L[1]); ph('addr-province', L[2]);
+  const req = mpcReqFields(cc);
+  MPC_REQ_ALL.forEach(k => { const e = document.getElementById(MPC_REQ_LBL[k]); if (e) e.classList.toggle('req', req.indexOf(k) !== -1); });
   const pc = document.getElementById('addr-postal');
-  if (pc) { pc.maxLength = mpcPostalMax(c); pc.placeholder = th ? '10xxx' : 'x'.repeat(Math.min(mpcPostalMax(c), 6)); }
-  const pe = document.getElementById('addr-phone');
-  if (pe) pe.placeholder = th ? '0xx-xxx-xxxx' : ((c && c.phone_prefix ? c.phone_prefix : '+') + ' xxx xxx xxx');
+  if (pc) {
+    pc.maxLength = mpcPostalMax(c); pc.placeholder = th ? '10xxx' : 'x'.repeat(Math.min(mpcPostalMax(c), 6));
+    pc.inputMode = (!c || (c.postal_regex && /^\^?\\d/.test(c.postal_regex))) ? 'numeric' : 'text';
+  }
+  const ps = document.getElementById('addr-phone-cc'); if (ps) ps.setAttribute('aria-label', tccT('mp_ui_0355'));
 }
+
+// [P7] เบอร์โทร = รหัสประเทศ (Countries.phone_prefix) + เลขชาติ · เก็บ/ส่งเป็น E.164
+function mpcFillPhoneCC(prefix) {
+  const sel = document.getElementById('addr-phone-cc'); if (!sel) return;
+  const keep = prefix || sel.value;
+  const list = (MPCFG.countries || []).filter(c => /^\+\d{1,4}$/.test(String(c.phone_prefix || '').trim()));
+  sel.innerHTML = list.length
+    ? list.map(c => { const px = String(c.phone_prefix).trim(); return `<option value="${mpcfgEsc(px)}">${mpcfgFlag(c.country_code)} ${mpcfgEsc(px)}</option>`; }).join('')
+    : '<option value="+66">🇹🇭 +66</option>';
+  if (keep && ![...sel.options].some(o => o.value === keep)) sel.insertAdjacentHTML('beforeend', `<option value="${mpcfgEsc(keep)}">${mpcfgEsc(keep)}</option>`);
+  if (keep) sel.value = keep;
+}
+function mpcPhoneSplit(phone, cc) {
+  const p = String(phone || '').trim();
+  const dflt = String((mpcCountry(cc) || {}).phone_prefix || '').trim();
+  if (p.charAt(0) === '+') {
+    const d = '+' + p.replace(/[^0-9]/g, '');
+    let best = '';
+    (MPCFG.countries || []).forEach(c => { const px = String(c.phone_prefix || '').trim(); if (px && d.indexOf(px) === 0 && px.length > best.length) best = px; });
+    return best ? { px: best, nat: d.slice(best.length) } : { px: dflt, nat: d };   // ไม่รู้จักรหัส → คงเลขเต็มไว้ (ขึ้นต้น +)
+  }
+  return { px: dflt, nat: p };   // เบอร์เก่าแบบท้องถิ่น (0xx...) — ตอนบันทึกจะตัด 0 นำหน้าแล้วเติมรหัสประเทศ
+}
+function mpcPhoneInit(phone, cc) {
+  const s = mpcPhoneSplit(phone, cc);
+  mpcFillPhoneCC(s.px);
+  const e = document.getElementById('addr-phone'); if (e) e.value = s.nat;
+  return s.nat;
+}
+function mpcPhoneE164() {
+  const px = String((document.getElementById('addr-phone-cc') || {}).value || '').trim();
+  let d = String((document.getElementById('addr-phone') || {}).value || '').replace(/[^0-9+]/g, '');
+  if (!d) return '';
+  if (d.charAt(0) === '+') return '+' + d.slice(1).replace(/\+/g, '');
+  d = d.replace(/\+/g, '');
+  if (d.indexOf('00') === 0) return '+' + d.slice(2);
+  return px + (d.charAt(0) === '0' ? d.slice(1) : d);
+}
+function mpcPhoneValid(e164) {   // กติกาเดียวกับ GAS (_phoneValid): E.164 ทั่วไป + phone_regex ของประเทศเจ้าของรหัสโทร
+  if (!/^\+[1-9]\d{7,14}$/.test(e164)) return false;
+  let best = null;
+  (MPCFG.countries || []).forEach(c => { const px = String(c.phone_prefix || '').trim(); if (px && e164.indexOf(px) === 0 && (!best || px.length > String(best.phone_prefix).length)) best = c; });
+  const rx = best ? String(best.phone_regex || '').trim() : '';
+  if (!rx) return true;
+  try { return new RegExp(rx).test(e164); } catch (e) { return true; }
+}
+
+// [P7] label_code (home|work|warehouse|other) — ข้อความเดิมที่เป็นไทยถูก map เป็นโค้ดแล้วแปลตามภาษาตอนแสดง
+const MPC_LBL = { home: ['mp_ui_0268', '🏠 บ้าน'], work: ['mp_ui_0269', '🏢 ที่ทำงาน'], warehouse: ['mp_ui_0270', '📦 คลังสินค้า'], other: ['mp_ui_0271', '🏨 โรงแรม/อื่นๆ'] };
+let _addrLabelCode = '';
+function mpcLabelCodeOf(l) {   // เหมือน _addrLabelCode ใน GAS
+  const t = String(l || '').trim();
+  if (/^(🏠\s*)?(บ้าน|home)$/i.test(t)) return 'home';
+  if (/^(🏢\s*)?(ที่ทำงาน|work|office)$/i.test(t)) return 'work';
+  if (/^(📦\s*)?(คลังสินค้า|คลัง|warehouse)$/i.test(t)) return 'warehouse';
+  if (/^(🏨\s*)?(โรงแรม\/อื่นๆ|อื่นๆ|อื่น ๆ|other)$/i.test(t)) return 'other';
+  return '';
+}
+function mpcAddrLabel(a, fb) {
+  const code = String(a.label_code || '');
+  const raw = String(a.label || '').trim();
+  if (code && MPC_LBL[code] && (!raw || mpcLabelCodeOf(raw) === code)) return tccT(MPC_LBL[code][0]);
+  return raw || fb || '';
+}
+function mpcAddrText(a) { return [a.address_line, a.address_line2, a.subdistrict, a.district, a.province, a.postal_code].filter(Boolean).join(' '); }
+function mpcAddrNoteHtml(a) { return a.delivery_note ? `<div class="tsm tm">📝 ${mpcfgEsc(a.delivery_note)}</div>` : ''; }
+function mpcAddrLabelTyped() {
+  const v = document.getElementById('addr-label').value.trim();
+  if (_addrLabelCode && (!MPC_LBL[_addrLabelCode] || v !== tccT(MPC_LBL[_addrLabelCode][0]))) {
+    _addrLabelCode = '';
+    document.querySelectorAll('.addr-lbl-btn').forEach(b => b.classList.remove('btn-gold'));
+  }
+}
+
 function mpcAddrCountryChanged() {
   const cc = document.getElementById('addr-country').value;
   mpcAddrApplySchema(cc);
+  mpcFillPhoneCC(String((mpcCountry(cc) || {}).phone_prefix || '').trim());   // [P7] รหัสโทรตามประเทศใหม่
   // ตำแหน่ง/ผลค้นหาแผนที่เป็นของประเทศเดิม → ล้าง
   ['addr-lat', 'addr-lng'].forEach(id => { const e = document.getElementById(id); if (e) e.value = '0'; });
   const q = document.getElementById('addr-search'); if (q) q.value = '';
-  const ac = document.getElementById('addr-autocomplete-list'); if (ac) ac.style.display = 'none';
+  _acHide();
+  mpcGeoConfirmHide();
   if (_leafMap) { try { _leafMap.remove(); } catch (e) {} _leafMap = null; _leafMarker = null; }
   const mp = document.getElementById('addr-map-preview');
   if (mp) mp.innerHTML = ('<div class="addr-map-placeholder"><span style="font-size:2rem;">🗺️</span><span>' + tccT('mp_js_0314') + '</span></div>');
@@ -10407,9 +10541,10 @@ function renderAddrList() {
   }
   el.innerHTML = _addrBook.map(a => `
     <div class="addr-card ${a.is_default ? 'is-default' : ''}">
-      <div class="addr-label">${mpcfgFlag(a.country_code||'TH')} ${mpcfgEsc(a.label || tccT('mp_js_0085'))} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0309')+'</span>') : ''}</div>
+      <div class="addr-label">${mpcfgFlag(a.country_code||'TH')} ${mpcfgEsc(mpcAddrLabel(a, tccT('mp_js_0085')))} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0309')+'</span>') : ''}</div>
       <div class="addr-name">${mpcfgEsc(a.recipient_name)} · ${mpcfgEsc(a.phone)}</div>
-      <div class="addr-line">${mpcfgEsc([a.address_line, a.subdistrict, a.district, a.province, a.postal_code].filter(Boolean).join(' '))}</div>
+      <div class="addr-line">${mpcfgEsc(mpcAddrText(a))}</div>
+      ${mpcAddrNoteHtml(a)}
       ${a.lat && a.lng ? `<a href="https://www.openstreetmap.org/?mlat=${Number(a.lat)}&mlon=${Number(a.lng)}#map=16/${Number(a.lat)}/${Number(a.lng)}" target="_blank" rel="noopener" class="tsm" style="color:var(--gold);text-decoration:none;">${tccT('mp_js_0310')}</a>` : ''}
       <div class="addr-acts">
         ${!a.is_default ? `<button class="btn btn-ghost btn-sm" onclick="doSetDefault('${_idSafe(a.addr_id)}')">${tccT('mp_js_0311')}</button>` : ''}
@@ -10427,17 +10562,21 @@ function openEditAddr(addrId) {
   document.getElementById('addr-lat').value        = '0';
   document.getElementById('addr-lng').value        = '0';
   document.getElementById('addr-search').value     = '';
-  document.getElementById('addr-autocomplete-list').style.display = 'none';
+  _acHide();
+  mpcGeoConfirmHide();
   // reset map — ต้อง destroy Leaflet instance เก่าก่อน ไม่งั้น instance ค้างบน element ที่ถูกลบ
   if (_leafMap) { try { _leafMap.remove(); } catch(e) {} _leafMap = null; _leafMarker = null; }
   document.getElementById('addr-map-preview').innerHTML =
     ('<div class="addr-map-placeholder"><span style="font-size:2rem;">🗺️</span><span>'+tccT('mp_js_0314')+'</span></div>');
+  _addrLabelCode = '';
 
   if (isNew) {
     document.getElementById('addr-label').value       = '';
     document.getElementById('addr-recipient').value   = '';
     document.getElementById('addr-phone').value       = '';
     document.getElementById('addr-line').value        = '';
+    document.getElementById('addr-line2').value       = '';
+    document.getElementById('addr-note').value        = '';
     document.getElementById('addr-subdistrict').value = '';
     document.getElementById('addr-district').value    = '';
     document.getElementById('addr-province').value    = '';
@@ -10446,15 +10585,23 @@ function openEditAddr(addrId) {
     // [P4] ประเทศเริ่มต้น = ประเทศสินค้าที่กำลังซื้อ (ถ้าเปิดจาก checkout) ไม่งั้นตลาดปัจจุบัน
     const _defCC = ((document.getElementById('m-buy')||{}).classList && document.getElementById('m-buy').classList.contains('open') && buyProd && buyProd.cc) || mpcCur();
     mpcFillAddrCountry(_defCC); mpcAddrApplySchema(_defCC);
-    mpcfgLoad().then(() => { const e = document.getElementById('addr-country'); if (e) { mpcFillAddrCountry(e.value); mpcAddrApplySchema(e.value); } });
+    mpcFillPhoneCC(String((mpcCountry(_defCC) || {}).phone_prefix || '').trim());
+    mpcfgLoad().then(() => {
+      const e = document.getElementById('addr-country'); if (!e) return;
+      mpcFillAddrCountry(e.value); mpcAddrApplySchema(e.value);
+      if (!document.getElementById('addr-phone').value) mpcFillPhoneCC(String((mpcCountry(e.value) || {}).phone_prefix || '').trim());
+    });
     document.querySelectorAll('.addr-lbl-btn').forEach(b => b.classList.remove('btn-gold'));
   } else {
     const a = _addrBook.find(x => x.addr_id === addrId);
     if (!a) return;
-    document.getElementById('addr-label').value       = a.label || '';
+    _addrLabelCode = String(a.label_code || '');
+    document.getElementById('addr-label').value       = mpcAddrLabel(a, '');
+    document.querySelectorAll('.addr-lbl-btn').forEach(b => b.classList.toggle('btn-gold', !!_addrLabelCode && b.dataset.code === _addrLabelCode && (!a.label || mpcLabelCodeOf(a.label) === _addrLabelCode)));
     document.getElementById('addr-recipient').value   = a.recipient_name || '';
-    document.getElementById('addr-phone').value       = a.phone || '';
     document.getElementById('addr-line').value        = a.address_line || '';
+    document.getElementById('addr-line2').value       = a.address_line2 || '';
+    document.getElementById('addr-note').value        = a.delivery_note || '';
     document.getElementById('addr-subdistrict').value = a.subdistrict || '';
     document.getElementById('addr-district').value    = a.district || '';
     document.getElementById('addr-province').value    = a.province || '';
@@ -10464,7 +10611,13 @@ function openEditAddr(addrId) {
     document.getElementById('addr-is-default').checked = !!a.is_default;
     const _aCC = String(a.country_code || 'TH').toUpperCase();
     mpcFillAddrCountry(_aCC); mpcAddrApplySchema(_aCC);
-    mpcfgLoad().then(() => { const e = document.getElementById('addr-country'); if (e) { mpcFillAddrCountry(e.value); mpcAddrApplySchema(e.value); } });
+    const _nat0 = mpcPhoneInit(a.phone || '', _aCC);
+    mpcfgLoad().then(() => {
+      const e = document.getElementById('addr-country'); if (!e) return;
+      mpcFillAddrCountry(e.value); mpcAddrApplySchema(e.value);
+      const pe = document.getElementById('addr-phone');
+      if (pe && pe.value === _nat0) mpcPhoneInit(a.phone || '', e.value);   // config เพิ่งโหลดเสร็จ → แยกรหัสโทรใหม่ (ถ้าผู้ใช้ยังไม่แก้)
+    });
     // แสดงแผนที่เดิมถ้ามี lat/lng
     if (a.lat && a.lng) showMapAt(a.lat, a.lng);
   }
@@ -10476,8 +10629,10 @@ function openEditAddr(addrId) {
   setTimeout(() => { if (_leafMap) _leafMap.invalidateSize(); }, 320);
 }
 
-function setAddrLabel(lbl, btn) {
-  document.getElementById('addr-label').value = lbl;
+function setAddrLabel(code, btn) {
+  const m = MPC_LBL[code]; if (!m) return;
+  _addrLabelCode = code;
+  document.getElementById('addr-label').value = tccT(m[0]);
   document.querySelectorAll('.addr-lbl-btn').forEach(b => b.classList.remove('btn-gold'));
   if (btn) btn.classList.add('btn-gold');
 }
@@ -10525,6 +10680,138 @@ async function mpGeoSearch(q, cc, lang) {
   return list;
 }
 
+// ── [P7] แปลงฟิลด์ OSM → ฟิลด์ฟอร์มตามประเทศ ──────────────────────────
+// ลำดับคีย์ OSM ต่อฟิลด์ (ตัวแรกที่มีค่าชนะ) · ประเทศที่ไม่ระบุใช้ค่า _
+//   town ไม่ถูกใส่ district ในประเทศที่ town = ระดับตำบล/คอมมูน (VN KH CN ID) → ไปที่ subdistrict แทน
+const MP_OSM_RULES = {
+  _:  { sub: ['subdistrict', 'suburb', 'quarter', 'neighbourhood', 'village', 'hamlet'], dist: ['city_district', 'county', 'municipality'], prov: ['state', 'region', 'province', 'city'] },
+  TH: { dist: ['city_district', 'county', 'municipality', 'town'] },
+  MY: { dist: ['city_district', 'county', 'municipality', 'town'] },
+  MM: { dist: ['city_district', 'county', 'municipality', 'town'] },
+  LA: { dist: ['city_district', 'county', 'municipality', 'town'] },
+  VN: { sub: ['subdistrict', 'suburb', 'quarter', 'neighbourhood', 'village', 'hamlet', 'town'] },
+  KH: { sub: ['subdistrict', 'suburb', 'quarter', 'neighbourhood', 'village', 'hamlet', 'town'] },
+  CN: { sub: ['subdistrict', 'suburb', 'quarter', 'neighbourhood', 'village', 'hamlet', 'town'] },
+  ID: { sub: ['subdistrict', 'suburb', 'quarter', 'neighbourhood', 'village', 'hamlet', 'town'] }
+};
+function mapOsmAddress(addr, cc) {
+  addr = (addr && typeof addr === 'object') ? addr : {};
+  cc = String(cc || addr.country_code || '').toUpperCase();
+  const r = Object.assign({}, MP_OSM_RULES._, MP_OSM_RULES[cc] || {});
+  const pick = keys => { for (const k of keys) { const v = String(addr[k] == null ? '' : addr[k]).trim(); if (v) return { v, k }; } return { v: '', k: '' }; };
+  const prov = pick(r.prov);
+  let sub = pick(r.sub).v;
+  let dist = pick(r.dist).v;
+  if (!dist && prov.k !== 'city' && addr.city) dist = String(addr.city).trim();   // จังหวัดมาจาก state → city คือระดับถัดลงมา
+  if (dist && (dist === prov.v || dist === sub)) dist = '';                        // กันค่าซ้ำข้ามช่อง (เช่น กรุงฮานอย)
+  if (sub && sub === prov.v) sub = '';
+  let postal = String(addr.postcode || '').split(/[;,]/)[0].trim();
+  const c = mpcCountry(cc);
+  if (postal && c && c.postal_regex) { try { if (!new RegExp(c.postal_regex).test(postal)) postal = ''; } catch (e) {} }   // ไม่ตรงรูปแบบประเทศ → ไม่เติม
+  return { subdistrict: sub, district: dist, province: prov.v, postal };
+}
+function mpcGeoOutside(p, cc) {
+  const pc = String((p && p.address && p.address.country_code) || '').toLowerCase();
+  return !!pc && pc !== String(cc || '').toLowerCase();
+}
+function mpcAddrFill(p, cc) {   // เติม 4 ช่องตามตำแหน่ง (เขียนทับทั้งหมด กันค่าเก่าค้างผิดช่อง) + ที่อยู่บรรทัดแรกถ้ายังว่าง
+  const m = mapOsmAddress(p.address || {}, cc);
+  document.getElementById('addr-subdistrict').value = m.subdistrict;
+  document.getElementById('addr-district').value    = m.district;
+  document.getElementById('addr-province').value    = m.province;
+  document.getElementById('addr-postal').value      = m.postal;
+  if (!document.getElementById('addr-line').value)
+    document.getElementById('addr-line').value = String(p.display_name || '').split(',')[0] || '';
+}
+function mpcAddrCC() { return String((document.getElementById('addr-country') || {}).value || mpcCur()).toUpperCase(); }
+function mpcAddrLang(cc) { return ((mpcCountry(cc) || {}).default_lang) || 'en'; }
+
+// ── Reverse geocode (ใช้ proxy /reverse ถ้าตั้ง MP_GEO_PROXY ไม่งั้น Nominatim ตรง ๆ ห่างกัน ≥ 1.1 วินาที) ──
+let _revAbort = null;
+async function mpGeoReverse(lat, lng, lang) {
+  if (_revAbort) { try { _revAbort.abort(); } catch (e) {} }
+  _revAbort = new AbortController();
+  const sig = _revAbort.signal;
+  let url;
+  if (MP_GEO_PROXY) {
+    url = MP_GEO_PROXY.replace(/\/+$/, '') + '/reverse?lat=' + encodeURIComponent(lat.toFixed(5)) + '&lon=' + encodeURIComponent(lng.toFixed(5)) + '&lang=' + encodeURIComponent(lang);
+  } else {
+    const wait = _geoLastAt + 1100 - Date.now();
+    if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    if (sig.aborted) return null;
+    _geoLastAt = Date.now();
+    url = 'https://nominatim.openstreetmap.org/reverse?lat=' + encodeURIComponent(lat.toFixed(5)) + '&lon=' + encodeURIComponent(lng.toFixed(5))
+        + '&format=json&addressdetails=1&accept-language=' + encodeURIComponent(lang);
+  }
+  const res = await fetch(url, { signal: sig });
+  if (!res.ok) throw new Error('reverse ' + res.status);
+  const d = await res.json();
+  if (!d || !d.display_name) return null;
+  return { place_id: String(d.place_id || ''), display_name: String(d.display_name), lat, lon: lng, address: (d.address && typeof d.address === 'object') ? d.address : {} };
+}
+
+// ── ยืนยันที่อยู่จากหมุด (ลากหมุด / ใช้ตำแหน่งปัจจุบัน) ──
+let _geoPending = null;
+function mpcGeoConfirmHide() {
+  _geoPending = null;
+  if (_revAbort) { try { _revAbort.abort(); } catch (e) {} }
+  const box = document.getElementById('addr-geo-confirm'); if (box) { box.style.display = 'none'; box.textContent = ''; }
+}
+async function mpcPinMoved(lat, lng) {
+  document.getElementById('addr-lat').value = lat;
+  document.getElementById('addr-lng').value = lng;
+  const box = document.getElementById('addr-geo-confirm'); if (!box) return;
+  _geoPending = null;
+  box.style.display = ''; box.textContent = tccT('mp_js_0628');
+  const cc = mpcAddrCC();
+  let p = null;
+  try { p = await mpGeoReverse(lat, lng, mpcAddrLang(cc)); } catch (e) { if (e && e.name === 'AbortError') return; }
+  if (Number(document.getElementById('addr-lat').value) !== lat || Number(document.getElementById('addr-lng').value) !== lng) return;   // มีการเลื่อนหมุดครั้งใหม่แล้ว
+  box.textContent = '';
+  if (!p) { box.textContent = tccT('mp_js_0629'); return; }
+  _geoPending = p;
+  const t = document.createElement('div'); t.style.fontWeight = '600'; t.textContent = tccT('mp_js_0625');
+  const d = document.createElement('div'); d.style.margin = '4px 0'; d.textContent = p.display_name;   // display_name มาจาก OSM → textContent เท่านั้น
+  box.appendChild(t); box.appendChild(d);
+  if (mpcGeoOutside(p, cc)) {
+    const w = document.createElement('div'); w.style.cssText = 'color:var(--warn);margin-bottom:6px;'; w.textContent = tccTF('mp_js_0624', { p1: cc });
+    box.appendChild(w);
+  }
+  const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+  const ok = document.createElement('button'); ok.type = 'button'; ok.className = 'btn btn-gold btn-sm'; ok.textContent = tccT('mp_ui_0356');
+  ok.addEventListener('click', () => { const q = _geoPending; if (!q) return; mpcAddrFill(q, mpcAddrCC()); document.getElementById('addr-search').value = q.display_name; mpcGeoConfirmHide(); showToast(tccT('mp_js_0630')); });
+  const no = document.createElement('button'); no.type = 'button'; no.className = 'btn btn-ghost btn-sm'; no.textContent = tccT('mp_ui_0357');
+  no.addEventListener('click', mpcGeoConfirmHide);
+  row.appendChild(ok); row.appendChild(no); box.appendChild(row);
+}
+function mpcUseMyLocation() {
+  if (!navigator.geolocation) { showToast(tccT('mp_js_0623'), 'warn'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    document.getElementById('addr-lat').value = lat; document.getElementById('addr-lng').value = lng;
+    showMapAt(lat, lng);
+    mpcPinMoved(lat, lng);
+  }, () => showToast(tccT('mp_js_0623'), 'warn'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+}
+
+// ── Autocomplete dropdown (role=listbox · ↑ ↓ Enter Esc) ──
+let _acActive = -1;
+function _acHide() {
+  const el = document.getElementById('addr-autocomplete-list'); if (el) el.style.display = 'none';
+  const input = document.getElementById('addr-search');
+  if (input) { input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+  _acActive = -1;
+}
+function _acHighlight() {
+  const el = document.getElementById('addr-autocomplete-list'); if (!el) return;
+  const input = document.getElementById('addr-search');
+  [...el.children].forEach((row, i) => {
+    const on = i === _acActive;
+    row.setAttribute('aria-selected', on ? 'true' : 'false');
+    row.style.background = on ? 'rgba(240,185,11,.15)' : '';
+    if (on) { row.scrollIntoView({ block: 'nearest' }); if (input) input.setAttribute('aria-activedescendant', row.id); }
+  });
+}
 function initAddrAutocomplete() {
   const input = document.getElementById('addr-search');
   if (!input || input._acInited) return;
@@ -10534,56 +10821,65 @@ function initAddrAutocomplete() {
   input.addEventListener('input', () => {
     clearTimeout(_autocompleteTimer);
     const val = input.value.trim();
-    if (val.length < MP_GEO_MIN_CHARS) { const el = listEl(); if (el) el.style.display = 'none'; return; }
+    if (val.length < MP_GEO_MIN_CHARS) { _acHide(); return; }
 
     _autocompleteTimer = setTimeout(async () => {
       try {
         // ค้นตามประเทศที่เลือกในฟอร์ม · ภาษาผลลัพธ์ = default_lang ของประเทศ
-        const cc   = String((document.getElementById('addr-country') || {}).value || mpcCur()).toUpperCase();
-        const lang = ((mpcCountry(cc) || {}).default_lang) || 'en';
-        const list = await mpGeoSearch(val, cc, lang);
+        const cc   = mpcAddrCC();
+        const list = await mpGeoSearch(val, cc, mpcAddrLang(cc));
         if (list === null || input.value.trim() !== val) return;   // ถูกแทนที่ด้วยคำค้นใหม่แล้ว
         const el = listEl(); if (!el) return;
         _acResults = list;
         el.textContent = '';
-        if (!list.length) { el.style.display = 'none'; return; }
+        _acActive = -1;
+        if (!list.length) { _acHide(); return; }
         list.forEach((p, i) => {
           // [v62] สร้างด้วย DOM + textContent (ไม่ใช้ innerHTML/inline handler) — display_name มาจาก OSM ซึ่งใครก็แก้ได้
           const row = document.createElement('div');
+          row.id = 'addr-ac-opt-' + i; row.setAttribute('role', 'option'); row.setAttribute('aria-selected', 'false');
           row.style.cssText = 'padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bdg);font-size:13px;';
           row.textContent = '\u{1F4CD} ' + p.display_name;
           row.addEventListener('mousedown', ev => { ev.preventDefault(); selectPlaceIdx(i); });
           el.appendChild(row);
         });
         el.style.display = '';
+        input.setAttribute('aria-expanded', 'true');
       } catch (e) {
         if (e && e.name === 'AbortError') return;
-        const el = listEl(); if (el) el.style.display = 'none';
+        _acHide();
       }
     }, MP_GEO_DEBOUNCE);
   });
+
+  input.addEventListener('keydown', ev => {
+    const el = listEl();
+    const open = !!el && el.style.display !== 'none' && _acResults.length > 0;
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      if (!open) return;
+      ev.preventDefault();
+      const n = _acResults.length;
+      _acActive = ev.key === 'ArrowDown' ? (_acActive + 1) % n : (_acActive <= 0 ? n - 1 : _acActive - 1);
+      _acHighlight();
+    } else if (ev.key === 'Enter') {
+      if (open && _acActive >= 0) { ev.preventDefault(); selectPlaceIdx(_acActive); }
+    } else if (ev.key === 'Escape') {
+      if (open) { ev.preventDefault(); ev.stopPropagation(); _acHide(); }
+    }
+  });
+  input.addEventListener('blur', () => setTimeout(_acHide, 120));
 }
 
 function selectPlaceIdx(i) {
   const p = _acResults[i]; if (!p) return;
-  const description = p.display_name;
-  document.getElementById('addr-search').value = description;
-  document.getElementById('addr-autocomplete-list').style.display = 'none';
+  const cc = mpcAddrCC();
+  document.getElementById('addr-search').value = p.display_name;
+  _acHide();
+  mpcGeoConfirmHide();
   document.getElementById('addr-lat').value = p.lat;
   document.getElementById('addr-lng').value = p.lon;
-
-  const addr = p.address || {};
-  const subdistrict = addr.suburb || addr.quarter || addr.neighbourhood || addr.village || '';
-  const district    = addr.city_district || addr.town || addr.city || '';
-  const province    = addr.state || addr.county || '';
-  const postal      = addr.postcode || '';
-  if (subdistrict) document.getElementById('addr-subdistrict').value = subdistrict;
-  if (district)    document.getElementById('addr-district').value    = district;
-  if (province)    document.getElementById('addr-province').value    = province;
-  if (postal)      document.getElementById('addr-postal').value      = postal;
-  if (!document.getElementById('addr-line').value)
-    document.getElementById('addr-line').value = description.split(',')[0] || '';
-
+  mpcAddrFill(p, cc);   // [P7] mapOsmAddress ตามประเทศ
+  if (mpcGeoOutside(p, cc)) showToast(tccTF('mp_js_0624', { p1: cc }), 'warn');
   showMapAt(p.lat, p.lon);
 }
 
@@ -10611,10 +10907,9 @@ function showMapAt(lat, lng) {
       className: '', iconAnchor: [11, 11]
     });
     _leafMarker = L.marker([lat, lng], { icon: goldIcon, draggable: true }).addTo(_leafMap);
-    _leafMarker.on('dragend', ev => {
+    _leafMarker.on('dragend', ev => {   // [P7] ลากหมุด → reverse geocode → ให้ผู้ใช้ยืนยันก่อนเติมช่อง
       const p = ev.target.getLatLng();
-      document.getElementById('addr-lat').value = p.lat;
-      document.getElementById('addr-lng').value = p.lng;
+      mpcPinMoved(p.lat, p.lng);
     });
     // invalidateSize หลัง tile โหลด — แก้กรณี modal เพิ่งเปิด
     setTimeout(() => _leafMap.invalidateSize(), 50);
@@ -10629,21 +10924,35 @@ function showMapAt(lat, lng) {
 // ── submitSaveAddress ──────────────────────────────────────────────────
 async function submitSaveAddress() {
   const recipient = document.getElementById('addr-recipient').value.trim();
-  const phone     = document.getElementById('addr-phone').value.trim();
   const addrLine  = document.getElementById('addr-line').value.trim();
-  const province  = document.getElementById('addr-province').value.trim();
+  const _addrCC = mpcAddrCC();   // [P4]
   if (!recipient) { showToast(tccT('mp_js_0316'), 'warn'); return; }
-  if (!phone)     { showToast(tccT('mp_js_0155'), 'warn'); return; }
+  if (!document.getElementById('addr-phone').value.trim()) { showToast(tccT('mp_js_0155'), 'warn'); return; }
   if (!addrLine)  { showToast(tccT('mp_js_0317'), 'warn'); return; }
-  if (!province)  { showToast(tccT('mp_js_0318'), 'warn'); return; }
-  // [P4] ประเทศ + รหัสไปรษณีย์ตาม postal_regex ของประเทศ (server ตรวจซ้ำ)
-  const _addrCC = String((document.getElementById('addr-country') || {}).value || mpcCur()).toUpperCase();
+  // [P7] ฟิลด์บังคับตาม Countries.required_fields (ค่าว่าง = province เหมือนเดิม)
+  const _req = mpcReqFields(_addrCC);
+  for (const k of _req) {
+    const el = document.getElementById(MPC_REQ_EL[k]);
+    if (el && !el.value.trim()) {
+      showToast(k === 'province' ? tccT('mp_js_0318') : tccTF('mp_js_0627', { p1: (document.getElementById(MPC_REQ_LBL[k]) || {}).textContent || k }), 'warn');
+      try { el.focus(); } catch (e) {}
+      return;
+    }
+  }
+  // [P7] เบอร์โทร → E.164 + ตรวจรูปแบบตามรหัสโทร (GAS ตรวจซ้ำ)
+  const phone = mpcPhoneE164();
+  if (!mpcPhoneValid(phone)) { showToast(tccTF('mp_js_0626', { p1: (document.getElementById('addr-phone-cc') || {}).value || _addrCC }), 'warn'); return; }
+  // [P4] รหัสไปรษณีย์ตาม postal_regex ของประเทศ (server ตรวจซ้ำ)
   const _postal = document.getElementById('addr-postal').value.trim();
   const _cRow   = mpcCountry(_addrCC);
   if (_postal && _cRow && _cRow.postal_regex) {
     let _re = null; try { _re = new RegExp(_cRow.postal_regex); } catch (e) {}
     if (_re && !_re.test(_postal)) { showToast(tccTF('mp_js_0610', { p1: _addrCC }), 'warn'); return; }
   }
+  // [P7] label: ปุ่มสำเร็จรูป → เก็บข้อความไทยเดิม (ระบบเก่าอ่านได้) + label_code (แปลตามภาษาตอนแสดง) · ข้อความที่พิมพ์เอง → เก็บตามที่พิมพ์
+  let _lbl = document.getElementById('addr-label').value.trim(), _lcode = _addrLabelCode;
+  if (_lcode && MPC_LBL[_lcode] && _lbl === tccT(MPC_LBL[_lcode][0])) _lbl = MPC_LBL[_lcode][1];
+  else _lcode = mpcLabelCodeOf(_lbl);
 
   showLoad(tccT('mp_js_0192'));
   try {
@@ -10651,14 +10960,17 @@ async function submitSaveAddress() {
       action:          'saveShippingAddress',
       member_id:       SESSION.member_id,
       addr_id:         document.getElementById('addr-edit-id').value || '',
-      label:           document.getElementById('addr-label').value.trim() || tccT('mp_js_0085'),
+      label:           _lbl || tccT('mp_js_0085'),
+      label_code:      _lcode,
       recipient_name:  recipient,
       phone,
       address_line:    addrLine,
+      address_line2:   document.getElementById('addr-line2').value.trim(),
+      delivery_note:   document.getElementById('addr-note').value.trim(),
       subdistrict:     document.getElementById('addr-subdistrict').value.trim(),
       district:        document.getElementById('addr-district').value.trim(),
-      province,
-      postal_code:     document.getElementById('addr-postal').value.trim(),
+      province:        document.getElementById('addr-province').value.trim(),
+      postal_code:     _postal,
       lat:             Number(document.getElementById('addr-lat').value) || 0,
       lng:             Number(document.getElementById('addr-lng').value) || 0,
       is_default:      document.getElementById('addr-is-default').checked,
@@ -10675,7 +10987,7 @@ async function submitSaveAddress() {
         await loadBuyerAddresses();
       }
     } else {
-      const errMsg = res.error || tccT('mp_js_0320');
+      const errMsg = (window.tccGasErr && window.tccGasErr(res)) || res.error || tccT('mp_js_0320');
       if (errMsg === 'Unknown action') {
         showToast(tccT('mp_js_0321'), 'err');
       } else {
@@ -10736,9 +11048,9 @@ function renderBuyAddrPreview(a) {
   const preview = document.getElementById('buy-addr-preview');
   if (!preview || !a) return;
   preview.innerHTML = `
-    <div class="ba-label">${mpcfgFlag(a.country_code || 'TH')} ${mpcfgEsc(a.label || '📍')}</div>
+    <div class="ba-label">${mpcfgFlag(a.country_code || 'TH')} ${mpcfgEsc(mpcAddrLabel(a, '📍'))}</div>
     <div class="ba-name">${mpcfgEsc(a.recipient_name)} · ${mpcfgEsc(a.phone)}</div>
-    <div class="ba-line">${mpcfgEsc([a.address_line, a.subdistrict, a.district, a.province, a.postal_code].filter(Boolean).join(' '))}</div>`;
+    <div class="ba-line">${mpcfgEsc(mpcAddrText(a))}</div>${mpcAddrNoteHtml(a)}`;
 }
 
 function openBuyAddrPicker() {
@@ -10753,9 +11065,9 @@ function openBuyAddrPicker() {
       const ok = String(a.country_code || 'TH').toUpperCase() === _cc;
       return `
       <div class="addr-card ${a.addr_id === _selectedAddrId ? 'is-default' : ''}" style="${ok ? 'cursor:pointer;' : 'opacity:.45;cursor:not-allowed;'}" ${ok ? `onclick="selectBuyAddr('${_idSafe(a.addr_id)}')"` : ''}>
-        <div class="addr-label">${mpcfgFlag(a.country_code || 'TH')} ${mpcfgEsc(a.label || '📍')} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0331')+'</span>') : ''}${ok ? '' : ` <span class="tsm tm">· ${tccT('mp_js_0611')}</span>`}</div>
+        <div class="addr-label">${mpcfgFlag(a.country_code || 'TH')} ${mpcfgEsc(mpcAddrLabel(a, '📍'))} ${a.is_default ? ('<span class="addr-default-badge">'+tccT('mp_js_0331')+'</span>') : ''}${ok ? '' : ` <span class="tsm tm">· ${tccT('mp_js_0611')}</span>`}</div>
         <div class="addr-name">${mpcfgEsc(a.recipient_name)} · ${mpcfgEsc(a.phone)}</div>
-        <div class="addr-line">${mpcfgEsc([a.address_line, a.district, a.province, a.postal_code].filter(Boolean).join(' '))}</div>
+        <div class="addr-line">${mpcfgEsc(mpcAddrText(a))}</div>${mpcAddrNoteHtml(a)}
       </div>`;
     }).join('');
   }
