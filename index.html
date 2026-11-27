@@ -1761,7 +1761,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 #wtf{ width:160px; }
 #wsf{ width:130px; }
 #thtype{ width:160px; }
-#thdf,#thdt{ width:140px; }
+#thdf,#thdt{ width:140px; cursor:pointer; color-scheme:dark; }   /* [TXH-DATE v1] ปฏิทิน native โทนมืด */
+#thdf::-webkit-calendar-picker-indicator,#thdt::-webkit-calendar-picker-indicator{ cursor:pointer; opacity:.85; }
 #thsq{ width:180px; }
 
 /* ── [v21 FIX F] Wallet TX filter bars on mobile ── */
@@ -2666,8 +2667,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <option value="Funding Fee">Funding Fee</option>
           <option value="Commission">Commission</option>
         </select>
-        <input type="date" class="fi" id="thdf" onchange="initTXH()">
-        <input type="date" class="fi" id="thdt" onchange="initTXH()">
+        <input type="date" class="fi" id="thdf" onclick="openDatePick(this,event)" onchange="txhDateChanged()">
+        <input type="date" class="fi" id="thdt" onclick="openDatePick(this,event)" onchange="txhDateChanged()">
         <input class="fi" placeholder="🔍 TX ID / รายละเอียด" id="thsq"
                oninput="initTXH()" data-i18n-placeholder="mp_ui_0037">
         <button class="btn btn-gold btn-sm" onclick="initTXH()" data-i18n="mp_ui_0038">ค้นหา</button>
@@ -6839,8 +6840,39 @@ function openTxDetail(el){
 let thPage = 1;
 const TH_PP = 20;
 
+// ─── [TXH-DATE v1] ช่องวันที่ในประวัติธุรกรรม ───
+// • คลิก/แตะตรงไหนของช่องก็เปิดปฏิทิน (เดิมเปิดได้เฉพาะตอนกดไอคอนเล็กๆ ด้านขวา)
+// • เลือกได้ตั้งแต่วันนี้ย้อนหลัง — ไม่มี min, max = วันนี้ (วันอนาคตเลือกไม่ได้)
+// • ช่วงวันที่ผูกกัน: "จากวันที่" ไม่เกิน "ถึงวันที่" และ "ถึงวันที่" ไม่ก่อน "จากวันที่"
+function _txhToday(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function txhDateSync(){
+  const f=document.getElementById('thdf'), t=document.getElementById('thdt');
+  if(!f||!t) return;
+  const today=_txhToday();
+  f.max=(t.value && t.value<today) ? t.value : today;
+  t.max=today;
+  t.min=f.value||'';
+}
+function openDatePick(el, ev){
+  txhDateSync();   // refresh max (เผื่อเปิดหน้าค้างข้ามเที่ยงคืน)
+  if(!el || typeof el.showPicker!=='function') return;   // browser เก่า → ใช้ native ตามเดิม
+  // คลิกที่ไอคอนปฏิทินด้านขวา → ให้ browser เปิดเอง (กันเปิดซ้ำแล้วปิดทันที)
+  if(ev && typeof ev.offsetX==='number' && ev.offsetX > el.clientWidth-32) return;
+  try{ el.showPicker(); }catch(e){}
+}
+function txhDateChanged(){
+  const f=document.getElementById('thdf'), t=document.getElementById('thdt');
+  const today=_txhToday();
+  if(f && f.value>today) f.value=today;   // พิมพ์วันอนาคตเอง → ดึงกลับเป็นวันนี้
+  if(t && t.value>today) t.value=today;
+  if(f && t && f.value && t.value && f.value>t.value){ const x=f.value; f.value=t.value; t.value=x; }   // สลับให้ถ้าช่วงกลับด้าน
+  txhDateSync();
+  initTXH();
+}
+
 function initTXH(){
   thPage = 1;  // reset ทุกครั้งที่ค้นหา
+  txhDateSync();
   _renderTXH();
 }
 
@@ -6864,8 +6896,9 @@ function _renderTXH(){
   // filter ประเภท
   if(typeF) rows = rows.filter(t => (t.type||'').includes(typeF));
   // filter วันที่
-  if(dateF) rows = rows.filter(t => (t.date||'') >= dateF);
-  if(dateT) rows = rows.filter(t => (t.date||'') <= dateT + 'T23:59');
+  // [TXH-DATE v1] เทียบเฉพาะส่วนวันที่ (YYYY-MM-DD) — รวมทั้งวันของ "ถึงวันที่" แม้ t.date มีวินาที
+  if(dateF) rows = rows.filter(t => (t.date||'').slice(0,10) >= dateF);
+  if(dateT) rows = rows.filter(t => (t.date||'').slice(0,10) <= dateT);
   // ค้นหา TX ID / Order ID / รายละเอียด
   if(searchQ) rows = rows.filter(t =>
     (t.id||'').toLowerCase().includes(searchQ) ||
