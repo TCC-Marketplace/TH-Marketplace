@@ -224,6 +224,14 @@ body.admin .admtabs{display:flex}
 .admtabs button.on{background:var(--green);color:#fff}
 .tbadge{display:none;margin-left:6px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--red);color:#fff;font-size:12px;font-weight:700;line-height:20px;vertical-align:1px}
 .tbadge.on{display:inline-block}
+/* [ORDER-TAB] สมาชิก: แท็บ แชท / ออเดอร์ (Visitor ไม่มี) · ตัวกรองออเดอร์ · ไอคอนห้องออเดอร์ 📦 */
+body.member.mtabs-on .mtabs{display:flex}
+.ofil{display:flex;gap:8px;padding:2px 16px 8px}
+.ofil button{height:30px;padding:0 14px;border-radius:15px;background:var(--surface);color:var(--tx2);font-size:13px;font-weight:600}
+.ofil button.on{background:var(--green);color:#fff}
+.omore{display:flex;justify-content:center;padding:10px 16px 20px}
+.omore .btn-s{height:38px;padding:0 22px;border-radius:19px}
+.avatar.oav{background:var(--surface2)!important;font-size:26px}
 .chead .mgb{display:none;flex-shrink:0;height:30px;padding:0 12px;border-radius:15px;background:var(--surface2);color:var(--tx);font-size:12px;font-weight:600;white-space:nowrap}
 body.admin.room .chead .mgb{display:block}
 .item.addroom .avatar{background:var(--green);font-size:26px;font-weight:400}
@@ -305,6 +313,7 @@ body.admin.room .chead .mgb{display:block}
       </div>
     </div>
     <div class="admtabs" id="admTabs"><button id="tabDm" class="on" type="button">แชท</button><button id="tabRooms" type="button">ห้องสนทนา<span class="tbadge" id="tabRoomsN"></span></button><button id="tabOrders" type="button" style="display:none">💬 ออเดอร์</button></div>
+    <div class="admtabs mtabs" id="memTabs"><button id="mtChat" class="on" type="button"></button><button id="mtOrders" type="button"><span id="mtOrdersL"></span><span class="tbadge" id="mtOrdersN"></span></button></div>
     <div class="sbox">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
       <input id="search" placeholder="ค้นหา" autocomplete="off">
@@ -485,6 +494,13 @@ const I18N = {
   listTitle: ["แชท", "Chats", "Trò chuyện", "ជជែក", "ချတ်", "ແຊັດ","Sembang","Obrolan","聊天"],
   search:   ["ค้นหา", "Search", "Tìm kiếm", "ស្វែងរក", "ရှာဖွေရန်", "ຄົ້ນຫາ","Cari","Cari","搜索"],
   ordersHead: ["💬 แชทออเดอร์", "💬 Order chats", "💬 Chat đơn hàng", "💬 ជជែកការបញ្ជាទិញ", "💬 အော်ဒါချက်တင်", "💬 ແຊັດອໍເດີ", "💬 Sembang pesanan", "💬 Obrolan pesanan", "💬 订单聊天"],
+  tabOrders: ["💬 ออเดอร์", "💬 Orders", "💬 Đơn hàng", "💬 ការបញ្ជាទិញ", "💬 အော်ဒါ", "💬 ອໍເດີ", "💬 Pesanan", "💬 Pesanan", "💬 订单"],
+  ordSearch: ["ค้นหา: รหัสออเดอร์ / ร้านค้า / ผู้ซื้อ / สินค้า", "Search: order ID / shop / buyer / product", "Tìm: mã đơn / cửa hàng / người mua / sản phẩm", "ស្វែងរក៖ លេខកូដ / ហាង / អ្នកទិញ / ផលិតផល", "ရှာရန်: အော်ဒါကုဒ် / ဆိုင် / ဝယ်သူ / ကုန်ပစ္စည်း", "ຄົ້ນຫາ: ລະຫັດອໍເດີ / ຮ້ານຄ້າ / ຜູ້ຊື້ / ສິນຄ້າ", "Cari: ID pesanan / kedai / pembeli / produk", "Cari: ID pesanan / toko / pembeli / produk", "搜索：订单号 / 店铺 / 买家 / 商品"],
+  ordAll: ["ทั้งหมด", "All", "Tất cả", "ទាំងអស់", "အားလုံး", "ທັງໝົດ", "Semua", "Semua", "全部"],
+  ordUnread: ["ยังไม่อ่าน", "Unread", "Chưa đọc", "មិនទាន់អាន", "မဖတ်ရသေး", "ຍັງບໍ່ໄດ້ອ່ານ", "Belum dibaca", "Belum dibaca", "未读"],
+  ordMore: ["แสดงเพิ่ม", "Show more", "Xem thêm", "បង្ហាញបន្ថែម", "ထပ်ပြရန်", "ສະແດງເພີ່ມ", "Tunjuk lagi", "Tampilkan lebih banyak", "显示更多"],
+  ordLoad: ["กำลังโหลด…", "Loading…", "Đang tải…", "កំពុងផ្ទុក…", "လုပ်ဆောင်နေသည်…", "ກຳລັງໂຫຼດ…", "Memuatkan…", "Memuat…", "加载中…"],
+  noOrders: ["ยังไม่มีแชทออเดอร์", "No order chats yet", "Chưa có chat đơn hàng", "មិនទាន់មានការជជែកការបញ្ជាទិញ", "အော်ဒါချက်တင် မရှိသေးပါ", "ຍັງບໍ່ມີແຊັດອໍເດີ", "Belum ada sembang pesanan", "Belum ada obrolan pesanan", "暂无订单聊天"],
   roomsHead: ["ห้องสนทนา", "Chat rooms", "Phòng trò chuyện", "បន្ទប់ជជែក", "စကားဝိုင်းများ", "ຫ້ອງສົນທະນາ","Bilik sembang","Ruang obrolan","聊天室"],
   stJoined: ["เข้าร่วมแล้ว", "Joined", "Đã tham gia", "បានចូលរួម", "ဝင်ပြီး", "ເຂົ້າຮ່ວມແລ້ວ","Telah menyertai","Sudah bergabung","已加入"],
   stPending: ["รออนุมัติ", "Pending", "Chờ duyệt", "រង់ចាំអនុម័ត", "အတည်ပြုရန် စောင့်ဆိုင်း", "ລໍຖ້າອະນຸມັດ","Menunggu kelulusan","Menunggu persetujuan","待审批"],
@@ -538,6 +554,8 @@ function pickLang() {
 
 // ---- ยืนยันตัวตน ----
 let initResolve = null, loginP = null, memberAvatar = "";
+// [ORDER-TAB] แท็บสมาชิก: memTab = chat | orders · รายการออเดอร์โหลดทีละหน้าจาก /api/order-rooms (ไม่มากับ /api/rooms)
+let memTab = "chat", returnTab = null, orderUnread = 0, ordRooms = [], ordOffset = 0, ordHasMore = false, ordOnlyUnread = false, ordLoadedM = false, ordErrM = "", ordBusyM = false, ordSeq = 0, ordSig = "", ordSearchT = null;
 let MEMBER_LIST = false, roomsCache = [], supportInfo = null, supAv = "", listBusy = false, roomSt = { status: "", locked: "", members: 0, readable: 1 };   // Member หน้าแรก + ห้องสนทนา (เฟส 2)
 let VISITOR = false, bootInit = null, vN = 0, vBusy = false, vSaved = null;   // Visitor: ไม่ล็อกอิน · ข้อความเก็บในหน้านี้เท่านั้น (id เล็ก ๆ ของฝั่งนี้)
 window.addEventListener("message", ev => {
@@ -577,7 +595,11 @@ async function openOrderRoom(orderId) {
   if (!MEMBER_LIST || !chatToken) { pendingOrder = orderId; return; }   // หน้ายังเริ่มไม่เสร็จ → เก็บไว้เปิดตอนพร้อม
   try {
     const d = await api("/api/order-rooms/open", { method: "POST", body: { order_id: orderId } });
-    if (d && d.room) openRoom(d.room);
+    if (d && d.room) {
+      if (returnTab === null) returnTab = memTab;   // [ORDER-TAB] จำแท็บเดิมไว้ → สลับไปแท็บออเดอร์ · ย้อนกลับแล้วกลับแท็บเดิม
+      memTab = "orders"; ordLoadedM = false;        // กลับมาแท็บออเดอร์ในอนาคตจะโหลดหน้าแรกใหม่ (มีห้องใหม่ที่เพิ่งสร้าง)
+      openRoom(d.room);
+    }
   } catch (e) { toast(e.message); }
 }
 window.addEventListener("message", ev => {
@@ -947,6 +969,7 @@ function renderList() {
 }
 $("#search").addEventListener("input", () => {
   if (!MEMBER_LIST && IS_ADMIN && admTab === "orders") { clearTimeout(ordTimer); ordTimer = setTimeout(loadAdminOrders, 350); return; }   // [ORDER-CHAT] ค้นที่ server (รวมเนื้อข้อความ) · หน่วง 350ms
+  if (MEMBER_LIST && !VISITOR && memTab === "orders") { clearTimeout(ordSearchT); ordSearchT = setTimeout(() => loadOrders("reset"), 350); return; }   // [ORDER-TAB] ค้นที่ server · หน่วง 350ms
   MEMBER_LIST ? renderMemberList() : renderAdminCurrent();
 });
 $("#bUnread").onclick = () => { onlyUnread = !onlyUnread; $("#bUnread").classList.toggle("act", onlyUnread); renderList(); toast(onlyUnread ? "แสดงเฉพาะที่ยังไม่อ่าน" : "แสดงทั้งหมด"); };
@@ -973,6 +996,7 @@ function itemRow(o) {
   const it = document.createElement("div"); it.className = "item";
   const wrap = document.createElement("div"); wrap.className = "avwrap";
   const av = document.createElement("div"); mkAvatar(av, o.name, o.color, o.id, o.avatar || ""); wrap.appendChild(av);
+  if (o.emoji) { av.textContent = o.emoji; av.classList.add("oav"); av.style.background = ""; }   // [ORDER-TAB] ห้องออเดอร์ใช้ 📦 แทนตัวอักษรแรกของรหัส
   if (o.pin && SHOW_PIN_BADGE) { const pb = document.createElement("div"); pb.className = "pinb"; pb.innerHTML = PIN_SVG; wrap.appendChild(pb); }
   const mid = document.createElement("div"); mid.className = "mid";
   const nm = document.createElement("div"); nm.className = "nm"; nm.textContent = o.name;
@@ -985,7 +1009,91 @@ function itemRow(o) {
   it.append(wrap, mid, rt); it.onclick = o.onclick;
   return it;
 }
+// [ORDER-TAB] ยอดค้างอ่านรวมที่รายงานให้แอป = ซัพพอร์ต + ห้องกลุ่มที่เข้าร่วม + ออเดอร์ทั้งหมด (เท่าเดิมก่อนแยกแท็บ)
+function reportMemberUnread() {
+  reportUnread(((supportInfo && supportInfo.unread) || 0) + roomsCache.reduce((n, r) => n + (r.kind !== "order" && r.status === "approved" ? (r.unread || 0) : 0), 0) + (orderUnread | 0));
+}
+function paintMemTabs() {
+  const on = MEMBER_LIST && !VISITOR && !IS_ADMIN;
+  document.body.classList.toggle("mtabs-on", on);
+  if (!on) return;
+  $("#mtChat").textContent = T("listTitle"); $("#mtOrdersL").textContent = T("tabOrders");
+  $("#mtChat").classList.toggle("on", memTab === "chat"); $("#mtOrders").classList.toggle("on", memTab === "orders");
+  const nb = $("#mtOrdersN"); nb.textContent = orderUnread > 99 ? "99+" : orderUnread; nb.classList.toggle("on", orderUnread > 0);
+  $("#search").placeholder = memTab === "orders" ? T("ordSearch") : T("search");
+}
+function setMemTab(t) {
+  if (VISITOR || (t !== "chat" && t !== "orders")) t = "chat";
+  if (t === memTab && $("#list").classList.contains("on")) return;
+  memTab = t; $("#search").value = ""; clearTimeout(ordSearchT);
+  paintMemTabs(); renderMemberList();
+  if (t === "orders") loadOrders("reset");
+}
+$("#mtChat").onclick = () => setMemTab("chat");
+$("#mtOrders").onclick = () => setMemTab("orders");
+
+// [ORDER-TAB] โหลดรายการออเดอร์: reset = เริ่มหน้าแรกใหม่ (เปิดแท็บ/ค้นหา/เปลี่ยนตัวกรอง) · more = หน้าถัดไป · poll = รีเฟรชหน้าแรกเงียบ ๆ แล้วรวมกับที่โหลดไว้
+async function loadOrders(mode) {
+  if (VISITOR || IS_ADMIN || !MEMBER_LIST) return;
+  if (mode === "poll" && ordBusyM) return;
+  const my = ++ordSeq;
+  const q = $("#search").value.trim();
+  const off = mode === "more" ? ordOffset : 0;
+  if (mode !== "poll") { ordBusyM = true; ordErrM = ""; if (mode === "reset") { ordLoadedM = false; renderMemberList(); } else renderMemberList(); }
+  try {
+    const d = await api("/api/order-rooms?q=" + encodeURIComponent(q) + "&offset=" + off + (ordOnlyUnread ? "&unread=1" : ""));
+    if (my !== ordSeq) return;   // มีคำค้น/ตัวกรองใหม่กว่าแล้ว → ทิ้งผลเก่า
+    const rooms = d.rooms || [];
+    if (mode === "reset") { ordRooms = rooms; ordOffset = d.next_offset | 0; ordHasMore = !!d.has_more; }
+    else if (mode === "more") {
+      const seen = new Set(ordRooms.map(r => r.id));
+      ordRooms = ordRooms.concat(rooms.filter(r => !seen.has(r.id))); ordOffset = d.next_offset | 0; ordHasMore = !!d.has_more;
+    } else if (ordRooms.length <= rooms.length + 1 && !d.has_more || ordRooms.length <= 30) {   // โพล: ยังไม่เคยกด "แสดงเพิ่ม" → แทนที่ทั้งหน้าแรก (ห้องที่อ่านแล้วหลุดจากตัวกรอง "ยังไม่อ่าน" ถูกต้อง)
+      ordRooms = rooms; ordOffset = d.next_offset | 0; ordHasMore = !!d.has_more;
+    } else {   // โพล: โหลดหลายหน้าไว้แล้ว → รวมหน้าแรกใหม่เข้ากับที่โหลดไว้ (ไม่ตัดรายการที่ผู้ใช้เลื่อนดูอยู่)
+      const map = new Map(ordRooms.map(r => [r.id, r])); rooms.forEach(r => map.set(r.id, r));
+      ordRooms = Array.from(map.values()).sort((x, y) => (y.last_at || 0) - (x.last_at || 0) || y.id - x.id);
+    }
+    ordLoadedM = true; ordErrM = "";
+    if (typeof d.unread_total === "number") orderUnread = d.unread_total;
+    paintMemTabs(); reportMemberUnread();
+  } catch (e) {
+    if (my !== ordSeq) return;
+    if (mode !== "poll") { ordErrM = e.message || "error"; ordLoadedM = true; }
+  } finally { if (my === ordSeq && mode !== "poll") ordBusyM = false; }
+  if (my !== ordSeq) return;
+  if (mode === "poll") {   // โพล: วาดใหม่เฉพาะเมื่อข้อมูลเปลี่ยน (ไม่กระชากตำแหน่งเลื่อน)
+    const sig = ordRooms.map(r => r.id + ":" + (r.unread | 0) + ":" + (r.last_at || 0)).join("|") + "/" + ordHasMore;
+    if (sig === ordSig) return; ordSig = sig;
+  }
+  if ($("#list").classList.contains("on") && memTab === "orders") renderMemberList();
+}
+function renderOrdersTab() {
+  const q = $("#search").value.trim();
+  const box = $("#chatlist"); box.innerHTML = "";
+  const fil = document.createElement("div"); fil.className = "ofil";
+  [[false, T("ordAll")], [true, T("ordUnread")]].forEach(([u, label]) => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = label; b.className = ordOnlyUnread === u ? "on" : "";
+    b.onclick = () => { if (ordOnlyUnread === u) return; ordOnlyUnread = u; loadOrders("reset"); };
+    fil.appendChild(b);
+  });
+  box.appendChild(fil);
+  ordRooms.forEach(r => box.appendChild(itemRow({ name: r.name, color: "", id: "room:" + r.id, avatar: "", emoji: "📦",
+    preview: r.last_at == null ? (r.descr || T("startChat")) : memberPreview(r), at: r.last_at, unread: r.unread, onclick: () => openRoom(r) })));
+  if (ordHasMore && ordRooms.length) {
+    const w = document.createElement("div"); w.className = "omore";
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn-s"; b.textContent = ordBusyM ? T("ordLoad") : T("ordMore"); b.disabled = ordBusyM;
+    b.onclick = () => loadOrders("more"); w.appendChild(b); box.appendChild(w);
+  }
+  if (!ordRooms.length) {
+    const e = document.createElement("div"); e.className = "empty";
+    e.textContent = ordErrM ? ordErrM : (!ordLoadedM || ordBusyM) ? T("ordLoad") : ((q || ordOnlyUnread) ? T("noMatch") : T("noOrders"));
+    box.appendChild(e);
+  }
+}
 function renderMemberList() {
+  paintMemTabs();
+  if (!VISITOR && memTab === "orders") { renderOrdersTab(); return; }
   const q = $("#search").value.trim().toLowerCase();
   const box = $("#chatlist"); box.innerHTML = "";
   const sup = supportInfo || { unread: 0, last_at: null };
@@ -996,15 +1104,7 @@ function renderMemberList() {
     box.appendChild(itemRow({ name: supName, color: "#d9a400", id: SUPPORT_ID, avatar: supAv, pin: true, preview: VISITOR ? T("vRowPv") : memberPreview(sup), at: VISITOR ? 0 : sup.last_at, unread: sup.unread,
       onclick: VISITOR ? () => openVisitorAi() : () => openChat({ id: SUPPORT_ID, name: T("support"), color: "#d9a400", avatar: supAv }) }));
   }
-  // [ORDER-CHAT] ห้องแชทออเดอร์ (ผู้ซื้อ↔ร้านค้า) แยกหัวข้อไว้บนสุด · เรียงข้อความล่าสุดก่อน · ยอดค้างอ่านรวมอยู่ใน badge ของหน้าอยู่แล้ว
-  const ors = roomsCache.filter(r => r.kind === "order" && (!q || (r.name + " " + (r.descr || "")).toLowerCase().includes(q))).sort((a, b) => (b.last_at || 0) - (a.last_at || 0) || b.id - a.id);
-  if (ors.length) {
-    const oh = document.createElement("div"); oh.className = "sec"; oh.textContent = T("ordersHead"); box.appendChild(oh);
-    ors.forEach(r => {
-      shown++;
-      box.appendChild(itemRow({ name: r.name, color: "", id: "room:" + r.id, avatar: "", preview: r.last_at == null ? (r.descr || T("startChat")) : memberPreview(r), at: r.last_at, unread: r.unread, onclick: () => openRoom(r) }));
-    });
-  }
+  // [ORDER-TAB] แท็บ "แชท" มีเฉพาะทีมซัพพอร์ตและห้องสนทนา · ห้องออเดอร์อยู่แท็บ "💬 ออเดอร์" (ถ้า Worker รุ่นเก่ายังส่ง kind=order มา ก็กรองทิ้ง)
   const rs = roomsCache.filter(r => r.kind !== "order" && (!q || r.name.toLowerCase().includes(q)));
   if (!q || rs.length) {
     const h = document.createElement("div"); h.className = "sec"; h.textContent = T("roomsHead"); box.appendChild(h);
@@ -1013,7 +1113,7 @@ function renderMemberList() {
     shown++;
     box.appendChild(itemRow({ name: r.name, color: "", id: "room:" + r.id, avatar: r.avatar || "", chip: roomChip(r), preview: r.status === "blocked" ? T("barBlocked") : (r.last_at == null ? (r.descr || T("startChat")) : memberPreview(r)), at: r.last_at, unread: r.unread, onclick: () => openRoom(r) }));
   });
-  if (!roomsCache.filter(r => r.kind !== "order").length && !ors.length && !q) { const e = document.createElement("div"); e.className = "empty"; e.textContent = T("noRooms"); box.appendChild(e); }
+  if (!roomsCache.filter(r => r.kind !== "order").length && !q) { const e = document.createElement("div"); e.className = "empty"; e.textContent = T("noRooms"); box.appendChild(e); }
   else if (!shown) { const e = document.createElement("div"); e.className = "empty"; e.textContent = T("noMatch"); box.appendChild(e); }
 }
 function startMemberHome() {
@@ -1026,8 +1126,12 @@ function enterMemberList(first) {
   peer = null; clearInterval(pollChatTimer); aiThinkReset(); vThinking = false;
   document.body.classList.remove("room", "ro", "dmro");
   $(".lhead h1").textContent = T("listTitle"); $("#search").placeholder = T("search");
+  if (returnTab) { memTab = returnTab; returnTab = null; }   // [ORDER-TAB] เข้าห้องออเดอร์จากแอปแล้วกดย้อนกลับ → กลับแท็บเดิมที่อยู่ก่อนหน้า
+  if (VISITOR) memTab = "chat";
   show("list");
-  if (roomsCache.length || supportInfo) renderMemberList();
+  paintMemTabs();
+  if (roomsCache.length || supportInfo || memTab === "orders") renderMemberList();
+  if (memTab === "orders") loadOrders(ordLoadedM ? "poll" : "reset");
   loadMemberList(first);
   if (first) loadMyMemberAvatar();   // [MEMBER-AV]
   clearInterval(pollListTimer);
@@ -1038,8 +1142,10 @@ async function loadMemberList(first) {
   try {
     const d = VISITOR ? await visitorRooms() : await api("/api/rooms");
     roomsCache = d.rooms || []; supportInfo = d.support || { unread: 0, last_at: null };
-    reportUnread((supportInfo.unread || 0) + roomsCache.reduce((s, r) => s + (r.status === "approved" ? (r.unread || 0) : 0), 0));
-    if ($("#list").classList.contains("on")) renderMemberList();
+    if (!VISITOR) orderUnread = typeof d.order_unread === "number" ? d.order_unread : roomsCache.reduce((n, r) => n + (r.kind === "order" ? (r.unread || 0) : 0), 0);   // Worker เก่าที่ยังส่งห้องออเดอร์มาใน /api/rooms → นับเอง
+    reportMemberUnread();
+    if ($("#list").classList.contains("on")) { if (memTab !== "orders" || VISITOR) renderMemberList(); else paintMemTabs(); }
+    if (!VISITOR && memTab === "orders" && $("#list").classList.contains("on")) loadOrders("poll");   // [ORDER-TAB] รีเฟรชหน้าแรกของออเดอร์ทุกรอบโพล (เบา · วาดเมื่อข้อมูลเปลี่ยน)
   } catch (e) {
     if (first) {   // Worker ยังไม่มี /api/rooms → ถอยไปห้องซัพพอร์ตตรง ๆ แบบเฟส 1 (เซสชันไม่ผ่าน = แจ้ง error ตามเดิม)
       if (e.message === T("authFail")) fatal(e.message);
@@ -1167,7 +1273,7 @@ function renderAdminOrders() {
   const box = $("#chatlist"); box.innerHTML = "";
   box.appendChild(secHead("แชทออเดอร์ผู้ซื้อ ↔ ร้านค้า (อ่านอย่างเดียว · มีบันทึกการเปิดดู) · " + adminOrders.length + " ห้อง"));
   adminOrders.forEach(r => box.appendChild(itemRow({
-    name: r.name, color: "", id: "room:" + r.id, avatar: "", chip: ["", r.count + " ข้อความ"],
+    name: r.name, color: "", id: "room:" + r.id, avatar: "", emoji: "📦", chip: ["", r.count + " ข้อความ"],
     preview: r.match ? "🔎 " + r.match : ("ผู้ซื้อ " + r.buyer_ext + " ↔ ร้าน " + r.seller_ext + (r.last_at != null ? " · " + memberPreview(r) : "")),
     at: r.last_at, unread: 0, onclick: () => openRoom(r),
   })));
@@ -1434,6 +1540,7 @@ function paintProf(p) {
 function paintHeadAv() {
   const pav = $("#pav"); pav.className = ""; pav.style.background = ""; pav.textContent = "";
   mkAvatar(pav, peer.name, peer.color, peer.id, peer.avatar);
+  if (peer.order) { pav.textContent = "📦"; pav.classList.add("oav"); pav.style.background = ""; }   // [ORDER-TAB]
 }
 $("#back").onclick = () => { if (MEMBER_LIST) enterMemberList(false); else if (fixedPeer) { if (onBack) onBack(); } else enterList(); };
 $("#lBack").onclick = () => { if (onBack) onBack(); };   // [FIX-BACK] หน้ารายการ → กลับ Home
