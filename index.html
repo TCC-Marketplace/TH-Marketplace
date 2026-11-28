@@ -1761,8 +1761,7 @@ tr:hover td{background:rgba(243,186,47,0.02);}
 #wtf{ width:160px; }
 #wsf{ width:130px; }
 #thtype{ width:160px; }
-#thdf,#thdt{ width:140px; cursor:pointer; color-scheme:dark; }   /* [TXH-DATE v1] ปฏิทิน native โทนมืด */
-#thdf::-webkit-calendar-picker-indicator,#thdt::-webkit-calendar-picker-indicator{ cursor:pointer; opacity:.85; }
+#thdf,#thdt{ width:140px; }
 #thsq{ width:180px; }
 
 /* ── [v21 FIX F] Wallet TX filter bars on mobile ── */
@@ -2667,8 +2666,8 @@ tr:hover td{background:rgba(243,186,47,0.02);}
           <option value="Funding Fee">Funding Fee</option>
           <option value="Commission">Commission</option>
         </select>
-        <input type="date" class="fi" id="thdf" onclick="openDatePick(this,event)" onchange="txhDateChanged()">
-        <input type="date" class="fi" id="thdt" onclick="openDatePick(this,event)" onchange="txhDateChanged()">
+        <input type="date" class="fi" id="thdf" onchange="initTXH()">
+        <input type="date" class="fi" id="thdt" onchange="initTXH()">
         <input class="fi" placeholder="🔍 TX ID / รายละเอียด" id="thsq"
                oninput="initTXH()" data-i18n-placeholder="mp_ui_0037">
         <button class="btn btn-gold btn-sm" onclick="initTXH()" data-i18n="mp_ui_0038">ค้นหา</button>
@@ -6840,39 +6839,8 @@ function openTxDetail(el){
 let thPage = 1;
 const TH_PP = 20;
 
-// ─── [TXH-DATE v1] ช่องวันที่ในประวัติธุรกรรม ───
-// • คลิก/แตะตรงไหนของช่องก็เปิดปฏิทิน (เดิมเปิดได้เฉพาะตอนกดไอคอนเล็กๆ ด้านขวา)
-// • เลือกได้ตั้งแต่วันนี้ย้อนหลัง — ไม่มี min, max = วันนี้ (วันอนาคตเลือกไม่ได้)
-// • ช่วงวันที่ผูกกัน: "จากวันที่" ไม่เกิน "ถึงวันที่" และ "ถึงวันที่" ไม่ก่อน "จากวันที่"
-function _txhToday(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
-function txhDateSync(){
-  const f=document.getElementById('thdf'), t=document.getElementById('thdt');
-  if(!f||!t) return;
-  const today=_txhToday();
-  f.max=(t.value && t.value<today) ? t.value : today;
-  t.max=today;
-  t.min=f.value||'';
-}
-function openDatePick(el, ev){
-  txhDateSync();   // refresh max (เผื่อเปิดหน้าค้างข้ามเที่ยงคืน)
-  if(!el || typeof el.showPicker!=='function') return;   // browser เก่า → ใช้ native ตามเดิม
-  // คลิกที่ไอคอนปฏิทินด้านขวา → ให้ browser เปิดเอง (กันเปิดซ้ำแล้วปิดทันที)
-  if(ev && typeof ev.offsetX==='number' && ev.offsetX > el.clientWidth-32) return;
-  try{ el.showPicker(); }catch(e){}
-}
-function txhDateChanged(){
-  const f=document.getElementById('thdf'), t=document.getElementById('thdt');
-  const today=_txhToday();
-  if(f && f.value>today) f.value=today;   // พิมพ์วันอนาคตเอง → ดึงกลับเป็นวันนี้
-  if(t && t.value>today) t.value=today;
-  if(f && t && f.value && t.value && f.value>t.value){ const x=f.value; f.value=t.value; t.value=x; }   // สลับให้ถ้าช่วงกลับด้าน
-  txhDateSync();
-  initTXH();
-}
-
 function initTXH(){
   thPage = 1;  // reset ทุกครั้งที่ค้นหา
-  txhDateSync();
   _renderTXH();
 }
 
@@ -6896,9 +6864,8 @@ function _renderTXH(){
   // filter ประเภท
   if(typeF) rows = rows.filter(t => (t.type||'').includes(typeF));
   // filter วันที่
-  // [TXH-DATE v1] เทียบเฉพาะส่วนวันที่ (YYYY-MM-DD) — รวมทั้งวันของ "ถึงวันที่" แม้ t.date มีวินาที
-  if(dateF) rows = rows.filter(t => (t.date||'').slice(0,10) >= dateF);
-  if(dateT) rows = rows.filter(t => (t.date||'').slice(0,10) <= dateT);
+  if(dateF) rows = rows.filter(t => (t.date||'') >= dateF);
+  if(dateT) rows = rows.filter(t => (t.date||'') <= dateT + 'T23:59');
   // ค้นหา TX ID / Order ID / รายละเอียด
   if(searchQ) rows = rows.filter(t =>
     (t.id||'').toLowerCase().includes(searchQ) ||
@@ -7021,7 +6988,7 @@ function filterOrd(st, btn){
       <td>${acts}</td>
       <td>
         <button class="btn btn-ghost btn-sm" style="font-size:11px;white-space:nowrap;"
-          onclick="startChatFromOrder(${_jsArg(o.buyer_member_id)},${_jsArg(o.buyer_full_name||o.buyer_member_id)},${_jsArg(SESSION.member_id)},${_jsArg(SESSION.username||SESSION.member_id)},${_jsArg(o.order_id)})">
+          onclick="startChatFromOrder('','','','',${_jsArg(o.order_id)})">
           ${tccT('mp_js_0001')}${chatOrdBdg(o.order_id)}
         </button>
       </td>
@@ -7104,7 +7071,7 @@ function filterOrd(st, btn){
         ${actsHtml}
         <div class="mob-card-acts" style="margin-top:6px;border-top:1px solid var(--bd);padding-top:8px;">
           <button class="btn btn-ghost" style="width:100%;font-size:12px;"
-            onclick="startChatFromOrder(${_jsArg(o.buyer_member_id)},${_jsArg(o.buyer_full_name||o.buyer_member_id)},${_jsArg(SESSION.member_id)},${_jsArg(SESSION.username||SESSION.member_id)},${_jsArg(o.order_id)})">
+            onclick="startChatFromOrder('','','','',${_jsArg(o.order_id)})">
             ${tccT('mp_js_0435')}${chatOrdBdg(o.order_id)}
           </button>
         </div>
@@ -7225,7 +7192,7 @@ function openOD(oid){
     const existingHtml   = odActsEl.innerHTML;
     odActsEl.innerHTML   = existingHtml +
       `<button class="btn btn-ghost w100" style="margin-top:6px;"
-         onclick="startChatFromOrder('${SESSION.member_id}','${buyerName}','${sellerMemberId}','${sellerName}','${o.order_id||o.id}')">
+         onclick="startChatFromOrder('','','','',${_jsArg(o.order_id||o.id)})">
          ${tccT('mp_js_0105')}${chatOrdBdg(o.order_id||o.id)}
        </button>` +
       // [SCH v1] ปุ่มติดต่อซัพพอร์ต (แชทกับทีมซัพพอร์ต) — แยกจากปุ่มแชทกับร้านค้าด้านบน
@@ -14870,54 +14837,65 @@ function chatCloseSidebar() {
 
 // ─── startChatFromOrder ───────────────────────────────────────────────
 async function startChatFromOrder(buyerId, buyerName, sellerId, sellerName, orderId) {
+  // [ORDER-CHAT] แชทผู้ซื้อ↔ร้านค้าย้ายไปแชทหลัก (Worker line-chat-marketplace) · ไม่สร้างห้องผ่าน GAS แล้ว
+  // Worker ตรวจเองจากออเดอร์ว่าผู้เรียกเป็นผู้ซื้อหรือร้านค้า → พารามิเตอร์ ID/ชื่อ (เดิม) ไม่ใช้อีก เหลือไว้ให้เรียกแบบเดิมได้
   if (!SESSION) { showToast(tccT('mp_js_0507'), 'warn'); return; }
-  showToast(tccT('mp_js_0525'), 'info');
-  try {
-    const res = await apiPost({
-      action:       'createChatRoom',
-      room_type:    'private_order',
-      order_id:     orderId,
-      member1_id:   buyerId,
-      member1_name: buyerName,
-      member2_id:   sellerId,
-      member2_name: sellerName,
-      room_name:    sellerName + ' (Order ' + orderId + ')'
-    });
-    if (!res || !res.room) throw new Error(tccT('mp_js_0526'));
-    const roomId = res.room.room_id;
-    go('shop-chat');
-    await chatLoadRooms(roomId);
-    if (!res.existed) showToast(tccT('mp_js_0527'), 'ok');
-  } catch(e) { showToast(tccTF('mp_js_0536',{p1:e.message}), 'warn'); }
+  if (!orderId) return;
+  if (typeof window.schOpenOrder === 'function') window.schOpenOrder(String(orderId));
 }
 
 // ─── Unread badge ─────────────────────────────────────────────────────
-var _chatUnreadByOrder = {}, _chatUnreadTotal = 0, _chatUnreadAt = 0;
+var _chatUnreadByOrder = {}, _chatLastByOrder = {}, _chatUnreadTotal = 0, _chatUnreadAt = 0;
 async function chatCheckUnread(force) {
   if (!SESSION) return 0;
-  if (!force && Date.now() - _chatUnreadAt < 20000) return _chatUnreadTotal;   // กันยิง GAS ถี่
+  if (!force && Date.now() - _chatUnreadAt < 20000) return _chatUnreadTotal;   // กันยิง Worker ถี่
   _chatUnreadAt = Date.now();
   try {
-    const res = await apiGet({ action: 'getChatUnread', member_id: _chatMyId() });
-    _chatUnreadTotal   = (res && res.unread) ? res.unread : 0;
-    _chatUnreadByOrder = (res && res.by_order) ? res.by_order : {};
-    chatRefreshOrderBadges();   // [SCH v1] ยอดค้างอ่านของแชท v7 แสดงบนปุ่ม "แชทกับร้านค้า" (ไม่ใช้ badge แท็บแชทแล้ว)
+    const d = (typeof window.schOrderSummary === 'function') ? await window.schOrderSummary(true) : null;
+    if (!d) return _chatUnreadTotal;
+    _chatUnreadTotal   = d.total || 0;
+    _chatUnreadByOrder = d.unread || {};
+    _chatLastByOrder   = d.last || {};
+    chatRefreshOrderBadges();   // ยอดค้างอ่าน + ข้อความล่าสุดของแชทออเดอร์ แสดงบนปุ่ม 💬 ต่อ Order (ฝั่งผู้ซื้อและร้านค้า)
     return _chatUnreadTotal;
-  } catch { return 0; }
+  } catch { return _chatUnreadTotal; }
 }
-// badge ตัวเลขบนปุ่ม "แชทกับร้านค้า" ต่อ Order
+// ข้อความล่าสุดของห้องออเดอร์ (ข้อความล้วน/ไอคอนสื่อ) · ฝั่งเราส่งเอง = นำหน้าด้วย ↩
+function _chatPvText(l) {
+  if (!l) return '';
+  let t = '';
+  if (l.deleted) t = '';
+  else if (l.type === 'image') t = '🖼️';
+  else if (l.type === 'video') t = '🎬';
+  else if (l.type === 'sticker') t = '😊';
+  else t = String(l.content || '');
+  return t ? (l.mine ? '↩ ' : '') + t : '';
+}
+// badge ตัวเลข + บรรทัดข้อความล่าสุด บนปุ่ม 💬 แชท ต่อ Order
 function chatOrdBdg(orderId) {
   if (Date.now() - _chatUnreadAt > 20000) chatCheckUnread();   // ข้อมูลเก่า → โหลดใหม่แล้วอัปเดต badge เอง
+  const oid = String(orderId).replace(/"/g, '').replace(/[<>&']/g, '');
   const n = _chatUnreadByOrder[orderId] || 0;
-  return '<span class="chat-ord-bdg" data-order="' + String(orderId).replace(/"/g, '') + '" style="display:' + (n > 0 ? 'inline-block' : 'none') +
+  const pv = _chatPvText(_chatLastByOrder[orderId]).replace(/[<>&"]/g, ' ');
+  return '<span class="chat-ord-bdg" data-order="' + oid + '" style="display:' + (n > 0 ? 'inline-block' : 'none') +
     ';min-width:16px;height:16px;padding:0 5px;margin-left:6px;border-radius:8px;background:var(--err,#e53935);color:#fff;font-size:10px;line-height:16px;font-weight:700;text-align:center;">' +
-    (n > 9 ? '9+' : n) + '</span>';
+    (n > 9 ? '9+' : n) + '</span>' +
+    '<span class="chat-ord-pv" data-order="' + oid + '" style="display:' + (pv ? 'block' : 'none') + ';max-width:190px;margin:2px auto 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:400;opacity:.8;' +
+    (n > 0 ? 'color:var(--gold);font-weight:700;opacity:1;' : '') + '">' + pv + '</span>';
 }
 function chatRefreshOrderBadges() {
   document.querySelectorAll('.chat-ord-bdg').forEach(el => {
     const n = _chatUnreadByOrder[el.getAttribute('data-order')] || 0;
     el.textContent = n > 9 ? '9+' : String(n);
     el.style.display = n > 0 ? 'inline-block' : 'none';
+  });
+  document.querySelectorAll('.chat-ord-pv').forEach(el => {
+    const oid = el.getAttribute('data-order'), n = _chatUnreadByOrder[oid] || 0, pv = _chatPvText(_chatLastByOrder[oid]);
+    el.textContent = pv;
+    el.style.display = pv ? 'block' : 'none';
+    el.style.color = n > 0 ? 'var(--gold)' : '';
+    el.style.fontWeight = n > 0 ? '700' : '400';
+    el.style.opacity = n > 0 ? '1' : '.8';
   });
 }
 
@@ -15087,8 +15065,33 @@ function chatRefreshOrderBadges() {
       var d = await r.json();
       var n = d && (typeof d.total === 'number' ? d.total : d.unread);
       setBadge(n || 0);
+      try { if (document.querySelector('.chat-ord-bdg') && typeof chatCheckUnread === 'function') chatCheckUnread(true); } catch (e2) {}   // [ORDER-CHAT] มีปุ่มแชทออเดอร์บนหน้าจอ → อัปเดต badge/ข้อความล่าสุดด้วย
     } catch (e) { /* เงียบ — ลองใหม่รอบหน้า */ }
   }
+  /* ── [ORDER-CHAT] สรุปแชทต่อออเดอร์ (ยอดค้างอ่าน + ข้อความล่าสุด) จาก Worker · แคชสั้นๆ กันยิงถี่ ── */
+  var ordSum = null, ordSumAt = 0, ordSumP = null;
+  window.schOrderSummary = function (force) {
+    if (!hasSession()) return Promise.resolve(null);
+    if (!force && ordSum && Date.now() - ordSumAt < 15000) return Promise.resolve(ordSum);
+    if (ordSumP) return ordSumP;
+    ordSumP = (async function () {
+      try {
+        var c = await ensureChat(false);
+        var r = await fetch(SCH_API_URL + '/api/order-rooms/summary', { headers: { Authorization: 'Bearer ' + c.token } });
+        if (r.status === 401) { chat = null; chatUid = ''; chatCacheWrite(null); return ordSum; }
+        if (!r.ok) return ordSum;
+        var d = await r.json(), by = {}, last = {};
+        (d.orders || []).forEach(function (o) {
+          if (!o || !o.order_id) return;
+          by[o.order_id] = o.unread || 0;
+          last[o.order_id] = { type: o.last_type, content: o.last_content, deleted: o.last_deleted, mine: !!o.last_mine, at: o.last_at };
+        });
+        ordSum = { total: d.total || 0, unread: by, last: last }; ordSumAt = Date.now();
+        return ordSum;
+      } catch (e) { return ordSum; } finally { ordSumP = null; }
+    })();
+    return ordSumP;
+  };
   function startPoll() { if (timer) return; pollBadge(); timer = setInterval(pollBadge, SCH_POLL_MS); }
   function stopPoll() { if (timer) { clearInterval(timer); timer = null; } }
   document.addEventListener('visibilitychange', function () { if (document.hidden) stopPoll(); else startPoll(); });
@@ -15132,7 +15135,7 @@ function chatRefreshOrderBadges() {
     if (!d || typeof d.type !== 'string') return;
     if (d.type === 'sc-need-init') sendInit();
     else if (d.type === 'sc-close') window.schClose();
-    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); console.log('[SCH] frame ready ' + (Date.now() - frameT0) + 'ms'); }
+    else if (d.type === 'sc-ready') { frameReady = true; schLoading(false); console.log('[SCH] frame ready ' + (Date.now() - frameT0) + 'ms'); sendOpenOrder(); }
     else if (d.type === 'sc-screen') schScreen = String(d.id || '');
     else if (d.type === 'sc-login') { schPushed = false; window.schClose(); try { if (typeof lgGoLogin === 'function') lgGoLogin(); } catch (e) {} }   // ไม่มี session (Visitor) กด "เข้าสู่ระบบ" ในแชท
     else if (d.type === 'sc-reset') { frameMode = ''; reloadFrame(); if (isOpen()) schLoading(true); }                          // เซสชันเปลี่ยนกลางทาง → โหลดแชทใหม่
@@ -15203,6 +15206,21 @@ function chatRefreshOrderBadges() {
   };
   // ทางเข้า: go('chat') ใน go() ของแอป
   window.schGoFromNav = function () { window.schOpen(); };
+  // [ORDER-CHAT] ปุ่ม 💬 แชท ต่อ Order (ผู้ซื้อ↔ร้านค้า) — เปิดแชทหลักแล้วเข้าห้องของออเดอร์นั้นทันที (Worker ตรวจสิทธิ์ผู้ซื้อ/ร้านค้าเอง)
+  var orderToOpen = '';
+  function sendOpenOrder() {
+    var f = $id('sch-frame');
+    if (!orderToOpen || !f || !f.contentWindow || !frameReady) return;
+    var o = orderToOpen; orderToOpen = '';
+    try { f.contentWindow.postMessage({ type: 'sc-open-order', order_id: o }, TGT); } catch (e) {}
+  }
+  window.schOpenOrder = function (orderId) {
+    if (!orderId) return;
+    if (!hasSession()) { window.schOpen(); return; }
+    orderToOpen = String(orderId);
+    window.schOpen();
+    sendOpenOrder();   // iframe พร้อมแล้ว → ส่งทันที · ยังไม่พร้อม → ส่งตอนได้ sc-ready
+  };
   // ปุ่ม "ติดต่อซัพพอร์ต" ในหน้า Order — เปิดแชทซัพพอร์ต แล้วเตือนให้แจ้งเลข Order
   window.schOpenFromOrder = function (orderId) {
     if (!hasSession()) { window.schOpen(); return; }
