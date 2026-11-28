@@ -304,7 +304,7 @@ body.admin.room .chead .mgb{display:block}
         </button>
       </div>
     </div>
-    <div class="admtabs" id="admTabs"><button id="tabDm" class="on" type="button">แชท</button><button id="tabRooms" type="button">ห้องสนทนา<span class="tbadge" id="tabRoomsN"></span></button></div>
+    <div class="admtabs" id="admTabs"><button id="tabDm" class="on" type="button">แชท</button><button id="tabRooms" type="button">ห้องสนทนา<span class="tbadge" id="tabRoomsN"></span></button><button id="tabOrders" type="button" style="display:none">💬 ออเดอร์</button></div>
     <div class="sbox">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
       <input id="search" placeholder="ค้นหา" autocomplete="off">
@@ -484,6 +484,7 @@ const I18N = {
   vFail:    ["ขออภัย ตอบไม่ได้ในตอนนี้ กรุณาลองใหม่อีกครั้ง", "Couldn't get an answer right now. Please try again.", "Hiện chưa thể trả lời. Vui lòng thử lại.", "មិនអាចឆ្លើយបានពេលនេះ។ សូមព្យាយាមម្តងទៀត។", "ယခု အဖြေမရနိုင်ပါ။ ထပ်ကြိုးစားပါ။", "ຕອບບໍ່ໄດ້ໃນຕອນນີ້. ກະລຸນາລອງໃໝ່.","Maaf, tidak dapat menjawab sekarang. Sila cuba lagi.","Maaf, belum bisa menjawab saat ini. Silakan coba lagi.","抱歉，暂时无法回答，请稍后再试。"],
   listTitle: ["แชท", "Chats", "Trò chuyện", "ជជែក", "ချတ်", "ແຊັດ","Sembang","Obrolan","聊天"],
   search:   ["ค้นหา", "Search", "Tìm kiếm", "ស្វែងរក", "ရှာဖွေရန်", "ຄົ້ນຫາ","Cari","Cari","搜索"],
+  ordersHead: ["💬 แชทออเดอร์", "💬 Order chats", "💬 Chat đơn hàng", "💬 ជជែកការបញ្ជាទិញ", "💬 အော်ဒါချက်တင်", "💬 ແຊັດອໍເດີ", "💬 Sembang pesanan", "💬 Obrolan pesanan", "💬 订单聊天"],
   roomsHead: ["ห้องสนทนา", "Chat rooms", "Phòng trò chuyện", "បន្ទប់ជជែក", "စကားဝိုင်းများ", "ຫ້ອງສົນທະນາ","Bilik sembang","Ruang obrolan","聊天室"],
   stJoined: ["เข้าร่วมแล้ว", "Joined", "Đã tham gia", "បានចូលរួម", "ဝင်ပြီး", "ເຂົ້າຮ່ວມແລ້ວ","Telah menyertai","Sudah bergabung","已加入"],
   stPending: ["รออนุมัติ", "Pending", "Chờ duyệt", "រង់ចាំអនុម័ត", "အတည်ပြုရန် စောင့်ဆိုင်း", "ລໍຖ້າອະນຸມັດ","Menunggu kelulusan","Menunggu persetujuan","待审批"],
@@ -567,7 +568,22 @@ window.addEventListener("message", ev => {
   Object.keys(d.map).forEach(k => { const v = String(d.map[k] || ""); if (/^https:\/\//i.test(v)) m[String(k)] = v; });
   AV_MAP = m;
   if (peer) { const a = avatarOf(peer); if (a !== peer.avatar) { peer.avatar = a; paintHeadAv(); renderMsgs(false); } }
-  else if ($("#list").classList.contains("on")) renderList();
+  else if ($("#list").classList.contains("on")) renderAdminCurrent();
+});
+// ---- [ORDER-CHAT] แอปสั่งเปิดห้องแชทของออเดอร์ (sc-open-order {order_id}) → Worker ตรวจสิทธิ์กับ GAS ตลาดแล้วคืนห้อง → เข้าห้องทันที ----
+let pendingOrder = "";
+async function openOrderRoom(orderId) {
+  if (!/^[A-Za-z0-9_\-]{1,64}$/.test(orderId)) return;
+  if (!MEMBER_LIST || !chatToken) { pendingOrder = orderId; return; }   // หน้ายังเริ่มไม่เสร็จ → เก็บไว้เปิดตอนพร้อม
+  try {
+    const d = await api("/api/order-rooms/open", { method: "POST", body: { order_id: orderId } });
+    if (d && d.room) openRoom(d.room);
+  } catch (e) { toast(e.message); }
+}
+window.addEventListener("message", ev => {
+  const d = ev.data;
+  if (IS_ADMIN || VISITOR || !d || d.type !== "sc-open-order" || ev.source !== window.parent) return;
+  openOrderRoom(String(d.order_id || "").trim());
 });
 // ---- host สั่งหยุด/เดินต่อ (สมาชิก: overlay ปิด/เปิด · แอดมิน: สลับแผง) ----
 window.addEventListener("message", ev => {
@@ -874,7 +890,7 @@ function enterList() {
 }
 async function loadList() {
   if (!canDo("dmView")) return;   // [PERMS] ไม่มีสิทธิ์ดูแชทส่วนตัว → ไม่ดึงรายชื่อ
-  try { usersCache = (await api("/api/users")).users; if (admTab === "rooms") paintNavBadge(); else renderList(); }   // แท็บห้อง: ไม่วาดรายการแชททับ
+  try { usersCache = (await api("/api/users")).users; if (admTab === "rooms" || admTab === "orders") paintNavBadge(); else renderList(); }   // แท็บห้อง: ไม่วาดรายการแชททับ
   catch (e) { if (!usersCache.length) fatal(e.message); }
 }
 function previewOf(u) {
@@ -929,7 +945,10 @@ function renderList() {
     box.appendChild(it);
   });
 }
-$("#search").addEventListener("input", () => (MEMBER_LIST ? renderMemberList() : renderAdminCurrent()));
+$("#search").addEventListener("input", () => {
+  if (!MEMBER_LIST && IS_ADMIN && admTab === "orders") { clearTimeout(ordTimer); ordTimer = setTimeout(loadAdminOrders, 350); return; }   // [ORDER-CHAT] ค้นที่ server (รวมเนื้อข้อความ) · หน่วง 350ms
+  MEMBER_LIST ? renderMemberList() : renderAdminCurrent();
+});
 $("#bUnread").onclick = () => { onlyUnread = !onlyUnread; $("#bUnread").classList.toggle("act", onlyUnread); renderList(); toast(onlyUnread ? "แสดงเฉพาะที่ยังไม่อ่าน" : "แสดงทั้งหมด"); };
 $("#bNew").onclick = () => { $("#search").focus(); };
 $("#bMore").onclick = () => showMenu([["รีเฟรช", () => { loadList(); toast("รีเฟรชแล้ว"); }], [onlyUnread ? "แสดงทั้งหมด" : "แสดงเฉพาะที่ยังไม่อ่าน", () => $("#bUnread").click()]]);
@@ -977,7 +996,16 @@ function renderMemberList() {
     box.appendChild(itemRow({ name: supName, color: "#d9a400", id: SUPPORT_ID, avatar: supAv, pin: true, preview: VISITOR ? T("vRowPv") : memberPreview(sup), at: VISITOR ? 0 : sup.last_at, unread: sup.unread,
       onclick: VISITOR ? () => openVisitorAi() : () => openChat({ id: SUPPORT_ID, name: T("support"), color: "#d9a400", avatar: supAv }) }));
   }
-  const rs = roomsCache.filter(r => !q || r.name.toLowerCase().includes(q));
+  // [ORDER-CHAT] ห้องแชทออเดอร์ (ผู้ซื้อ↔ร้านค้า) แยกหัวข้อไว้บนสุด · เรียงข้อความล่าสุดก่อน · ยอดค้างอ่านรวมอยู่ใน badge ของหน้าอยู่แล้ว
+  const ors = roomsCache.filter(r => r.kind === "order" && (!q || (r.name + " " + (r.descr || "")).toLowerCase().includes(q))).sort((a, b) => (b.last_at || 0) - (a.last_at || 0) || b.id - a.id);
+  if (ors.length) {
+    const oh = document.createElement("div"); oh.className = "sec"; oh.textContent = T("ordersHead"); box.appendChild(oh);
+    ors.forEach(r => {
+      shown++;
+      box.appendChild(itemRow({ name: r.name, color: "", id: "room:" + r.id, avatar: "", preview: r.last_at == null ? (r.descr || T("startChat")) : memberPreview(r), at: r.last_at, unread: r.unread, onclick: () => openRoom(r) }));
+    });
+  }
+  const rs = roomsCache.filter(r => r.kind !== "order" && (!q || r.name.toLowerCase().includes(q)));
   if (!q || rs.length) {
     const h = document.createElement("div"); h.className = "sec"; h.textContent = T("roomsHead"); box.appendChild(h);
   }
@@ -985,12 +1013,13 @@ function renderMemberList() {
     shown++;
     box.appendChild(itemRow({ name: r.name, color: "", id: "room:" + r.id, avatar: r.avatar || "", chip: roomChip(r), preview: r.status === "blocked" ? T("barBlocked") : (r.last_at == null ? (r.descr || T("startChat")) : memberPreview(r)), at: r.last_at, unread: r.unread, onclick: () => openRoom(r) }));
   });
-  if (!roomsCache.length && !q) { const e = document.createElement("div"); e.className = "empty"; e.textContent = T("noRooms"); box.appendChild(e); }
+  if (!roomsCache.filter(r => r.kind !== "order").length && !ors.length && !q) { const e = document.createElement("div"); e.className = "empty"; e.textContent = T("noRooms"); box.appendChild(e); }
   else if (!shown) { const e = document.createElement("div"); e.className = "empty"; e.textContent = T("noMatch"); box.appendChild(e); }
 }
 function startMemberHome() {
   MEMBER_LIST = true; document.body.classList.add("member");
   enterMemberList(true);
+  if (pendingOrder) { const o = pendingOrder; pendingOrder = ""; openOrderRoom(o); }   // [ORDER-CHAT] แอปสั่งเปิดห้องออเดอร์มาก่อนหน้าแชทพร้อม
 }
 function enterMemberList(first) {
   if (VISITOR && peer && peer.id === SUPPORT_ID) vSaved = msgs;   // Visitor กลับมาหน้ารายการ → เก็บบทสนทนา FAQ ไว้ใช้ต่อ
@@ -1019,7 +1048,7 @@ async function loadMemberList(first) {
   } finally { listBusy = false; }
 }
 function openRoom(r) {
-  peer = { id: "room:" + r.id, kind: "room", roomId: r.id, name: r.name, color: "", avatar: r.avatar || "" };
+  peer = { id: "room:" + r.id, kind: "room", roomId: r.id, name: r.name, color: "", avatar: r.avatar || "", order: r.kind === "order", orderId: r.order_id || "", descr: r.descr || "" };
   msgs = new Map(); lastId = 0; lastUpd = 0; peerRead = 0; peerTyping = false; reportedRead = 0;
   roomSt = { status: r.status, locked: "", members: r.members, readable: r.readable, pending: r.pending || 0 };
   setReply(null); $("#stickers").classList.remove("on");
@@ -1038,11 +1067,13 @@ function openRoom(r) {
   pollChatTimer = setInterval(() => { if (!document.hidden && !PAUSED) pollChat(false); }, VISITOR ? 6000 : 3000);
 }
 function paintRoomBar() {
-  const st = roomSt.status, ro = (st !== "approved" && st !== "admin") || (st === "admin" && !canDo("roomPost"));
+  const adminOrder = IS_ADMIN && !!(peer && peer.order);   // [ORDER-CHAT] ทีมงานอ่านแชทออเดอร์ได้อย่างเดียว
+  const st = roomSt.status, ro = adminOrder || (st !== "approved" && st !== "admin") || (st === "admin" && !canDo("roomPost"));
   document.body.classList.toggle("ro", ro);
   if (!ro) return;
   let msg, btn = false;
-  if (st === "admin") msg = "คุณไม่มีสิทธิ์พิมพ์ในห้องในนามทีมงาน (อ่านได้อย่างเดียว)";
+  if (adminOrder) msg = "แชทออเดอร์ผู้ซื้อ ↔ ร้านค้า — ทีมงานอ่านได้อย่างเดียว (เปิดดูถูกบันทึกประวัติ)";
+  else if (st === "admin") msg = "คุณไม่มีสิทธิ์พิมพ์ในห้องในนามทีมงาน (อ่านได้อย่างเดียว)";
   else if (st === "visitor") { msg = T("barVisitor"); btn = true; }
   else if (st === "blocked" || roomSt.locked === "blocked") msg = T("barBlocked");
   else if (st === "pending") msg = T("barPending");
@@ -1060,7 +1091,7 @@ $("#rbarBtn").onclick = async () => {
   } catch (e) { toast(e.message); }
   finally { b.disabled = false; }
 };
-const roomStatusLine = () => T("membersN").replace("{n}", roomSt.members) + (IS_ADMIN && roomSt.pending ? " · " + roomSt.pending + " รออนุมัติ" : "");
+const roomStatusLine = () => (peer && peer.order) ? (peer.descr || peer.orderId || "") : T("membersN").replace("{n}", roomSt.members) + (IS_ADMIN && roomSt.pending ? " · " + roomSt.pending + " รออนุมัติ" : "");
 async function pollRoom(first) {
   const pid = peer.id;
   let d;
@@ -1096,25 +1127,53 @@ function applyAdminPerms() {
   $("#tabDm").style.display = dm ? "" : "none";
   if (!dm && admTab === "dm") { admTab = "rooms"; $("#tabDm").classList.remove("on"); $("#tabRooms").classList.add("on"); }
   $("#mgBtn").style.display = canMg() ? "" : "none";
+  $("#tabOrders").style.display = ADM_PM === null ? "" : "none";   // [ORDER-CHAT] ตรวจแชทออเดอร์ (ข้อพิพาท) = root เท่านั้น · Worker ตรวจซ้ำที่ server
+  if (ADM_PM !== null && admTab === "orders") setAdmTab(canDo("dmView") ? "dm" : "rooms");
   paintMyAv();
 }
 const mg = { roomId: 0, tab: "pending", members: [], gblocks: [], loaded: false };
 const MG_TABS = [["pending", "รออนุมัติ"], ["approved", "สมาชิก"], ["blocked", "ถูกบล็อก"], ["global", "ทั้งระบบ"]];   // "ทั้งระบบ" = บล็อกทุกห้อง (แชทซัพพอร์ตไม่กระทบ)
-const renderAdminCurrent = () => (admTab === "rooms" ? renderAdminRooms() : renderList());
+const renderAdminCurrent = () => (admTab === "rooms" ? renderAdminRooms() : admTab === "orders" ? renderAdminOrders() : renderList());
 function paintTabBadge() {
   reportUnread(adminUnread());
   const b = $("#tabRoomsN"); b.textContent = pendingQ.length > 99 ? "99+" : pendingQ.length; b.classList.toggle("on", pendingQ.length > 0);
 }
 function setAdmTab(t) {
   if (t === "dm" && !canDo("dmView")) t = "rooms";
+  if (t === "orders" && ADM_PM !== null) t = canDo("dmView") ? "dm" : "rooms";
   admTab = t;
-  $("#tabDm").classList.toggle("on", t === "dm"); $("#tabRooms").classList.toggle("on", t === "rooms");
-  $("#search").placeholder = t === "rooms" ? "ค้นหาห้อง / สมาชิกที่ขอเข้า" : "ค้นหา";
+  $("#tabDm").classList.toggle("on", t === "dm"); $("#tabRooms").classList.toggle("on", t === "rooms"); $("#tabOrders").classList.toggle("on", t === "orders");
+  $("#search").placeholder = t === "rooms" ? "ค้นหาห้อง / สมาชิกที่ขอเข้า" : t === "orders" ? "ค้นหา: รหัสออเดอร์ / ร้านค้า / ผู้ซื้อ / รหัสสมาชิก / สินค้า / ข้อความ" : "ค้นหา";
   renderAdminCurrent();
   if (t === "rooms") loadAdminRooms();
+  if (t === "orders") loadAdminOrders();
 }
 $("#tabDm").onclick = () => setAdmTab("dm");
 $("#tabRooms").onclick = () => setAdmTab("rooms");
+$("#tabOrders").onclick = () => setAdmTab("orders");
+// ================= [ORDER-CHAT] แอดมิน (root): ค้นหา/อ่านแชทผู้ซื้อ↔ร้านค้า เพื่อตรวจข้อพิพาท · อ่านอย่างเดียว · มีบันทึกประวัติ =================
+let adminOrders = [], ordBusy = false, ordTimer = null, ordLoaded = false, ordErr = "";
+async function loadAdminOrders() {
+  if (!IS_ADMIN || ADM_PM !== null) return;
+  if (ordBusy) { clearTimeout(ordTimer); ordTimer = setTimeout(loadAdminOrders, 300); return; }   // กำลังค้นอยู่ → ค้นใหม่ต่อท้าย
+  ordBusy = true; ordErr = "";
+  const q = $("#search").value.trim();
+  try { const d = await api("/api/admin/order-rooms?q=" + encodeURIComponent(q)); adminOrders = d.rooms || []; ordLoaded = true; }
+  catch (e) { ordErr = e.message || "โหลดไม่สำเร็จ"; adminOrders = []; }
+  finally { ordBusy = false; }
+  if (admTab === "orders" && $("#list").classList.contains("on")) renderAdminOrders();
+}
+function renderAdminOrders() {
+  const box = $("#chatlist"); box.innerHTML = "";
+  box.appendChild(secHead("แชทออเดอร์ผู้ซื้อ ↔ ร้านค้า (อ่านอย่างเดียว · มีบันทึกการเปิดดู) · " + adminOrders.length + " ห้อง"));
+  adminOrders.forEach(r => box.appendChild(itemRow({
+    name: r.name, color: "", id: "room:" + r.id, avatar: "", chip: ["", r.count + " ข้อความ"],
+    preview: r.match ? "🔎 " + r.match : ("ผู้ซื้อ " + r.buyer_ext + " ↔ ร้าน " + r.seller_ext + (r.last_at != null ? " · " + memberPreview(r) : "")),
+    at: r.last_at, unread: 0, onclick: () => openRoom(r),
+  })));
+  if (ordErr) { const e = document.createElement("div"); e.className = "empty"; e.textContent = ordErr; box.appendChild(e); }
+  else if (!adminOrders.length) { const e = document.createElement("div"); e.className = "empty"; e.textContent = ordBusy ? "กำลังค้นหา..." : (ordLoaded ? "ไม่พบแชทออเดอร์ที่ตรงกับคำค้น" : "กำลังโหลด..."); box.appendChild(e); }
+}
 async function loadAdminRooms() {
   if (!IS_ADMIN || admBusy) return; admBusy = true;
   try {
